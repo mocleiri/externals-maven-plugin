@@ -56,7 +56,6 @@ public class ReadPropertiesMojo extends AbstractMojo {
      */
     private boolean quiet;
 
-    @Override
     public void execute() throws MojoExecutionException {
         Properties projectProperties = new Properties();
         for (int i = 0; i < files.length; i++) {
@@ -94,7 +93,7 @@ public class ReadPropertiesMojo extends AbstractMojo {
         }
 
         boolean useEnvVariables = false;
-        for (Enumeration<?> n = projectProperties.propertyNames(); n.hasMoreElements();) {
+        for (Enumeration n = projectProperties.propertyNames(); n.hasMoreElements();) {
             String k = (String) n.nextElement();
             String p = (String) projectProperties.get(k);
             if (p.indexOf("${env.") != -1) {
@@ -110,7 +109,7 @@ public class ReadPropertiesMojo extends AbstractMojo {
                 throw new MojoExecutionException("Error getting system envorinment variables: ", e);
             }
         }
-        for (Enumeration<?> n = projectProperties.propertyNames(); n.hasMoreElements();) {
+        for (Enumeration n = projectProperties.propertyNames(); n.hasMoreElements();) {
             String k = (String) n.nextElement();
             projectProperties.setProperty(k, getPropertyValue(k, projectProperties, environment));
         }
