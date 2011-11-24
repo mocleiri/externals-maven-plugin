@@ -70,7 +70,12 @@ public class ReadPropertiesMojo extends AbstractMojo {
                     projectProperties = project.getProperties();
 
                     try {
-                        projectProperties.load(stream);
+                        String filename = file.getName().toLowerCase();
+                        if (filename.endsWith(".xml")) {
+                            projectProperties.loadFromXML(stream);
+                        } else {
+                            projectProperties.load(stream);
+                        }
                     } finally {
                         if (stream != null) {
                             stream.close();
