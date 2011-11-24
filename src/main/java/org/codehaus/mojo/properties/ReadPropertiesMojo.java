@@ -42,7 +42,7 @@ public class ReadPropertiesMojo extends AbstractMojo {
     private MavenProject project;
 
     /**
-     * The properties files that will be used when reading properties.
+     * The properties files that will be used when reading properties. Can use both .properties and .xml files
      *
      * @parameter
      * @required
