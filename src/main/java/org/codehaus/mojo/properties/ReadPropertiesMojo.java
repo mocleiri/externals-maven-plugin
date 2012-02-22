@@ -77,7 +77,12 @@ public class ReadPropertiesMojo extends AbstractMojo {
             File file = files[i];
 
             if (file == null) {
-                continue;
+                if (quiet) {
+                    getLog().info("Ignoring null properties file parameter");
+                    continue;
+                } else {
+                    throw new MojoExecutionException("null properties file parameter");
+                }
             }
 
             if (file.exists()) {
@@ -104,7 +109,7 @@ public class ReadPropertiesMojo extends AbstractMojo {
                 }
             } else {
                 if (quiet) {
-                    getLog().warn("Ignoring missing properties file: " + file.getAbsolutePath());
+                    getLog().info("Ignoring missing properties file: " + file.getAbsolutePath());
                 } else {
                     throw new MojoExecutionException("Properties file not found: " + file.getAbsolutePath());
                 }
