@@ -28,7 +28,7 @@
 
   <groupId>org.kuali.maven.plugins</groupId>
   <artifactId>properties-maven-plugin</artifactId>
-  <version>1.0.5-SNAPSHOT</version>
+  <version>1.0.5</version>
 
   <name>Properties Maven Plugin</name>
   <description> 
@@ -48,9 +48,9 @@
   </prerequisites>
 
   <scm>
-    <connection>scm:svn:http://svn.kuali.org/repos/foundation/trunk/properties-maven-plugin</connection>
-    <developerConnection>scm:svn:http://svn.kuali.org/repos/foundation/trunk/properties-maven-plugin</developerConnection>
-    <url>http://svn.kuali.org/repos/foundation/trunk/properties-maven-plugin</url>
+    <connection>scm:svn:http://svn.kuali.org/repos/foundation/tags/properties-maven-plugin-1.0.5</connection>
+    <developerConnection>scm:svn:http://svn.kuali.org/repos/foundation/tags/properties-maven-plugin-1.0.5</developerConnection>
+    <url>http://svn.kuali.org/repos/foundation/tags/properties-maven-plugin-1.0.5</url>
   </scm>
 
   <developers>
