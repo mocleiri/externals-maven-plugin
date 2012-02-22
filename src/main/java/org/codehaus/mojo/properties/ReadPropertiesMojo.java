@@ -76,6 +76,10 @@ public class ReadPropertiesMojo extends AbstractMojo {
         for (int i = 0; i < files.length; i++) {
             File file = files[i];
 
+            if (file == null) {
+                continue;
+            }
+
             if (file.exists()) {
                 try {
                     getLog().debug("Loading property file: " + file);
