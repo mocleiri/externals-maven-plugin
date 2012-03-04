@@ -29,11 +29,12 @@ package org.codehaus.mojo.properties;
  */
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.Enumeration;
 import java.util.Properties;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.project.MavenProject;
@@ -49,6 +50,7 @@ import org.codehaus.plexus.util.cli.CommandLineUtils;
  * @goal read-project-properties
  */
 public class ReadPropertiesMojo extends AbstractMojo {
+
     /**
      * @parameter default-value="${project}"
      * @required
@@ -65,54 +67,18 @@ public class ReadPropertiesMojo extends AbstractMojo {
     private File[] files;
 
     /**
-     * If the plugin should be quiet if any of the files was not found
+     * If true, the plugin will ignore any non-existent properties files
      *
      * @parameter default-value="false"
      */
     private boolean quiet;
 
     public void execute() throws MojoExecutionException {
-        Properties projectProperties = new Properties();
+        Properties projectProperties = project.getProperties();
         for (int i = 0; i < files.length; i++) {
             File file = files[i];
-
-            if (file == null) {
-                if (quiet) {
-                    getLog().info("Ignoring null properties file parameter");
-                    continue;
-                } else {
-                    throw new MojoExecutionException("null properties file parameter");
-                }
-            }
-
-            if (file.exists()) {
-                try {
-                    getLog().debug("Loading property file: " + file);
-
-                    FileInputStream stream = new FileInputStream(file);
-                    projectProperties = project.getProperties();
-
-                    try {
-                        String filename = file.getName().toLowerCase();
-                        if (filename.endsWith(".xml")) {
-                            projectProperties.loadFromXML(stream);
-                        } else {
-                            projectProperties.load(stream);
-                        }
-                    } finally {
-                        if (stream != null) {
-                            stream.close();
-                        }
-                    }
-                } catch (IOException e) {
-                    throw new MojoExecutionException("Error reading properties file " + file.getAbsolutePath(), e);
-                }
-            } else {
-                if (quiet) {
-                    getLog().info("Ignoring missing properties file: " + file.getAbsolutePath());
-                } else {
-                    throw new MojoExecutionException("Properties file not found: " + file.getAbsolutePath());
-                }
+            if (validate(file)) {
+                load(file, projectProperties);
             }
         }
 
@@ -156,7 +122,7 @@ public class ReadPropertiesMojo extends AbstractMojo {
      *            environment variables
      * @return resolved property value
      */
-    private String getPropertyValue(String k, Properties p, Properties environment) {
+    protected String getPropertyValue(String k, Properties p, Properties environment) {
         String v = p.getProperty(k);
         String ret = "";
         int idx, idx2;
@@ -204,4 +170,35 @@ public class ReadPropertiesMojo extends AbstractMojo {
         }
         return ret + v;
     }
+
+    protected boolean validate(File file) throws MojoExecutionException {
+        boolean exists = file != null && file.exists();
+        if (exists) {
+            return true;
+        }
+        if (quiet) {
+            getLog().info("Ignoring non-existent properties file '" + file + "'");
+            return false;
+        } else {
+            throw new MojoExecutionException("Non-existent properties file '" + file + "'");
+        }
+    }
+
+    protected void load(File file, Properties properties) throws MojoExecutionException {
+        InputStream in = null;
+        try {
+            getLog().info("Loading " + file);
+            String filename = file.getName().toLowerCase();
+            if (filename.endsWith(".xml")) {
+                properties.loadFromXML(in);
+            } else {
+                properties.load(in);
+            }
+        } catch (IOException e) {
+            throw new MojoExecutionException("Error reading properties file " + file.getAbsolutePath(), e);
+        } finally {
+            IOUtils.closeQuietly(in);
+        }
+    }
+
 }
