@@ -88,6 +88,9 @@ public class ReadPropertiesMojo extends AbstractMojo {
     @Override
     public void execute() throws MojoExecutionException {
         List<String> ignoreList = getListFromCSV(ignore);
+        if (!StringUtils.isBlank(ignore)) {
+            getLog().info("Ignoring " + ignore);
+        }
         Properties projectProperties = project.getProperties();
         for (int i = 0; i < files.length; i++) {
             File file = files[i];
@@ -111,7 +114,7 @@ public class ReadPropertiesMojo extends AbstractMojo {
             try {
                 environment = CommandLineUtils.getSystemEnvVars();
             } catch (IOException e) {
-                throw new MojoExecutionException("Error getting system envorinment variables: ", e);
+                throw new MojoExecutionException("Error getting system environment variables: ", e);
             }
         }
         for (Enumeration<?> n = projectProperties.propertyNames(); n.hasMoreElements();) {
