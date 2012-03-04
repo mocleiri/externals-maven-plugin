@@ -72,7 +72,7 @@ public class ReadPropertiesMojo extends AbstractMojo {
     private File[] files;
 
     /**
-     * If true, the plugin will ignore any non-existent properties files
+     * If true, the plugin will silently ignore any non-existent properties files, and the build will continue
      *
      * @parameter expression="${properties.quiet}" default-value="false"
      */
@@ -84,16 +84,6 @@ public class ReadPropertiesMojo extends AbstractMojo {
      * @parameter expression="${properties.ignore}"
      */
     private String ignore;
-
-    protected void updateProperties(Properties p1, Properties p2, List<String> ignore) {
-        Set<String> names = p2.stringPropertyNames();
-        for (String name : names) {
-            if (!ignore.contains(name)) {
-                String value = p2.getProperty(name);
-                p1.setProperty(name, value);
-            }
-        }
-    }
 
     @Override
     public void execute() throws MojoExecutionException {
@@ -127,6 +117,16 @@ public class ReadPropertiesMojo extends AbstractMojo {
         for (Enumeration<?> n = projectProperties.propertyNames(); n.hasMoreElements();) {
             String k = (String) n.nextElement();
             projectProperties.setProperty(k, getPropertyValue(k, projectProperties, environment));
+        }
+    }
+
+    protected void updateProperties(Properties p1, Properties p2, List<String> ignore) {
+        Set<String> names = p2.stringPropertyNames();
+        for (String name : names) {
+            if (!ignore.contains(name)) {
+                String value = p2.getProperty(name);
+                p1.setProperty(name, value);
+            }
         }
     }
 
