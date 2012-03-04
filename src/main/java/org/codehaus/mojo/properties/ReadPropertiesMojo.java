@@ -33,7 +33,6 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.Enumeration;
 import java.util.List;
 import java.util.Properties;
 import java.util.Set;
@@ -100,26 +99,18 @@ public class ReadPropertiesMojo extends AbstractMojo {
             }
         }
 
-        boolean useEnvVariables = false;
-        for (Enumeration<?> n = projectProperties.propertyNames(); n.hasMoreElements();) {
-            String k = (String) n.nextElement();
-            String p = (String) projectProperties.get(k);
-            if (p.indexOf("${env.") != -1) {
-                useEnvVariables = true;
-                break;
-            }
+        Properties env = getEnvironment();
+        for (String name : projectProperties.stringPropertyNames()) {
+            String value = getPropertyValue(name, projectProperties, env);
+            projectProperties.setProperty(name, value);
         }
-        Properties environment = null;
-        if (useEnvVariables) {
-            try {
-                environment = CommandLineUtils.getSystemEnvVars();
-            } catch (IOException e) {
-                throw new MojoExecutionException("Error getting system environment variables: ", e);
-            }
-        }
-        for (Enumeration<?> n = projectProperties.propertyNames(); n.hasMoreElements();) {
-            String k = (String) n.nextElement();
-            projectProperties.setProperty(k, getPropertyValue(k, projectProperties, environment));
+    }
+
+    protected Properties getEnvironment() throws MojoExecutionException {
+        try {
+            return CommandLineUtils.getSystemEnvVars();
+        } catch (IOException e) {
+            throw new MojoExecutionException("Error get environment variables", e);
         }
     }
 
