@@ -54,6 +54,7 @@ import org.apache.maven.plugin.MojoFailureException;
  * @goal write-project-properties
  */
 public class WriteProjectProperties extends AbstractWritePropertiesMojo {
+
     /**
      * If true, the plugin will create a second properties file with a ".sorted" extension that contains the properties
      * sorted by name
