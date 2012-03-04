@@ -34,9 +34,15 @@ package org.codehaus.mojo.properties;
  * under the License.
  */
 
+import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Enumeration;
+import java.util.List;
 import java.util.Properties;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 
@@ -48,25 +54,62 @@ import org.apache.maven.plugin.MojoFailureException;
  * @goal write-project-properties
  */
 public class WriteProjectProperties extends AbstractWritePropertiesMojo {
+    /**
+     * If true, the plugin will create a second properties file with a ".sorted" extension that contains the properties
+     * sorted by name
+     *
+     * @parameter default-value="false" expression="${properties.writeSorted}"
+     */
+    private boolean writeSorted;
+
+    @Override
     public void execute() throws MojoExecutionException, MojoFailureException {
         validateOutputFile();
-        Properties projProperties = new Properties();
-        projProperties.putAll(project.getProperties());
+        Properties properties = new Properties();
+        properties.putAll(project.getProperties());
 
         Properties systemProperties = System.getProperties();
 
         // allow system properties to over write key/value found in maven properties
-        Enumeration enumeration = systemProperties.keys();
+        Enumeration<?> enumeration = systemProperties.keys();
         while (enumeration.hasMoreElements()) {
             String key = (String) enumeration.nextElement();
             String value = systemProperties.getProperty(key);
-            if (projProperties.get(key) != null) {
-                projProperties.put(key, value);
+            if (properties.get(key) != null) {
+                properties.put(key, value);
             }
 
         }
 
         getLog().info("Creating " + outputFile);
-        writeProperties(projProperties, outputFile);
+        writeProperties(properties, outputFile);
+        if (writeSorted) {
+            createSorted(outputFile, properties);
+        }
+    }
+
+    protected void createSorted(File file, Properties properties) throws MojoExecutionException {
+        List<String> names = new ArrayList<String>(properties.stringPropertyNames());
+        Collections.sort(names);
+        StringBuilder sb = new StringBuilder();
+        for (String name : names) {
+            String value = properties.getProperty(name);
+            sb.append(name + "=" + value + "\n");
+        }
+        try {
+            String filename = outputFile.getAbsolutePath() + ".sorted";
+            getLog().info("Creating " + filename);
+            FileUtils.writeByteArrayToFile(new File(filename), sb.toString().getBytes());
+        } catch (IOException e) {
+            throw new MojoExecutionException("Error creating sorted file", e);
+        }
+    }
+
+    public boolean isWriteSorted() {
+        return writeSorted;
+    }
+
+    public void setWriteSorted(boolean writeSorted) {
+        this.writeSorted = writeSorted;
     }
 }
