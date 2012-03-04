@@ -87,13 +87,14 @@ public class ReadPropertiesMojo extends AbstractMojo {
     @Override
     public void execute() throws MojoExecutionException {
         List<String> ignoreList = getListFromCSV(ignore);
-        if (!StringUtils.isBlank(ignore)) {
-            getLog().info("Ignoring " + ignore);
-        }
         Properties projectProperties = project.getProperties();
         for (int i = 0; i < files.length; i++) {
             File file = files[i];
             if (validate(file)) {
+                getLog().info("Loading " + file);
+                if (!StringUtils.isBlank(ignore)) {
+                    getLog().info("Ignoring " + ignore);
+                }
                 Properties p = getProperties(file);
                 updateProperties(projectProperties, p, ignoreList);
             }
@@ -218,7 +219,6 @@ public class ReadPropertiesMojo extends AbstractMojo {
     protected Properties getProperties(File file) throws MojoExecutionException {
         InputStream in = null;
         try {
-            getLog().info("Loading " + file);
             Properties properties = new Properties();
             in = new FileInputStream(file);
             String filename = file.getName().toLowerCase();
