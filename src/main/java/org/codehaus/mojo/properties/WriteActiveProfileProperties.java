@@ -49,14 +49,15 @@ import org.apache.maven.plugin.MojoExecutionException;
  * @goal write-active-profile-properties
  */
 public class WriteActiveProfileProperties extends AbstractWritePropertiesMojo {
+    @Override
     public void execute() throws MojoExecutionException {
         validateOutputFile();
-        List list = project.getActiveProfiles();
+        List<?> list = project.getActiveProfiles();
         if (getLog().isInfoEnabled()) {
             getLog().debug(list.size() + " profile(s) active");
         }
         Properties properties = new Properties();
-        for (Iterator iter = list.iterator(); iter.hasNext();) {
+        for (Iterator<?> iter = list.iterator(); iter.hasNext();) {
             Profile profile = (Profile) iter.next();
             if (profile.getProperties() != null) {
                 properties.putAll(profile.getProperties());
