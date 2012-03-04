@@ -32,13 +32,17 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.Enumeration;
+import java.util.List;
 import java.util.Properties;
+import java.util.Set;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.project.MavenProject;
+import org.codehaus.plexus.util.StringUtils;
 import org.codehaus.plexus.util.cli.CommandLineUtils;
 
 /**
@@ -70,21 +74,41 @@ public class ReadPropertiesMojo extends AbstractMojo {
     /**
      * If true, the plugin will ignore any non-existent properties files
      *
-     * @parameter default-value="false"
+     * @parameter expression="${properties.quiet}" default-value="false"
      */
     private boolean quiet;
 
+    /**
+     * Comma separated list of property values to ignore
+     *
+     * @parameter expression="${properties.ignore}"
+     */
+    private String ignore;
+
+    protected void updateProperties(Properties p1, Properties p2, List<String> ignore) {
+        Set<String> names = p2.stringPropertyNames();
+        for (String name : names) {
+            if (!ignore.contains(name)) {
+                String value = p2.getProperty(name);
+                p1.setProperty(name, value);
+            }
+        }
+    }
+
+    @Override
     public void execute() throws MojoExecutionException {
+        List<String> ignoreList = getListFromCSV(ignore);
         Properties projectProperties = project.getProperties();
         for (int i = 0; i < files.length; i++) {
             File file = files[i];
             if (validate(file)) {
-                load(file, projectProperties);
+                Properties p = getProperties(file);
+                updateProperties(projectProperties, p, ignoreList);
             }
         }
 
         boolean useEnvVariables = false;
-        for (Enumeration n = projectProperties.propertyNames(); n.hasMoreElements();) {
+        for (Enumeration<?> n = projectProperties.propertyNames(); n.hasMoreElements();) {
             String k = (String) n.nextElement();
             String p = (String) projectProperties.get(k);
             if (p.indexOf("${env.") != -1) {
@@ -100,10 +124,22 @@ public class ReadPropertiesMojo extends AbstractMojo {
                 throw new MojoExecutionException("Error getting system envorinment variables: ", e);
             }
         }
-        for (Enumeration n = projectProperties.propertyNames(); n.hasMoreElements();) {
+        for (Enumeration<?> n = projectProperties.propertyNames(); n.hasMoreElements();) {
             String k = (String) n.nextElement();
             projectProperties.setProperty(k, getPropertyValue(k, projectProperties, environment));
         }
+    }
+
+    protected List<String> getListFromCSV(String csv) {
+        if (StringUtils.isBlank(csv)) {
+            return new ArrayList<String>();
+        }
+        List<String> list = new ArrayList<String>();
+        String[] tokens = StringUtils.split(csv, ",");
+        for (String token : tokens) {
+            list.add(token.trim());
+        }
+        return list;
     }
 
     /**
@@ -185,10 +221,11 @@ public class ReadPropertiesMojo extends AbstractMojo {
         }
     }
 
-    protected void load(File file, Properties properties) throws MojoExecutionException {
+    protected Properties getProperties(File file) throws MojoExecutionException {
         InputStream in = null;
         try {
             getLog().info("Loading " + file);
+            Properties properties = new Properties();
             in = new FileInputStream(file);
             String filename = file.getName().toLowerCase();
             if (filename.endsWith(".xml")) {
@@ -196,11 +233,40 @@ public class ReadPropertiesMojo extends AbstractMojo {
             } else {
                 properties.load(in);
             }
+            return properties;
         } catch (IOException e) {
             throw new MojoExecutionException("Error reading properties file " + file.getAbsolutePath(), e);
         } finally {
             IOUtils.closeQuietly(in);
         }
+    }
+
+    public File[] getFiles() {
+        return files;
+    }
+
+    public void setFiles(File[] files) {
+        this.files = files;
+    }
+
+    public boolean isQuiet() {
+        return quiet;
+    }
+
+    public void setQuiet(boolean quiet) {
+        this.quiet = quiet;
+    }
+
+    public String getIgnore() {
+        return ignore;
+    }
+
+    public void setIgnore(String ignoreProperties) {
+        this.ignore = ignoreProperties;
+    }
+
+    public MavenProject getProject() {
+        return project;
     }
 
 }
