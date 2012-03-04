@@ -29,6 +29,7 @@ package org.codehaus.mojo.properties;
  */
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Enumeration;
@@ -188,6 +189,7 @@ public class ReadPropertiesMojo extends AbstractMojo {
         InputStream in = null;
         try {
             getLog().info("Loading " + file);
+            in = new FileInputStream(file);
             String filename = file.getName().toLowerCase();
             if (filename.endsWith(".xml")) {
                 properties.loadFromXML(in);
