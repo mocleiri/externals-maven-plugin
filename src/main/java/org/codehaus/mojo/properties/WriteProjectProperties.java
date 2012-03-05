@@ -118,6 +118,7 @@ public class WriteProjectProperties extends AbstractWritePropertiesMojo {
         for (String name : names) {
             String value = properties.getProperty(name);
             value = value.replace("\n", "\\n");
+            value = value.replace("\r", "\\r");
             value = value.replace("\t", "\\t");
             value = value.replace(":", "\\:");
             value = value.replace("#", "\\#");
