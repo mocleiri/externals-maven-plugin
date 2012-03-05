@@ -125,7 +125,7 @@ public class ReadPropertiesMojo extends AbstractMojo {
         }
     }
 
-    protected List<String> getListFromCSV(String csv) {
+    protected static final List<String> getListFromCSV(String csv) {
         if (StringUtils.isBlank(csv)) {
             return new ArrayList<String>();
         }

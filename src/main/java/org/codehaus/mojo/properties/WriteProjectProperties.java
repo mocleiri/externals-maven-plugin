@@ -17,6 +17,7 @@ package org.codehaus.mojo.properties;
 
 import java.io.File;
 import java.io.IOException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -52,6 +53,13 @@ public class WriteProjectProperties extends AbstractWritePropertiesMojo {
      */
     private boolean includeSystemProperties;
 
+    /**
+     * Comma separated set of properties to omit from writing to the properties file
+     *
+     * @parameter expression="${properties.omit}"
+     */
+    private String omit;
+
     @Override
     public void execute() throws MojoExecutionException, MojoFailureException {
         validateOutputFile();
@@ -73,6 +81,8 @@ public class WriteProjectProperties extends AbstractWritePropertiesMojo {
             }
         }
 
+        remove(properties, omit);
+
         getLog().info("Creating " + outputFile);
         if (antEchoPropertiesMode) {
             echoPropertiesMode(outputFile, properties);
@@ -81,12 +91,30 @@ public class WriteProjectProperties extends AbstractWritePropertiesMojo {
         }
     }
 
+    protected void remove(Properties properties, String csv) {
+        List<String> keys = ReadPropertiesMojo.getListFromCSV(csv);
+        for (String key : keys) {
+            properties.remove(key);
+        }
+
+    }
+
     protected void echoPropertiesMode(File file, Properties properties) throws MojoExecutionException {
+        // DSTAMP=20120304
+        // TODAY=March 4 2012
+        // TSTAMP=1651
+        SimpleDateFormat dstamp = new SimpleDateFormat("yyyyMMdd");
+        SimpleDateFormat today = new SimpleDateFormat("MMMM d yyyy");
+        SimpleDateFormat tstamp = new SimpleDateFormat("HHmm");
         List<String> names = new ArrayList<String>(properties.stringPropertyNames());
         Collections.sort(names);
+        Date now = new Date();
         StringBuilder sb = new StringBuilder();
-        sb.append("#Properties\n");
-        sb.append("#" + new Date());
+        sb.append("#Ant properties\n");
+        sb.append("#" + now + "\n");
+        sb.append("DSTAMP=" + dstamp.format(now) + "\n");
+        sb.append("TODAY=" + today.format(now) + "\n");
+        sb.append("TSTAMP=" + tstamp.format(now) + "\n");
         for (String name : names) {
             String value = properties.getProperty(name);
             value = value.replace("\n", "\\n");
