@@ -38,7 +38,7 @@ import org.apache.maven.plugin.MojoFailureException;
 public class WriteProjectProperties extends AbstractWritePropertiesMojo {
 
     /**
-     * If true, the plugin will create the properties file formatted the same way Ant formats it using the
+     * If true, the plugin will create the properties file formatted the same way Ant formats properties files using the
      * &lt;echoproperties&gt; task. The properties will be sorted by name with the ':', '#' and '=' symbols escaped with
      * a backslash
      *
