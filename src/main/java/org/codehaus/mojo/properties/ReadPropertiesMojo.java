@@ -15,19 +15,6 @@
  */
 package org.codehaus.mojo.properties;
 
-/*
- * Licensed to the Apache Software Foundation (ASF) under one or more contributor license agreements. See the NOTICE
- * file distributed with this work for additional information regarding copyright ownership. The ASF licenses this file
- * to you under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the
- * License. You may obtain a copy of the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on
- * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
- * specific language governing permissions and limitations under the License.
- */
-
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -43,6 +30,9 @@ import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.project.MavenProject;
 import org.codehaus.plexus.util.StringUtils;
 import org.codehaus.plexus.util.cli.CommandLineUtils;
+import org.springframework.core.io.DefaultResourceLoader;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.ResourceLoader;
 
 /**
  * The read-project-properties goal reads property files and stores the properties as project properties. It serves as
@@ -63,12 +53,13 @@ public class ReadPropertiesMojo extends AbstractMojo {
     private MavenProject project;
 
     /**
-     * The properties files that will be used when reading properties. Can use both .properties and .xml files
+     * Locations where properties files can be found. Any url Spring resource loading can understand is valid. eg
+     * <code>classpath:myprops.properties</code>. Both, .properties and .xml style properties are supported.
      *
      * @parameter
      * @required
      */
-    private File[] files;
+    private String[] locations;
 
     /**
      * If true, the plugin will silently ignore any non-existent properties files, and the build will continue
@@ -88,14 +79,14 @@ public class ReadPropertiesMojo extends AbstractMojo {
     public void execute() throws MojoExecutionException {
         List<String> ignoreList = getListFromCSV(ignore);
         Properties projectProperties = project.getProperties();
-        for (int i = 0; i < files.length; i++) {
-            File file = files[i];
-            if (validate(file)) {
-                getLog().info("Loading " + file);
+        for (int i = 0; i < locations.length; i++) {
+            String location = locations[i];
+            if (validate(location)) {
+                getLog().info("Loading " + location);
                 if (!StringUtils.isBlank(ignore)) {
                     getLog().info("Ignoring " + ignore);
                 }
-                Properties p = getProperties(file);
+                Properties p = getProperties(location);
                 updateProperties(projectProperties, p, ignoreList);
             }
         }
@@ -203,44 +194,64 @@ public class ReadPropertiesMojo extends AbstractMojo {
         return ret + v;
     }
 
-    protected boolean validate(File file) throws MojoExecutionException {
-        boolean exists = file != null && file.exists();
+    protected boolean exists(String location) {
+        if (StringUtils.isBlank(location)) {
+            return false;
+        }
+        File file = new File(location);
+        if (file.exists()) {
+            return true;
+        }
+        ResourceLoader loader = new DefaultResourceLoader();
+        Resource resource = loader.getResource(location);
+        return resource.exists();
+    }
+
+    protected boolean validate(String location) throws MojoExecutionException {
+        boolean exists = exists(location);
         if (exists) {
             return true;
         }
         if (quiet) {
-            getLog().info("Ignoring non-existent properties file '" + file + "'");
+            getLog().info("Ignoring non-existent properties file '" + location + "'");
             return false;
         } else {
-            throw new MojoExecutionException("Non-existent properties file '" + file + "'");
+            throw new MojoExecutionException("Non-existent properties file '" + location + "'");
         }
     }
 
-    protected Properties getProperties(File file) throws MojoExecutionException {
+    protected InputStream getInputStream(String location) throws IOException {
+        InputStream in = null;
+        try {
+            File file = new File(location);
+            if (file.exists()) {
+                return new FileInputStream(location);
+            }
+            ResourceLoader loader = new DefaultResourceLoader();
+            Resource resource = loader.getResource(location);
+            return resource.getInputStream();
+        } finally {
+            IOUtils.closeQuietly(in);
+        }
+    }
+
+    protected Properties getProperties(String location) throws MojoExecutionException {
         InputStream in = null;
         try {
             Properties properties = new Properties();
-            in = new FileInputStream(file);
-            String filename = file.getName().toLowerCase();
-            if (filename.endsWith(".xml")) {
+            in = getInputStream(location);
+            String lowerCase = location.toLowerCase();
+            if (lowerCase.endsWith(".xml")) {
                 properties.loadFromXML(in);
             } else {
                 properties.load(in);
             }
             return properties;
         } catch (IOException e) {
-            throw new MojoExecutionException("Error reading properties file " + file.getAbsolutePath(), e);
+            throw new MojoExecutionException("Error reading properties file " + location, e);
         } finally {
             IOUtils.closeQuietly(in);
         }
-    }
-
-    public File[] getFiles() {
-        return files;
-    }
-
-    public void setFiles(File[] files) {
-        this.files = files;
     }
 
     public boolean isQuiet() {
@@ -261,6 +272,14 @@ public class ReadPropertiesMojo extends AbstractMojo {
 
     public MavenProject getProject() {
         return project;
+    }
+
+    public String[] getLocations() {
+        return locations;
+    }
+
+    public void setLocations(String[] locations) {
+        this.locations = locations;
     }
 
 }
