@@ -69,6 +69,13 @@ public class ReadPropertiesMojo extends AbstractMojo {
     private boolean quiet;
 
     /**
+     * If true, the plugin will emit more verbose logging messages.
+     *
+     * @parameter expression="${properties.verbose}" default-value="false"
+     */
+    private boolean verbose;
+
+    /**
      * Comma separated list of property values to ignore
      *
      * @parameter expression="${properties.ignore}"
@@ -79,7 +86,7 @@ public class ReadPropertiesMojo extends AbstractMojo {
     public void execute() throws MojoExecutionException {
         List<String> ignoreList = getListFromCSV(ignore);
         Properties projectProperties = project.getProperties();
-        if (!StringUtils.isBlank(ignore)) {
+        if (verbose && !StringUtils.isBlank(ignore)) {
             getLog().info("Ignoring " + ignore);
         }
         for (int i = 0; i < locations.length; i++) {
@@ -195,6 +202,14 @@ public class ReadPropertiesMojo extends AbstractMojo {
         return ret + v;
     }
 
+    protected String toEmpty(String s) {
+        if (StringUtils.isBlank(s)) {
+            return "";
+        } else {
+            return s;
+        }
+    }
+
     protected boolean exists(String location) {
         if (StringUtils.isBlank(location)) {
             return false;
@@ -214,7 +229,9 @@ public class ReadPropertiesMojo extends AbstractMojo {
             return true;
         }
         if (quiet) {
-            getLog().info("Ignoring non-existent properties file '" + location + "'");
+            if (verbose) {
+                getLog().info("Ignoring non-existent properties file '" + toEmpty(location) + "'");
+            }
             return false;
         } else {
             throw new MojoExecutionException("Non-existent properties file '" + location + "'");
@@ -275,6 +292,14 @@ public class ReadPropertiesMojo extends AbstractMojo {
 
     public void setLocations(String[] locations) {
         this.locations = locations;
+    }
+
+    public boolean isVerbose() {
+        return verbose;
+    }
+
+    public void setVerbose(boolean verbose) {
+        this.verbose = verbose;
     }
 
 }
