@@ -33,7 +33,8 @@
   <description> 
     The Properties Maven Plugin is here to make life a little easier when dealing
     with properties. It provides goals to read and write properties from files.
-    The Kuali version of this plugin adds support for loading properties from XML files
+    The Kuali version of this plugin adds support for loading properties from XML files and reading properties files from any 
+    location Spring resource loading can understand (eg classpath:myprops.properties)
   </description>
   <properties>
     <mvn.version>3.0.4</mvn.version>
