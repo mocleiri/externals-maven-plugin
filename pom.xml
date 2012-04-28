@@ -39,9 +39,6 @@
     <mvn.version>3.0.4</mvn.version>
     <slf4j.version>1.6.4</slf4j.version>
   </properties>
-  <prerequisites>
-    <maven>2.0.6</maven>
-  </prerequisites>
   <scm>
     <connection>scm:svn:http://svn.kuali.org/repos/foundation/trunk/properties-maven-plugin</connection>
     <developerConnection>scm:svn:http://svn.kuali.org/repos/foundation/trunk/properties-maven-plugin</developerConnection>
