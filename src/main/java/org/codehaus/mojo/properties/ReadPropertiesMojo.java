@@ -79,15 +79,15 @@ public class ReadPropertiesMojo extends AbstractMojo {
     public void execute() throws MojoExecutionException {
         List<String> ignoreList = getListFromCSV(ignore);
         Properties projectProperties = project.getProperties();
+        if (!StringUtils.isBlank(ignore)) {
+            getLog().info("Ignoring " + ignore);
+        }
         for (int i = 0; i < locations.length; i++) {
             String location = locations[i];
             if (!validate(location)) {
                 continue;
             }
             getLog().info("Loading " + location);
-            if (!StringUtils.isBlank(ignore)) {
-                getLog().info("Ignoring " + ignore);
-            }
             Properties p = getProperties(location);
             updateProperties(projectProperties, p, ignoreList);
         }
