@@ -17,42 +17,36 @@
 
 -->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
-
+  <modelVersion>4.0.0</modelVersion>
   <parent>
     <groupId>org.kuali.pom</groupId>
     <artifactId>kuali-common</artifactId>
     <version>1.1.7</version>
   </parent>
-
-  <modelVersion>4.0.0</modelVersion>
-
   <groupId>org.kuali.maven.plugins</groupId>
   <artifactId>properties-maven-plugin</artifactId>
   <version>1.1.0-SNAPSHOT</version>
-
+  <packaging>maven-plugin</packaging>
+  <url>http://${kuali.site.hostname}/maven/plugins/${project.artifactId}/${project.version}</url>
   <name>Properties Maven Plugin</name>
+  <inceptionYear>2009</inceptionYear>
   <description> 
     The Properties Maven Plugin is here to make life a little easier when dealing
     with properties. It provides goals to read and write properties from files.
     The Kuali version of this plugin adds support for loading properties from XML files
   </description>
-
-  <inceptionYear>2009</inceptionYear>
-
-  <packaging>maven-plugin</packaging>
-
-  <url>http://${kuali.site.hostname}/maven/plugins/${project.artifactId}/${project.version}</url>
-
+  <properties>
+    <maven.api.version>2.0.6</maven.api.version>
+    <slf4j.version>1.6.4</slf4j.version>
+  </properties>
   <prerequisites>
     <maven>2.0.6</maven>
   </prerequisites>
-
   <scm>
     <connection>scm:svn:http://svn.kuali.org/repos/foundation/trunk/properties-maven-plugin</connection>
     <developerConnection>scm:svn:http://svn.kuali.org/repos/foundation/trunk/properties-maven-plugin</developerConnection>
     <url>http://svn.kuali.org/repos/foundation/trunk/properties-maven-plugin</url>
   </scm>
-
   <developers>
     <developer>
       <id>arsenalist</id>
@@ -71,7 +65,6 @@
       <email>jcaddel@kuali.org</email>
     </developer>
   </developers>
-
   <dependencies>
     <dependency>
       <groupId>commons-io</groupId>
@@ -104,7 +97,7 @@
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
-      <version>3.8.1</version>
+      <version>4.10</version>
       <scope>test</scope>
     </dependency>
     <dependency>
@@ -112,10 +105,21 @@
       <artifactId>spring-core</artifactId>
       <version>3.1.1.RELEASE</version>
     </dependency>
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-api</artifactId>
+      <version>${slf4j.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>jcl-over-slf4j</artifactId>
+      <version>${slf4j.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-log4j12</artifactId>
+      <version>${slf4j.version}</version>
+    </dependency>
   </dependencies>
-
-  <properties>
-    <maven.api.version>2.0.6</maven.api.version>
-  </properties>
 
 </project>

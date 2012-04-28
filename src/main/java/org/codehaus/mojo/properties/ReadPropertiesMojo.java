@@ -81,14 +81,15 @@ public class ReadPropertiesMojo extends AbstractMojo {
         Properties projectProperties = project.getProperties();
         for (int i = 0; i < locations.length; i++) {
             String location = locations[i];
-            if (validate(location)) {
-                getLog().info("Loading " + location);
-                if (!StringUtils.isBlank(ignore)) {
-                    getLog().info("Ignoring " + ignore);
-                }
-                Properties p = getProperties(location);
-                updateProperties(projectProperties, p, ignoreList);
+            if (!validate(location)) {
+                continue;
             }
+            getLog().info("Loading " + location);
+            if (!StringUtils.isBlank(ignore)) {
+                getLog().info("Ignoring " + ignore);
+            }
+            Properties p = getProperties(location);
+            updateProperties(projectProperties, p, ignoreList);
         }
 
         Properties env = getEnvironment();
@@ -221,18 +222,13 @@ public class ReadPropertiesMojo extends AbstractMojo {
     }
 
     protected InputStream getInputStream(String location) throws IOException {
-        InputStream in = null;
-        try {
-            File file = new File(location);
-            if (file.exists()) {
-                return new FileInputStream(location);
-            }
-            ResourceLoader loader = new DefaultResourceLoader();
-            Resource resource = loader.getResource(location);
-            return resource.getInputStream();
-        } finally {
-            IOUtils.closeQuietly(in);
+        File file = new File(location);
+        if (file.exists()) {
+            return new FileInputStream(location);
         }
+        ResourceLoader loader = new DefaultResourceLoader();
+        Resource resource = loader.getResource(location);
+        return resource.getInputStream();
     }
 
     protected Properties getProperties(String location) throws MojoExecutionException {
@@ -240,8 +236,7 @@ public class ReadPropertiesMojo extends AbstractMojo {
         try {
             Properties properties = new Properties();
             in = getInputStream(location);
-            String lowerCase = location.toLowerCase();
-            if (lowerCase.endsWith(".xml")) {
+            if (location.toLowerCase().endsWith(".xml")) {
                 properties.loadFromXML(in);
             } else {
                 properties.load(in);
