@@ -52,16 +52,28 @@ public class TranslatePropertiesMojo extends AbstractMojo {
      */
     private String suffix;
 
+    protected String getProperty(String key) {
+        String sys = System.getProperty(key);
+        String proj = project.getProperties().getProperty(key);
+        if (!StringUtils.isBlank(sys)) {
+            return sys;
+        } else {
+            return proj;
+        }
+
+    }
+
     @Override
     public void execute() throws MojoExecutionException {
         Properties props = project.getProperties();
-        for (String property : properties) {
-            String value = props.getProperty(property);
+        for (String key : properties) {
+            String value = getProperty(key);
             if (StringUtils.isBlank(value)) {
                 continue;
             } else {
                 String newValue = value.replace(".", "/");
-                String newKey = property + suffix;
+                String newKey = key + suffix;
+                getLog().info("Setting " + newKey + "=" + newValue);
                 props.setProperty(newKey, newValue);
             }
         }
