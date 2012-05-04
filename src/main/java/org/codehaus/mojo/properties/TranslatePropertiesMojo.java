@@ -47,7 +47,7 @@ public class TranslatePropertiesMojo extends AbstractMojo {
     private String[] properties;
 
     /**
-     * @parameter expression="${properties.suffix} default-value=".path"
+     * @parameter expression="${properties.suffix}" default-value=".path"
      * @required
      */
     private String suffix;
