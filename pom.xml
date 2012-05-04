@@ -25,7 +25,7 @@
   </parent>
   <groupId>org.kuali.maven.plugins</groupId>
   <artifactId>properties-maven-plugin</artifactId>
-  <version>1.1.1-SNAPSHOT</version>
+  <version>1.1.1</version>
   <packaging>maven-plugin</packaging>
   <url>http://${kuali.site.hostname}/maven/plugins/${project.artifactId}/${project.version}</url>
   <name>Properties Maven Plugin</name>
@@ -41,9 +41,9 @@
     <slf4j.version>1.6.4</slf4j.version>
   </properties>
   <scm>
-    <connection>scm:svn:http://svn.kuali.org/repos/foundation/trunk/properties-maven-plugin</connection>
-    <developerConnection>scm:svn:http://svn.kuali.org/repos/foundation/trunk/properties-maven-plugin</developerConnection>
-    <url>http://svn.kuali.org/repos/foundation/trunk/properties-maven-plugin</url>
+    <connection>scm:svn:http://svn.kuali.org/repos/foundation/tags/properties-maven-plugin-1.1.1</connection>
+    <developerConnection>scm:svn:http://svn.kuali.org/repos/foundation/tags/properties-maven-plugin-1.1.1</developerConnection>
+    <url>http://svn.kuali.org/repos/foundation/tags/properties-maven-plugin-1.1.1</url>
   </scm>
   <developers>
     <developer>
