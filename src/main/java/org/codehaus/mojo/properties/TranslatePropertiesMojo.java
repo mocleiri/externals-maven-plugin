@@ -29,9 +29,9 @@ import org.apache.maven.project.MavenProject;
  *
  * A new project property with ".path" added as a suffix gets set with the transformed value
  *
- * @goal path-properties
+ * @goal translate-properties
  */
-public class PathPropertiesMojo extends AbstractMojo {
+public class TranslatePropertiesMojo extends AbstractMojo {
 
     /**
      * @parameter default-value="${project}"
