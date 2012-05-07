@@ -66,7 +66,7 @@ public class ParseVersionPropertiesMojo extends AbstractMojo {
         if (StringUtils.isBlank(value)) {
             return;
         }
-        props.setProperty(key + suffix, value);
+        props.setProperty(key + "." + suffix, value);
         getLog().info("Setting " + key + "." + suffix + "=" + value);
     }
 
