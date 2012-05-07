@@ -70,7 +70,7 @@ public class ParseVersionPropertiesMojo extends AbstractMojo {
 
     protected Version parseVersion(String s) {
         Version version = new Version();
-        String[] tokens = StringUtils.split(s, ".");
+        String[] tokens = StringUtils.split(s, ".-");
         if (tokens.length > 0) {
             version.setMajor(tokens[0]);
         }
