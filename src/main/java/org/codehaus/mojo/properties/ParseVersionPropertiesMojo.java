@@ -23,7 +23,9 @@ import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.project.MavenProject;
 
 /**
- * Parse version number properties into [major].[minor].[incremental].[qualifier]
+ * Parse version number properties into [major].[minor].[incremental].[qualifier]. The version parsing logic is crudely
+ * simple. It splits the version string into tokens using both "." and "-" as delimiters. It assumes the first token is
+ * "major", the second token is "minor" the third token is "incremental" and the fourth token is "qualifier".
  *
  * @goal parse-version-properties
  */
@@ -82,12 +84,6 @@ public class ParseVersionPropertiesMojo extends AbstractMojo {
         }
         if (tokens.length > 3) {
             version.setQualifier(tokens[3]);
-        }
-        if (StringUtils.isBlank(version.getQualifier())) {
-            int pos = s.indexOf("-");
-            if (pos != -1 && s.length() > pos) {
-                version.setQualifier(s.substring(pos + 1));
-            }
         }
         return version;
     }
