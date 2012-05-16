@@ -27,6 +27,9 @@ import org.apache.maven.project.MavenProject;
 import org.jasypt.util.text.BasicTextEncryptor;
 
 /**
+ * Inspect project and system properties for any keys ending with <code>endsWith</code>. Any matching properties are
+ * assumed to be encrypted. They are decrypted and stored as project properties minus the <code>endsWith</code> suffix.
+ *
  * @goal decryptall
  */
 public class DecryptAllPropertiesMojo extends AbstractMojo {
@@ -47,12 +50,16 @@ public class DecryptAllPropertiesMojo extends AbstractMojo {
     private String endsWith;
 
     /**
+     * If true the plain text decrypted values are displayed to the console.
+     *
      * @parameter expression="${properties.show}" default-value="false"
      * @required
      */
     private boolean show;
 
     /**
+     * The password for decrypting property values. This same password must have been used to encrypt them.
+     *
      * @parameter expression="${properties.password}"
      * @required
      */
@@ -95,7 +102,5 @@ public class DecryptAllPropertiesMojo extends AbstractMojo {
         } else {
             return proj;
         }
-
     }
-
 }
