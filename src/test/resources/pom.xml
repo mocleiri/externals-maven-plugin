@@ -38,7 +38,7 @@
           <artifactId>${project.artifactId}</artifactId>
           <version>${project.version}</version>
           <configuration>
-            <password>abc123</password>
+            <password>${kuali.enc.password}</password>
             <show>true</show>
           </configuration>
         </plugin>
@@ -58,6 +58,10 @@
             <configuration>
               <properties>
                 <param>dnsme.secretKey</param>
+                <param>kuali.gpg.passphrase</param>
+                <param>impex.dba.password</param>
+                <param>ec2.secretKey</param>
+                <param>rice.ses.password</param>
               </properties>
             </configuration>
           </execution>
