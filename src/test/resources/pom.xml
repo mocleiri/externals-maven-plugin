@@ -38,7 +38,7 @@
           <artifactId>${project.artifactId}</artifactId>
           <version>${project.version}</version>
           <configuration>
-            <password>foo</password>
+            <password>abc123</password>
             <properties>
               <param>foo</param>
             </properties>
