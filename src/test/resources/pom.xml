@@ -39,9 +39,6 @@
           <version>${project.version}</version>
           <configuration>
             <password>abc123</password>
-            <properties>
-              <param>foo</param>
-            </properties>
             <show>true</show>
           </configuration>
         </plugin>
@@ -58,6 +55,11 @@
             <goals>
               <goal>encrypt</goal>
             </goals>
+            <configuration>
+              <properties>
+                <param>foo</param>
+              </properties>
+            </configuration>
           </execution>
           <execution>
             <id>decrypt</id>
@@ -65,6 +67,11 @@
             <goals>
               <goal>decrypt</goal>
             </goals>
+            <configuration>
+              <properties>
+                <param>foo.encrypted</param>
+              </properties>
+            </configuration>
           </execution>
         </executions>
       </plugin>
