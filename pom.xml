@@ -70,4 +70,22 @@
       <version>1.9.0</version>
     </dependency>
   </dependencies>
+  <build>
+    <testResources>
+      <testResource>
+        <directory>src/test/resources</directory>
+        <filtering>true</filtering>
+        <includes>
+          <include>pom.xml</include>
+        </includes>
+      </testResource>
+      <testResource>
+        <directory>src/test/resources</directory>
+        <filtering>false</filtering>
+        <excludes>
+          <exclude>pom.xml</exclude>
+        </excludes>
+      </testResource>
+    </testResources>
+  </build>
 </project>
