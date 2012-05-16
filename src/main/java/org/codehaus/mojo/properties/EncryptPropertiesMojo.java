@@ -69,6 +69,7 @@ public class EncryptPropertiesMojo extends AbstractMojo {
         for (String key : properties) {
             String value = getProperty(key);
             if (StringUtils.isBlank(value)) {
+                getLog().info("Skipping " + key);
                 continue;
             }
             String newValue = encryptor.encrypt(value);
@@ -82,14 +83,6 @@ public class EncryptPropertiesMojo extends AbstractMojo {
                 getLog().info("Setting " + newKey);
             }
         }
-    }
-
-    protected void setProjectProperty(String key, String suffix, String value, Properties props) {
-        if (StringUtils.isBlank(value)) {
-            return;
-        }
-        props.setProperty(key + "." + suffix, value);
-        getLog().info("Setting " + key + "." + suffix + "=" + value);
     }
 
     protected String getProperty(String key) {
