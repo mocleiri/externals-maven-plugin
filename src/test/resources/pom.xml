@@ -39,7 +39,7 @@
           <version>${project.version}</version>
           <configuration>
             <password>${kuali.enc.password}</password>
-            <show>true</show>
+            <show>false</show>
           </configuration>
         </plugin>
       </plugins>
