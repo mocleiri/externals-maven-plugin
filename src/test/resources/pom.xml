@@ -42,6 +42,7 @@
             <properties>
               <param>foo</param>
             </properties>
+            <show>true</show>
           </configuration>
         </plugin>
       </plugins>
