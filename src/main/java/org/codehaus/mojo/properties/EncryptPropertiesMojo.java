@@ -76,11 +76,9 @@ public class EncryptPropertiesMojo extends AbstractMojo {
             String newKey = key + "." + suffix;
             props.setProperty(newKey, newValue);
             if (show) {
-                getLog().info("Setting " + newKey);
-                getLog().info("Plain Text: " + value);
-                getLog().info("Encrypted: " + newValue);
+                getLog().info("Setting " + newKey + "=" + newValue + " - " + value);
             } else {
-                getLog().info("Setting " + newKey);
+                getLog().info("Setting " + newKey + "=" + newValue);
             }
         }
     }
