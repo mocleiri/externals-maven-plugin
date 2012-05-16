@@ -24,7 +24,7 @@ import org.apache.maven.project.MavenProject;
 import org.jasypt.util.text.BasicTextEncryptor;
 
 /**
- * @goal encrypt-properties
+ * @goal encrypt
  */
 public class EncryptPropertiesMojo extends AbstractMojo {
 
@@ -75,7 +75,9 @@ public class EncryptPropertiesMojo extends AbstractMojo {
             String newKey = key + "." + suffix;
             props.setProperty(newKey, newValue);
             if (show) {
-                getLog().info("Setting " + newKey + " Plain Text: " + value + " Encrypted: " + newValue);
+                getLog().info("Setting " + newKey);
+                getLog().info("Plain Text: " + value);
+                getLog().info("Encrypted: " + newValue);
             } else {
                 getLog().info("Setting " + newKey);
             }
