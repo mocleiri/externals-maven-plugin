@@ -80,9 +80,7 @@ public class DecryptAllPropertiesMojo extends AbstractMojo {
             String newKey = key.substring(0, key.length() - length);
             props.setProperty(newKey, newValue);
             if (show) {
-                getLog().info("Setting " + newKey);
-                getLog().info("Encrypted: " + value);
-                getLog().info("Plain Text: " + newValue);
+                getLog().info("Setting " + newKey + "=" + newValue + " - " + value);
             } else {
                 getLog().info("Setting " + newKey);
             }
