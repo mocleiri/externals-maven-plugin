@@ -27,7 +27,7 @@ import org.apache.maven.project.MavenProject;
 import org.jasypt.util.text.BasicTextEncryptor;
 
 /**
- * @goal decrypt
+ * @goal decryptall
  */
 public class DecryptAllPropertiesMojo extends AbstractMojo {
 

@@ -62,10 +62,10 @@
             </configuration>
           </execution>
           <execution>
-            <id>decrypt</id>
+            <id>decryptall</id>
             <phase>test</phase>
             <goals>
-              <goal>decrypt</goal>
+              <goal>decryptall</goal>
             </goals>
             <configuration>
               <properties>
