@@ -24,7 +24,7 @@ import org.apache.maven.project.MavenProject;
 import org.jasypt.util.text.BasicTextEncryptor;
 
 /**
- * @goal encrypt
+ * @goal decrypt
  */
 public class DecryptPropertiesMojo extends AbstractMojo {
 
@@ -36,7 +36,7 @@ public class DecryptPropertiesMojo extends AbstractMojo {
     private MavenProject project;
 
     /**
-     * The list of properties containing values to encrypt
+     * The list of properties containing values to decrypt
      *
      * @parameter
      * @required
@@ -44,7 +44,7 @@ public class DecryptPropertiesMojo extends AbstractMojo {
     private String[] properties;
 
     /**
-     * @parameter expression="${properties.suffix}" default-value="encrypted"
+     * @parameter expression="${properties.suffix}" default-value="decrypted"
      * @required
      */
     private String suffix;
@@ -72,7 +72,7 @@ public class DecryptPropertiesMojo extends AbstractMojo {
                 getLog().info("Skipping " + key);
                 continue;
             }
-            String newValue = encryptor.encrypt(value);
+            String newValue = encryptor.decrypt(value);
             String newKey = key + "." + suffix;
             props.setProperty(newKey, newValue);
             if (show) {
