@@ -15,6 +15,9 @@
  */
 package org.codehaus.mojo.properties;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.Properties;
 
 import org.apache.commons.lang.StringUtils;
@@ -26,7 +29,7 @@ import org.jasypt.util.text.BasicTextEncryptor;
 /**
  * @goal decrypt
  */
-public class DecryptPropertiesMojo extends AbstractMojo {
+public class DecryptAllPropertiesMojo extends AbstractMojo {
 
     /**
      * @parameter default-value="${project}"
@@ -36,18 +39,12 @@ public class DecryptPropertiesMojo extends AbstractMojo {
     private MavenProject project;
 
     /**
-     * The list of properties containing values to decrypt
+     * The pattern for matching properties in need of decryption
      *
-     * @parameter
+     * @parameter expression="${properties.endsWith}" default-value=".encrypted"
      * @required
      */
-    private String[] properties;
-
-    /**
-     * @parameter expression="${properties.suffix}" default-value="decrypted"
-     * @required
-     */
-    private String suffix;
+    private String endsWith;
 
     /**
      * @parameter expression="${properties.show}" default-value="false"
@@ -66,14 +63,21 @@ public class DecryptPropertiesMojo extends AbstractMojo {
         BasicTextEncryptor encryptor = new BasicTextEncryptor();
         encryptor.setPassword(password);
         Properties props = project.getProperties();
-        for (String key : properties) {
+        List<String> keys = new ArrayList<String>(props.stringPropertyNames());
+        Collections.sort(keys);
+        for (String key : keys) {
+            boolean decrypt = key.endsWith(endsWith);
+            if (!decrypt) {
+                continue;
+            }
             String value = getProperty(key);
             if (StringUtils.isBlank(value)) {
-                getLog().info("Skipping " + key);
+                getLog().info("Skipping blank property " + key);
                 continue;
             }
             String newValue = encryptor.decrypt(value);
-            String newKey = key + "." + suffix;
+            int length = endsWith.length();
+            String newKey = key.substring(0, key.length() - length);
             props.setProperty(newKey, newValue);
             if (show) {
                 getLog().info("Setting " + newKey);
@@ -96,11 +100,4 @@ public class DecryptPropertiesMojo extends AbstractMojo {
 
     }
 
-    public String[] getProperties() {
-        return properties;
-    }
-
-    public void setProperties(String[] properties) {
-        this.properties = properties;
-    }
 }

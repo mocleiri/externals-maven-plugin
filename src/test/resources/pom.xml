@@ -57,7 +57,7 @@
             </goals>
             <configuration>
               <properties>
-                <param>foo</param>
+                <param>dnsme.secretKey</param>
               </properties>
             </configuration>
           </execution>
