@@ -24,6 +24,8 @@ import org.apache.maven.project.MavenProject;
 import org.jasypt.util.text.BasicTextEncryptor;
 
 /**
+ * Generate encrypted values for the specified system or project properties.
+ *
  * @goal encrypt
  */
 public class EncryptPropertiesMojo extends AbstractMojo {
@@ -44,18 +46,28 @@ public class EncryptPropertiesMojo extends AbstractMojo {
     private String[] properties;
 
     /**
+     * The encrypted value for the properties are stored under their original property key with this text appended to
+     * the end.
+     *
+     * eg "database.password" is stored as "database.password.encrypted"
+     *
      * @parameter expression="${properties.suffix}" default-value="encrypted"
      * @required
      */
     private String suffix;
 
     /**
+     * If true, the plain text values being encrypted are displayed to the console.
+     *
      * @parameter expression="${properties.show}" default-value="false"
      * @required
      */
     private boolean show;
 
     /**
+     *
+     * The password for encrypting property values. This same password can be used to to decrypt the encrypted values.
+     *
      * @parameter expression="${properties.password}"
      * @required
      */
