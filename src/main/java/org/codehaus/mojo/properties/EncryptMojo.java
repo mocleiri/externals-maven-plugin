@@ -49,7 +49,7 @@ public class EncryptMojo extends AbstractMojo {
         BasicTextEncryptor encryptor = new BasicTextEncryptor();
         encryptor.setPassword(password);
         String encrypted = encryptor.encrypt(text);
-        getLog().info(text + "=" + encrypted);
+        getLog().info(text + " -> " + encrypted);
     }
 
 }
