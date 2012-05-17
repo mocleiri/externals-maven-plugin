@@ -33,7 +33,7 @@
   <description>Encrypt / decrypt text</description>
   <scm>
     <connection>scm:svn:https://svn.kuali.org/repos/foundation/trunk/crypto-maven-plugin</connection>
-    <developerConnection>scm:svn:https://svn.kuali.org/repos/foundation/trunk/crytpo-maven-plugin</developerConnection>
+    <developerConnection>scm:svn:https://svn.kuali.org/repos/foundation/trunk/crypto-maven-plugin</developerConnection>
     <url>https://svn.kuali.org/repos/foundation/trunk/crypto-maven-plugin</url>
   </scm>
   <developers>
