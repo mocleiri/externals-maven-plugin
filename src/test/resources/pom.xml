@@ -61,6 +61,7 @@
                 <param>kuali.gpg.passphrase</param>
                 <param>impex.dba.password</param>
                 <param>ec2.secretKey</param>
+                <param>ec2.secretKey.ks</param>
                 <param>rice.ses.password</param>
               </properties>
             </configuration>
