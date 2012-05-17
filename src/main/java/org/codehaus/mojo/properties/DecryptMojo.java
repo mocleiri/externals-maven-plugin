@@ -15,139 +15,41 @@
  */
 package org.codehaus.mojo.properties;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Properties;
-
-import org.apache.commons.lang.StringUtils;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
-import org.apache.maven.project.MavenProject;
 import org.jasypt.util.text.BasicTextEncryptor;
 
 /**
- * Inspect project and system properties for any keys ending with <code>endsWith</code>. Any matching properties are
- * assumed to be encrypted. They are decrypted and stored as project properties minus the <code>endsWith</code> suffix.
+ * Decrypt the specified text using the specified password
  *
- * @goal decryptall
+ * @goal decrypt
  */
 public class DecryptMojo extends AbstractMojo {
 
     /**
-     * @parameter default-value="${project}"
-     * @required
-     * @readonly
-     */
-    private MavenProject project;
-
-    /**
-     * If true, the plugin will emit no logging information
      *
-     * @parameter expression="${properties.quiet}" default-value="false"
-     * @required
-     */
-    private boolean quiet;
-
-    /**
-     * The pattern for matching properties in need of decryption
+     * The password for encrypting text. This same password can be used to to decrypt the encrypted text
      *
-     * @parameter expression="${properties.endsWith}" default-value=".encrypted"
-     * @required
-     */
-    private String endsWith;
-
-    /**
-     * If true the plain text decrypted values are displayed to the console.
-     *
-     * @parameter expression="${properties.show}" default-value="false"
-     * @required
-     */
-    private boolean show;
-
-    /**
-     * The password for decrypting property values. This same password must have been used to encrypt them.
-     *
-     * @parameter expression="${properties.password}"
+     * @parameter expression="${crypto.password}"
      * @required
      */
     private String password;
+
+    /**
+     *
+     * The encrypted text to decrypt.
+     *
+     * @parameter expression="${crypto.text}"
+     * @required
+     */
+    private String text;
 
     @Override
     public void execute() throws MojoExecutionException {
         BasicTextEncryptor encryptor = new BasicTextEncryptor();
         encryptor.setPassword(password);
-        Properties props = project.getProperties();
-        List<String> keys = new ArrayList<String>(props.stringPropertyNames());
-        Collections.sort(keys);
-        for (String key : keys) {
-            boolean decrypt = key.endsWith(endsWith);
-            if (!decrypt) {
-                continue;
-            }
-            String value = getProperty(key);
-            if (StringUtils.isBlank(value) && !quiet) {
-                getLog().info("Skipping blank property " + key);
-                continue;
-            }
-            String newValue = encryptor.decrypt(value);
-            int length = endsWith.length();
-            String newKey = key.substring(0, key.length() - length);
-            props.setProperty(newKey, newValue);
-            if (quiet) {
-                continue;
-            }
-            if (show) {
-                getLog().info("Setting " + newKey + "=" + newValue + " - " + value);
-            } else {
-                getLog().info("Setting " + newKey);
-            }
-        }
+        String decrypted = encryptor.decrypt(text);
+        getLog().info(text + "=" + decrypted);
     }
 
-    protected String getProperty(String key) {
-        String sys = System.getProperty(key);
-        String proj = project.getProperties().getProperty(key);
-        if (!StringUtils.isBlank(sys)) {
-            return sys;
-        } else {
-            return proj;
-        }
-    }
-
-    public boolean isQuiet() {
-        return quiet;
-    }
-
-    public void setQuiet(boolean quiet) {
-        this.quiet = quiet;
-    }
-
-    public String getEndsWith() {
-        return endsWith;
-    }
-
-    public void setEndsWith(String endsWith) {
-        this.endsWith = endsWith;
-    }
-
-    public boolean isShow() {
-        return show;
-    }
-
-    public void setShow(boolean show) {
-        this.show = show;
-    }
-
-    public String getPassword() {
-        return password;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
-    }
-
-    public MavenProject getProject() {
-        return project;
-    }
 }
