@@ -15,149 +15,41 @@
  */
 package org.codehaus.mojo.properties;
 
-import java.util.Properties;
-
-import org.apache.commons.lang.StringUtils;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
-import org.apache.maven.project.MavenProject;
 import org.jasypt.util.text.BasicTextEncryptor;
 
 /**
- * Generate encrypted values for the specified system or project properties.
+ * Encrypt the specified text using the specified password
  *
  * @goal encrypt
  */
 public class EncryptMojo extends AbstractMojo {
 
     /**
-     * @parameter default-value="${project}"
-     * @required
-     * @readonly
-     */
-    private MavenProject project;
-
-    /**
-     * The list of properties containing values to encrypt
      *
-     * @parameter
-     * @required
-     */
-    private String[] properties;
-
-    /**
-     * The encrypted value for the properties are stored under their original property key with this text appended to
-     * the end.
+     * The password for encrypting text. This same password can be used to to decrypt the encrypted text
      *
-     * eg "database.password" is stored as "database.password.encrypted"
-     *
-     * @parameter expression="${properties.suffix}" default-value="encrypted"
-     * @required
-     */
-    private String suffix;
-
-    /**
-     * If true, the plain text values being encrypted are displayed to the console.
-     *
-     * @parameter expression="${properties.show}" default-value="false"
-     * @required
-     */
-    private boolean show;
-
-    /**
-     * If true, the plugin will emit no logging information
-     *
-     * @parameter expression="${properties.quiet}" default-value="false"
-     * @required
-     */
-    private boolean quiet;
-
-    /**
-     *
-     * The password for encrypting property values. This same password can be used to to decrypt the encrypted values.
-     *
-     * @parameter expression="${properties.password}"
+     * @parameter expression="${crypto.password}"
      * @required
      */
     private String password;
+
+    /**
+     *
+     * The text to encrypt.
+     *
+     * @parameter expression="${crypto.text}"
+     * @required
+     */
+    private String text;
 
     @Override
     public void execute() throws MojoExecutionException {
         BasicTextEncryptor encryptor = new BasicTextEncryptor();
         encryptor.setPassword(password);
-        Properties props = project.getProperties();
-        for (String key : properties) {
-            String value = getProperty(key);
-            if (StringUtils.isBlank(value) && !quiet) {
-                getLog().info("Skipping " + key);
-                continue;
-            }
-            if (quiet) {
-                continue;
-            }
-            String newValue = encryptor.encrypt(value);
-            String newKey = key + "." + suffix;
-            props.setProperty(newKey, newValue);
-            if (show) {
-                getLog().info("Setting " + newKey + "=" + newValue + " - " + value);
-            } else {
-                getLog().info("Setting " + newKey + "=" + newValue);
-            }
-        }
+        String encrypted = encryptor.encrypt(text);
+        getLog().info(text + "=" + encrypted);
     }
 
-    protected String getProperty(String key) {
-        String sys = System.getProperty(key);
-        String proj = project.getProperties().getProperty(key);
-        if (!StringUtils.isBlank(sys)) {
-            return sys;
-        } else {
-            return proj;
-        }
-
-    }
-
-    public String[] getProperties() {
-        return properties;
-    }
-
-    public void setProperties(String[] properties) {
-        this.properties = properties;
-    }
-
-    public String getSuffix() {
-        return suffix;
-    }
-
-    public void setSuffix(String suffix) {
-        this.suffix = suffix;
-    }
-
-    public boolean isShow() {
-        return show;
-    }
-
-    public void setShow(boolean show) {
-        this.show = show;
-    }
-
-    public boolean isQuiet() {
-        return quiet;
-    }
-
-    public void setQuiet(boolean quiet) {
-        this.quiet = quiet;
-    }
-
-    public String getPassword() {
-        return password;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
-    }
-
-    public MavenProject getProject() {
-        return project;
-    }
 }
