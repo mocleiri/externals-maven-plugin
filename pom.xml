@@ -32,9 +32,9 @@
   <inceptionYear>2009</inceptionYear>
   <description>Encrypt / decrypt text</description>
   <scm>
-    <connection>scm:svn:http://svn.kuali.org/repos/foundation/trunk/crypto-maven-plugin</connection>
-    <developerConnection>scm:svn:http://svn.kuali.org/repos/foundation/trunk/crytpo-maven-plugin</developerConnection>
-    <url>http://svn.kuali.org/repos/foundation/trunk/crypto-maven-plugin</url>
+    <connection>scm:svn:https://svn.kuali.org/repos/foundation/trunk/crypto-maven-plugin</connection>
+    <developerConnection>scm:svn:https://svn.kuali.org/repos/foundation/trunk/crytpo-maven-plugin</developerConnection>
+    <url>https://svn.kuali.org/repos/foundation/trunk/crypto-maven-plugin</url>
   </scm>
   <developers>
     <developer>
