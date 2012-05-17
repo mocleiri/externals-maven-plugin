@@ -28,7 +28,7 @@ import org.jasypt.util.text.BasicTextEncryptor;
  *
  * @goal encrypt
  */
-public class EncryptPropertiesMojo extends AbstractMojo {
+public class EncryptMojo extends AbstractMojo {
 
     /**
      * @parameter default-value="${project}"

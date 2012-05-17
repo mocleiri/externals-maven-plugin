@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <projectDescription>
-  <name>properties-maven-plugin</name>
+  <name>crypto-maven-plugin</name>
   <projects>
   </projects>
   <buildSpec>

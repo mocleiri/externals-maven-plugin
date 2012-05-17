@@ -32,7 +32,7 @@ import org.jasypt.util.text.BasicTextEncryptor;
  *
  * @goal decryptall
  */
-public class DecryptAllPropertiesMojo extends AbstractMojo {
+public class DecryptMojo extends AbstractMojo {
 
     /**
      * @parameter default-value="${project}"
