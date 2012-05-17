@@ -28,7 +28,7 @@ public class DecryptMojo extends AbstractMojo {
 
     /**
      *
-     * The password for encrypting text. This same password can be used to to decrypt the encrypted text
+     * The password for encrypting text. This same password can be used to decrypt the encrypted text
      *
      * @parameter expression="${crypto.password}"
      * @required
