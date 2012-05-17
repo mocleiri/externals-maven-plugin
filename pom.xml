@@ -25,16 +25,16 @@
   </parent>
   <groupId>org.kuali.maven.plugins</groupId>
   <artifactId>crypto-maven-plugin</artifactId>
-  <version>1.0.0</version>
+  <version>1.0.1-SNAPSHOT</version>
   <packaging>maven-plugin</packaging>
   <url>http://${kuali.site.hostname}/maven/plugins/${project.artifactId}/${project.version}</url>
   <name>Crytpo Maven Plugin</name>
   <inceptionYear>2009</inceptionYear>
   <description>Encrypt / decrypt text</description>
   <scm>
-    <connection>scm:svn:https://svn.kuali.org/repos/foundation/tags/crypto-maven-plugin-1.0.0</connection>
-    <developerConnection>scm:svn:https://svn.kuali.org/repos/foundation/tags/crypto-maven-plugin-1.0.0</developerConnection>
-    <url>https://svn.kuali.org/repos/foundation/tags/crypto-maven-plugin-1.0.0</url>
+    <connection>scm:svn:https://svn.kuali.org/repos/foundation/trunk/crypto-maven-plugin</connection>
+    <developerConnection>scm:svn:https://svn.kuali.org/repos/foundation/trunk/crypto-maven-plugin</developerConnection>
+    <url>https://svn.kuali.org/repos/foundation/trunk/crypto-maven-plugin</url>
   </scm>
   <developers>
     <developer>
