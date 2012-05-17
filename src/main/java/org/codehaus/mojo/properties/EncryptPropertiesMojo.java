@@ -65,6 +65,14 @@ public class EncryptPropertiesMojo extends AbstractMojo {
     private boolean show;
 
     /**
+     * If true, the plugin will emit no logging information
+     *
+     * @parameter expression="${properties.quiet}" default-value="false"
+     * @required
+     */
+    private boolean quiet;
+
+    /**
      *
      * The password for encrypting property values. This same password can be used to to decrypt the encrypted values.
      *
@@ -80,8 +88,11 @@ public class EncryptPropertiesMojo extends AbstractMojo {
         Properties props = project.getProperties();
         for (String key : properties) {
             String value = getProperty(key);
-            if (StringUtils.isBlank(value)) {
+            if (StringUtils.isBlank(value) && !quiet) {
                 getLog().info("Skipping " + key);
+                continue;
+            }
+            if (quiet) {
                 continue;
             }
             String newValue = encryptor.encrypt(value);
@@ -112,5 +123,41 @@ public class EncryptPropertiesMojo extends AbstractMojo {
 
     public void setProperties(String[] properties) {
         this.properties = properties;
+    }
+
+    public String getSuffix() {
+        return suffix;
+    }
+
+    public void setSuffix(String suffix) {
+        this.suffix = suffix;
+    }
+
+    public boolean isShow() {
+        return show;
+    }
+
+    public void setShow(boolean show) {
+        this.show = show;
+    }
+
+    public boolean isQuiet() {
+        return quiet;
+    }
+
+    public void setQuiet(boolean quiet) {
+        this.quiet = quiet;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+    public MavenProject getProject() {
+        return project;
     }
 }

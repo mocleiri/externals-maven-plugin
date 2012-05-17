@@ -42,6 +42,14 @@ public class DecryptAllPropertiesMojo extends AbstractMojo {
     private MavenProject project;
 
     /**
+     * If true, the plugin will emit no logging information
+     *
+     * @parameter expression="${properties.quiet}" default-value="false"
+     * @required
+     */
+    private boolean quiet;
+
+    /**
      * The pattern for matching properties in need of decryption
      *
      * @parameter expression="${properties.endsWith}" default-value=".encrypted"
@@ -78,7 +86,7 @@ public class DecryptAllPropertiesMojo extends AbstractMojo {
                 continue;
             }
             String value = getProperty(key);
-            if (StringUtils.isBlank(value)) {
+            if (StringUtils.isBlank(value) && !quiet) {
                 getLog().info("Skipping blank property " + key);
                 continue;
             }
@@ -86,6 +94,9 @@ public class DecryptAllPropertiesMojo extends AbstractMojo {
             int length = endsWith.length();
             String newKey = key.substring(0, key.length() - length);
             props.setProperty(newKey, newValue);
+            if (quiet) {
+                continue;
+            }
             if (show) {
                 getLog().info("Setting " + newKey + "=" + newValue + " - " + value);
             } else {
@@ -102,5 +113,41 @@ public class DecryptAllPropertiesMojo extends AbstractMojo {
         } else {
             return proj;
         }
+    }
+
+    public boolean isQuiet() {
+        return quiet;
+    }
+
+    public void setQuiet(boolean quiet) {
+        this.quiet = quiet;
+    }
+
+    public String getEndsWith() {
+        return endsWith;
+    }
+
+    public void setEndsWith(String endsWith) {
+        this.endsWith = endsWith;
+    }
+
+    public boolean isShow() {
+        return show;
+    }
+
+    public void setShow(boolean show) {
+        this.show = show;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+    public MavenProject getProject() {
+        return project;
     }
 }
