@@ -56,24 +56,7 @@ public class SVNUtils {
 			SVNWCClient client = getSVNWCClient();
 			SVNURL svnUrl = getSvnUrl(url);
 			SVNPropertyData data = client.doGetProperty(svnUrl, EXTERNALS_PROPERTY_NAME, SVNRevision.HEAD, SVNRevision.HEAD);
-			if (data == null) {
-				return new ArrayList<SVNExternal>();
-			}
-			SVNPropertyValue value = data.getValue();
-			String s = SVNPropertyValue.getPropertyAsString(value);
-			String[] tokens = StringUtils.split(s, "\n");
-			List<SVNExternal> externals = new ArrayList<SVNExternal>();
-			for (String token : tokens) {
-				String[] values = StringUtils.split(token, " ");
-				String newUrl = values[0];
-				String dir = values[1];
-				File file = new File(dir);
-				SVNExternal external = new SVNExternal();
-				external.setUrl(newUrl);
-				external.setWorkingCopyPath(file);
-				externals.add(external);
-			}
-			return externals;
+			return getExternals(data, null);
 		} catch (SVNException e) {
 			throw new IllegalStateException(e);
 		}
@@ -83,27 +66,34 @@ public class SVNUtils {
 		try {
 			SVNWCClient client = getSVNWCClient();
 			SVNPropertyData data = client.doGetProperty(workingCopyPath, EXTERNALS_PROPERTY_NAME, SVNRevision.WORKING, SVNRevision.WORKING);
-			if (data == null) {
-				return new ArrayList<SVNExternal>();
-			}
-			SVNPropertyValue value = data.getValue();
-			String s = SVNPropertyValue.getPropertyAsString(value);
-			String[] tokens = StringUtils.split(s, "\n");
-			List<SVNExternal> externals = new ArrayList<SVNExternal>();
-			for (String token : tokens) {
-				String[] values = StringUtils.split(token, " ");
-				String url = values[0];
-				String dir = values[1];
-				File file = new File(workingCopyPath.getAbsolutePath() + File.separator + dir);
-				SVNExternal external = new SVNExternal();
-				external.setUrl(url);
-				external.setWorkingCopyPath(file);
-				externals.add(external);
-			}
-			return externals;
+			return getExternals(data, workingCopyPath);
 		} catch (SVNException e) {
 			throw new IllegalStateException(e);
 		}
+	}
+
+	protected List<SVNExternal> getExternals(SVNPropertyData data, File workingCopyPath) {
+		if (data == null) {
+			return new ArrayList<SVNExternal>();
+		}
+		SVNPropertyValue value = data.getValue();
+		String s = SVNPropertyValue.getPropertyAsString(value);
+		String[] tokens = StringUtils.split(s, "\n");
+		List<SVNExternal> externals = new ArrayList<SVNExternal>();
+		for (String token : tokens) {
+			String[] values = StringUtils.split(token, " ");
+			String url = values[0];
+			String dir = values[1];
+			File file = new File(dir);
+			if (workingCopyPath != null) {
+				file = new File(workingCopyPath.getAbsolutePath() + File.separator + dir);
+			}
+			SVNExternal external = new SVNExternal();
+			external.setUrl(url);
+			external.setWorkingCopyPath(file);
+			externals.add(external);
+		}
+		return externals;
 	}
 
 	public long getLastRevision(File workingCopyPath) {
