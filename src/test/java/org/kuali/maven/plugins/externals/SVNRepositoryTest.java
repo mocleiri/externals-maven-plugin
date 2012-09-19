@@ -1,6 +1,7 @@
 package org.kuali.maven.plugins.externals;
 
 import java.io.File;
+import java.util.List;
 
 import org.junit.Test;
 import org.slf4j.Logger;
@@ -17,7 +18,11 @@ public class SVNRepositoryTest {
 	public void testGetExternals() {
 		try {
 			File workingCopyPath = new File("/Users/jeffcaddel/ws/aggregate");
-			svnUtils.getExternals(workingCopyPath);
+			List<SVNExternal> externals = svnUtils.getExternals(workingCopyPath);
+			log.info("externals " + externals.size());
+			for (SVNExternal external : externals) {
+				log.info(external.getUrl() + " " + external.getWorkingCopyPath());
+			}
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
