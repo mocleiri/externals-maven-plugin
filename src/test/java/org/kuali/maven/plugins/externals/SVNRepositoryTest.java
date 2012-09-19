@@ -53,7 +53,7 @@ public class SVNRepositoryTest {
 	}
 
 	protected ISVNAuthenticationManager getAuthenticationManager(String username, String password) {
-		SVNAuthentication auth = new SVNPasswordAuthentication("jcaddel", "gw570229", false, null, false);
+		SVNAuthentication auth = new SVNPasswordAuthentication(username, password, false, null, false);
 		SVNAuthentication[] array = new SVNAuthentication[] { auth };
 		return new BasicAuthenticationManager(array);
 	}
