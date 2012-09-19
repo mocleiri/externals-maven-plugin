@@ -17,7 +17,7 @@ public class SVNRepositoryTest {
 	public void testGetLatestRevision() {
 		try {
 			String url = "https://svn.kuali.org/repos/student/enrollment/aggregate/trunk";
-			File workingCopyPath = new File("/Users/jeffcaddel/ws/jenkins-maven-plugin");
+			File workingCopyPath = new File(".");
 			log.info(url + " - Last revision: " + svnUtils.getLastRevision(url));
 			log.info(workingCopyPath + " - Last revision: " + svnUtils.getLastRevision(workingCopyPath));
 		} catch (Exception e) {
