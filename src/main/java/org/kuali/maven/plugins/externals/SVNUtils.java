@@ -1,13 +1,12 @@
 package org.kuali.maven.plugins.externals;
 
 import java.io.File;
-import java.net.MalformedURLException;
-import java.net.URI;
-import java.net.URL;
+import java.util.List;
 
 import org.codehaus.plexus.util.StringUtils;
 import org.tmatesoft.svn.core.SVNDirEntry;
 import org.tmatesoft.svn.core.SVNException;
+import org.tmatesoft.svn.core.SVNPropertyValue;
 import org.tmatesoft.svn.core.SVNURL;
 import org.tmatesoft.svn.core.auth.ISVNAuthenticationManager;
 import org.tmatesoft.svn.core.internal.io.dav.DAVRepositoryFactory;
@@ -16,6 +15,7 @@ import org.tmatesoft.svn.core.internal.io.svn.SVNRepositoryFactoryImpl;
 import org.tmatesoft.svn.core.io.SVNRepository;
 import org.tmatesoft.svn.core.io.SVNRepositoryFactory;
 import org.tmatesoft.svn.core.wc.SVNInfo;
+import org.tmatesoft.svn.core.wc.SVNPropertyData;
 import org.tmatesoft.svn.core.wc.SVNRevision;
 import org.tmatesoft.svn.core.wc.SVNWCClient;
 import org.tmatesoft.svn.core.wc.SVNWCUtil;
@@ -23,6 +23,7 @@ import org.tmatesoft.svn.core.wc.SVNWCUtil;
 public class SVNUtils {
 
 	private static final String EMPTY_STRING = "";
+	private static final String EXTERNALS_PROPERTY_NAME = "svn:externals";
 
 	protected static SVNUtils instance;
 
@@ -44,15 +45,33 @@ public class SVNUtils {
 		return instance;
 	}
 
+	public List<SVNExternal> getExternals(File workingCopyPath) {
+		try {
+			SVNWCClient client = getSVNWCClient();
+			SVNPropertyData data = client.doGetProperty(workingCopyPath, EXTERNALS_PROPERTY_NAME, SVNRevision.WORKING, SVNRevision.WORKING);
+			String name = data.getName();
+			SVNPropertyValue value = data.getValue();
+			String s = SVNPropertyValue.getPropertyAsString(value);
+			System.out.println(name + "=" + s);
+		} catch (SVNException e) {
+			throw new IllegalStateException(e);
+		}
+		return null;
+	}
+
 	public long getLastRevision(File workingCopyPath) {
 		SVNInfo info = getInfo(workingCopyPath);
 		return info.getCommittedRevision().getNumber();
 	}
 
+	protected SVNWCClient getSVNWCClient() {
+		ISVNAuthenticationManager authMgr = SVNWCUtil.createDefaultAuthenticationManager();
+		return new SVNWCClient(authMgr, null);
+	}
+
 	protected SVNInfo getInfo(File workingCopyPath) {
 		try {
-			ISVNAuthenticationManager authMgr = SVNWCUtil.createDefaultAuthenticationManager();
-			SVNWCClient client = new SVNWCClient(authMgr, null);
+			SVNWCClient client = getSVNWCClient();
 			SVNRevision revision = SVNRevision.create(-1);
 			return client.doInfo(workingCopyPath, revision);
 		} catch (SVNException e) {
@@ -92,16 +111,4 @@ public class SVNUtils {
 			throw new IllegalStateException(e);
 		}
 	}
-
-	protected String getUrl(File file) {
-		URI uri = file.toURI();
-		try {
-			URL url = uri.toURL();
-			String s = url.toExternalForm();
-			return StringUtils.replace(s, "file:", "file://");
-		} catch (MalformedURLException e) {
-			throw new IllegalStateException(e);
-		}
-	}
-
 }
