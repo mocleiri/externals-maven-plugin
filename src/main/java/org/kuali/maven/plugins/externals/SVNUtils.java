@@ -51,7 +51,7 @@ public class SVNUtils {
 			SVNWCClient client = getSVNWCClient();
 			SVNPropertyData data = client.doGetProperty(workingCopyPath, EXTERNALS_PROPERTY_NAME, SVNRevision.WORKING, SVNRevision.WORKING);
 			if (data == null) {
-				return null;
+				return new ArrayList<SVNExternal>();
 			}
 			SVNPropertyValue value = data.getValue();
 			String s = SVNPropertyValue.getPropertyAsString(value);
