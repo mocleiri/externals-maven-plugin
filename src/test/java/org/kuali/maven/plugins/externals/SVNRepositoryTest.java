@@ -15,6 +15,31 @@ public class SVNRepositoryTest {
 	String password = System.getProperty("svn.password");
 
 	@Test
+	public void testGetExternalsFromUrl() {
+		try {
+			String url = "https://svn.kuali.org/repos/student/enrollment/aggregate/trunk";
+			List<SVNExternal> externals = svnUtils.getExternals(url);
+			log.info("externals " + externals.size());
+			for (SVNExternal external : externals) {
+				log.info(external.getUrl() + " " + external.getWorkingCopyPath());
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+
+	@Test
+	public void testGetUrl() {
+		try {
+			File workingCopyPath = new File("/Users/jeffcaddel/ws/aggregate");
+			String url = svnUtils.getUrl(workingCopyPath);
+			log.info("url=" + url);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+
+	@Test
 	public void testGetExternals() {
 		try {
 			File workingCopyPath = new File("/Users/jeffcaddel/ws/aggregate");

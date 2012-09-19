@@ -46,6 +46,39 @@ public class SVNUtils {
 		return instance;
 	}
 
+	public String getUrl(File workingCopyPath) {
+		SVNInfo info = getInfo(workingCopyPath);
+		return info.getURL().toDecodedString();
+	}
+
+	public List<SVNExternal> getExternals(String url) {
+		try {
+			SVNWCClient client = getSVNWCClient();
+			SVNURL svnUrl = getSvnUrl(url);
+			SVNPropertyData data = client.doGetProperty(svnUrl, EXTERNALS_PROPERTY_NAME, SVNRevision.HEAD, SVNRevision.HEAD);
+			if (data == null) {
+				return new ArrayList<SVNExternal>();
+			}
+			SVNPropertyValue value = data.getValue();
+			String s = SVNPropertyValue.getPropertyAsString(value);
+			String[] tokens = StringUtils.split(s, "\n");
+			List<SVNExternal> externals = new ArrayList<SVNExternal>();
+			for (String token : tokens) {
+				String[] values = StringUtils.split(token, " ");
+				String newUrl = values[0];
+				String dir = values[1];
+				File file = new File(dir);
+				SVNExternal external = new SVNExternal();
+				external.setUrl(newUrl);
+				external.setWorkingCopyPath(file);
+				externals.add(external);
+			}
+			return externals;
+		} catch (SVNException e) {
+			throw new IllegalStateException(e);
+		}
+	}
+
 	public List<SVNExternal> getExternals(File workingCopyPath) {
 		try {
 			SVNWCClient client = getSVNWCClient();
@@ -113,14 +146,22 @@ public class SVNUtils {
 
 	protected SVNRepository getRepository(String url, String username, String password) {
 		try {
-			@SuppressWarnings("deprecation")
-			SVNURL svnUrl = SVNURL.parseURIDecoded(url);
+			SVNURL svnUrl = getSvnUrl(url);
 			SVNRepository repository = SVNRepositoryFactory.create(svnUrl, null);
 			if (!StringUtils.isBlank(username) && !StringUtils.isBlank(password)) {
 				ISVNAuthenticationManager authManager = SVNWCUtil.createDefaultAuthenticationManager(username, password);
 				repository.setAuthenticationManager(authManager);
 			}
 			return repository;
+		} catch (SVNException e) {
+			throw new IllegalStateException(e);
+		}
+	}
+
+	@SuppressWarnings("deprecation")
+	protected SVNURL getSvnUrl(String url) {
+		try {
+			return SVNURL.parseURIDecoded(url);
 		} catch (SVNException e) {
 			throw new IllegalStateException(e);
 		}
