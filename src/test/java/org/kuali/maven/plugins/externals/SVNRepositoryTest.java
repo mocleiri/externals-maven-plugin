@@ -19,7 +19,7 @@ public class SVNRepositoryTest {
 			String url = "https://svn.kuali.org/repos/student/enrollment/aggregate/trunk";
 			File workingCopyPath = new File(".");
 			log.info(url + " - Last revision: " + svnUtils.getLastRevision(url));
-			log.info(workingCopyPath + " - Last revision: " + svnUtils.getLastRevision(workingCopyPath));
+			log.info(workingCopyPath.getAbsolutePath() + " - Last revision: " + svnUtils.getLastRevision(workingCopyPath));
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
