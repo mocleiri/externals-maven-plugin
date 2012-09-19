@@ -4,6 +4,7 @@ import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 
 /**
+ * 
  * @goal getrevision
  * 
  * @author jeffcaddel
