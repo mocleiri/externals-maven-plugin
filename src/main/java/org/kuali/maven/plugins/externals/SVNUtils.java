@@ -1,6 +1,7 @@
 package org.kuali.maven.plugins.externals;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.codehaus.plexus.util.StringUtils;
@@ -49,14 +50,27 @@ public class SVNUtils {
 		try {
 			SVNWCClient client = getSVNWCClient();
 			SVNPropertyData data = client.doGetProperty(workingCopyPath, EXTERNALS_PROPERTY_NAME, SVNRevision.WORKING, SVNRevision.WORKING);
-			String name = data.getName();
+			if (data == null) {
+				return null;
+			}
 			SVNPropertyValue value = data.getValue();
 			String s = SVNPropertyValue.getPropertyAsString(value);
-			System.out.println(name + "=" + s);
+			String[] tokens = StringUtils.split(s, "\n");
+			List<SVNExternal> externals = new ArrayList<SVNExternal>();
+			for (String token : tokens) {
+				String[] values = StringUtils.split(token, " ");
+				String url = values[0];
+				String dir = values[1];
+				File file = new File(workingCopyPath.getAbsolutePath() + File.separator + dir);
+				SVNExternal external = new SVNExternal();
+				external.setUrl(url);
+				external.setWorkingCopyPath(file);
+				externals.add(external);
+			}
+			return externals;
 		} catch (SVNException e) {
 			throw new IllegalStateException(e);
 		}
-		return null;
 	}
 
 	public long getLastRevision(File workingCopyPath) {
