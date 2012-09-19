@@ -1,5 +1,10 @@
 package org.kuali.maven.plugins.externals;
 
+/**
+ *
+ * 
+ * 
+ */
 public class External {
 
 	String url;
