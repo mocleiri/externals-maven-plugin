@@ -14,7 +14,7 @@ public class SVNRepositoryTest {
 	String password = System.getProperty("svn.password");
 
 	@Test
-	public void testGetLatestRevision() {
+	public void testGetLastRevision() {
 		try {
 			String url = "https://svn.kuali.org/repos/student/enrollment/aggregate/trunk";
 			File workingCopyPath = new File(".");

@@ -56,7 +56,7 @@ public class SVNUtils {
 			SVNRevision revision = SVNRevision.create(-1);
 			return client.doInfo(workingCopyPath, revision);
 		} catch (SVNException e) {
-			throw new IllegalArgumentException(e);
+			throw new IllegalStateException(e);
 		}
 	}
 
