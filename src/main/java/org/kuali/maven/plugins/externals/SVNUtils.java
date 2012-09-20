@@ -69,13 +69,16 @@ public class SVNUtils {
 	}
 
 	/**
-	 * Return the Subversion url that corresponds to the local file systems working copy
+	 * Return the Subversion url that corresponds with the local working copy
 	 */
 	public String getUrl(File workingCopyPath) {
 		SVNInfo info = getInfo(workingCopyPath);
 		return info.getURL().toDecodedString();
 	}
 
+	/**
+	 * Return any svn:externals associated with the given url. Returns an empty list if there are none. Never returns null.
+	 */
 	public List<SVNExternal> getExternals(String url) {
 		try {
 			SVNWCClient client = getSVNWCClient();
@@ -87,6 +90,9 @@ public class SVNUtils {
 		}
 	}
 
+	/**
+	 * Return any svn:externals associated with the working copy. Returns an empty list if there are none. Never returns null.
+	 */
 	public List<SVNExternal> getExternals(File workingCopyPath) {
 		try {
 			SVNWCClient client = getSVNWCClient();
@@ -95,6 +101,22 @@ public class SVNUtils {
 		} catch (SVNException e) {
 			throw new IllegalStateException(e);
 		}
+	}
+
+	/**
+	 * Return the revision of the last commit for the working copy.
+	 */
+	public long getLastRevision(File workingCopyPath) {
+		SVNInfo info = getInfo(workingCopyPath);
+		return info.getCommittedRevision().getNumber();
+	}
+
+	/**
+	 * Return the revision of the last commit for the given url
+	 */
+	public long getLastRevision(String url) {
+		SVNRepository repository = getRepository(url);
+		return getLastRevision(repository);
 	}
 
 	protected List<SVNExternal> getExternals(SVNPropertyData data, File workingCopyPath) {
@@ -134,11 +156,6 @@ public class SVNUtils {
 		}
 	}
 
-	public long getLastRevision(File workingCopyPath) {
-		SVNInfo info = getInfo(workingCopyPath);
-		return info.getCommittedRevision().getNumber();
-	}
-
 	protected SVNWCClient getSVNWCClient() {
 		ISVNAuthenticationManager authMgr = SVNWCUtil.createDefaultAuthenticationManager();
 		return new SVNWCClient(authMgr, null);
@@ -152,11 +169,6 @@ public class SVNUtils {
 		} catch (SVNException e) {
 			throw new IllegalStateException(e);
 		}
-	}
-
-	public long getLastRevision(String url) {
-		SVNRepository repository = getRepository(url);
-		return getLastRevision(repository);
 	}
 
 	protected long getLastRevision(SVNRepository repository) {
