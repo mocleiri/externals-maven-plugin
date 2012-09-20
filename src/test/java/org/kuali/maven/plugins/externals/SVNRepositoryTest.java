@@ -17,8 +17,22 @@ public class SVNRepositoryTest {
 	@Test
 	public void testGetExternalsFromUrl() {
 		try {
-			String url = "https://svn.kuali.org/repos/student/enrollment/aggregate/trunk";
+			String url = "https://svn.kuali.org/repos/student/sandbox/enrollment/aggregate/trunk";
 			List<SVNExternal> externals = svnUtils.getExternals(url);
+			log.info("externals " + externals.size());
+			for (SVNExternal external : externals) {
+				log.info(external.getUrl() + " " + external.getWorkingCopyPath());
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+
+	@Test
+	public void testGetExternalsFromWorkingCopyPath() {
+		try {
+			File workingCopyPath = new File("/Users/jeffcaddel/ws/aggregate");
+			List<SVNExternal> externals = svnUtils.getExternals(workingCopyPath);
 			log.info("externals " + externals.size());
 			for (SVNExternal external : externals) {
 				log.info(external.getUrl() + " " + external.getWorkingCopyPath());
@@ -34,20 +48,6 @@ public class SVNRepositoryTest {
 			File workingCopyPath = new File("/Users/jeffcaddel/ws/aggregate");
 			String url = svnUtils.getUrl(workingCopyPath);
 			log.info("url=" + url);
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-	}
-
-	@Test
-	public void testGetExternals() {
-		try {
-			File workingCopyPath = new File("/Users/jeffcaddel/ws/aggregate");
-			List<SVNExternal> externals = svnUtils.getExternals(workingCopyPath);
-			log.info("externals " + externals.size());
-			for (SVNExternal external : externals) {
-				log.info(external.getUrl() + " " + external.getWorkingCopyPath());
-			}
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
