@@ -89,11 +89,12 @@ public class SVNUtils {
 				continue;
 			}
 			String[] values = StringUtils.split(token, " ");
-			String url = values[0];
-			String path = values[1];
+			String path = values[0];
+			String url = values[1];
 			File externalsPath = getExternalWorkingCopyPath(workingCopyPath, path);
 			SVNExternal external = new SVNExternal();
 			external.setUrl(url);
+			external.setPath(path);
 			external.setWorkingCopyPath(externalsPath);
 			externals.add(external);
 		}

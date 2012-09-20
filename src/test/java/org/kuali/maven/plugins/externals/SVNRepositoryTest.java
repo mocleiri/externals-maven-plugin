@@ -21,7 +21,7 @@ public class SVNRepositoryTest {
 			List<SVNExternal> externals = svnUtils.getExternals(url);
 			log.info("externals " + externals.size());
 			for (SVNExternal external : externals) {
-				log.info(external.getUrl() + " " + external.getWorkingCopyPath());
+				log.info(external.getPath() + " " + external.getWorkingCopyPath() + " " + external.getUrl());
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -35,7 +35,7 @@ public class SVNRepositoryTest {
 			List<SVNExternal> externals = svnUtils.getExternals(workingCopyPath);
 			log.info("externals " + externals.size());
 			for (SVNExternal external : externals) {
-				log.info(external.getUrl() + " " + external.getWorkingCopyPath());
+				log.info(external.getPath() + " " + external.getWorkingCopyPath() + " " + external.getUrl());
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
