@@ -81,19 +81,31 @@ public class SVNUtils {
 		String[] tokens = StringUtils.split(s, "\n");
 		List<SVNExternal> externals = new ArrayList<SVNExternal>();
 		for (String token : tokens) {
+			token = token.trim();
+			if (token.startsWith("#")) {
+				continue;
+			}
+			if (StringUtils.isBlank(token)) {
+				continue;
+			}
 			String[] values = StringUtils.split(token, " ");
 			String url = values[0];
-			String dir = values[1];
-			File file = new File(dir);
-			if (workingCopyPath != null) {
-				file = new File(workingCopyPath.getAbsolutePath() + File.separator + dir);
-			}
+			String path = values[1];
+			File externalsPath = getExternalsWorkingCopyPath(workingCopyPath, path);
 			SVNExternal external = new SVNExternal();
 			external.setUrl(url);
-			external.setWorkingCopyPath(file);
+			external.setWorkingCopyPath(externalsPath);
 			externals.add(external);
 		}
 		return externals;
+	}
+
+	protected File getExternalsWorkingCopyPath(File workingCopyPath, String path) {
+		if (workingCopyPath == null) {
+			return null;
+		} else {
+			return new File(workingCopyPath.getAbsolutePath() + File.separator + path);
+		}
 	}
 
 	public long getLastRevision(File workingCopyPath) {
