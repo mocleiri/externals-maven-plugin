@@ -91,7 +91,7 @@ public class SVNUtils {
 			String[] values = StringUtils.split(token, " ");
 			String url = values[0];
 			String path = values[1];
-			File externalsPath = getExternalsWorkingCopyPath(workingCopyPath, path);
+			File externalsPath = getExternalWorkingCopyPath(workingCopyPath, path);
 			SVNExternal external = new SVNExternal();
 			external.setUrl(url);
 			external.setWorkingCopyPath(externalsPath);
@@ -100,7 +100,7 @@ public class SVNUtils {
 		return externals;
 	}
 
-	protected File getExternalsWorkingCopyPath(File workingCopyPath, String path) {
+	protected File getExternalWorkingCopyPath(File workingCopyPath, String path) {
 		if (workingCopyPath == null) {
 			return null;
 		} else {
