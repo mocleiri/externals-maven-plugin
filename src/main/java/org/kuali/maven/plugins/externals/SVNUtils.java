@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.codehaus.plexus.util.StringUtils;
+import org.tmatesoft.svn.core.SVNCommitInfo;
 import org.tmatesoft.svn.core.SVNDirEntry;
 import org.tmatesoft.svn.core.SVNException;
 import org.tmatesoft.svn.core.SVNPropertyValue;
@@ -15,6 +16,9 @@ import org.tmatesoft.svn.core.internal.io.fs.FSRepositoryFactory;
 import org.tmatesoft.svn.core.internal.io.svn.SVNRepositoryFactoryImpl;
 import org.tmatesoft.svn.core.io.SVNRepository;
 import org.tmatesoft.svn.core.io.SVNRepositoryFactory;
+import org.tmatesoft.svn.core.wc.SVNClientManager;
+import org.tmatesoft.svn.core.wc.SVNCopyClient;
+import org.tmatesoft.svn.core.wc.SVNCopySource;
 import org.tmatesoft.svn.core.wc.SVNInfo;
 import org.tmatesoft.svn.core.wc.SVNPropertyData;
 import org.tmatesoft.svn.core.wc.SVNRevision;
@@ -44,6 +48,23 @@ public class SVNUtils {
 			instance = new SVNUtils();
 		}
 		return instance;
+	}
+
+	/**
+	 * Copy <code>src</code> to <code>dst</code> creating parent directories as needed. An exception is thrown if <code>dst</code> already exists.
+	 */
+	public SVNCommitInfo copy(String src, String dst, String msg, String username, String password) {
+		SVNClientManager cm = SVNClientManager.newInstance(null, username, password);
+		SVNCopyClient client = cm.getCopyClient();
+		SVNURL dstUrl = getSvnUrl(dst);
+		SVNURL srcUrl = getSvnUrl(src);
+		SVNCopySource svnCopySource = new SVNCopySource(SVNRevision.HEAD, SVNRevision.HEAD, srcUrl);
+		SVNCopySource[] sources = new SVNCopySource[] { svnCopySource };
+		try {
+			return client.doCopy(sources, dstUrl, false, true, true, msg, null);
+		} catch (SVNException e) {
+			throw new IllegalStateException(e);
+		}
 	}
 
 	public String getUrl(File workingCopyPath) {
@@ -131,10 +152,10 @@ public class SVNUtils {
 
 	public long getLastRevision(String url) {
 		SVNRepository repository = getRepository(url);
-		return getLatestRevision(repository);
+		return getLastRevision(repository);
 	}
 
-	protected long getLatestRevision(SVNRepository repository) {
+	protected long getLastRevision(SVNRepository repository) {
 		try {
 			SVNDirEntry entry = repository.info(EMPTY_STRING, -1);
 			return entry.getRevision();

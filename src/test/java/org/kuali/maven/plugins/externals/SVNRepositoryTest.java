@@ -6,6 +6,7 @@ import java.util.List;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.tmatesoft.svn.core.SVNCommitInfo;
 
 public class SVNRepositoryTest {
 
@@ -13,6 +14,19 @@ public class SVNRepositoryTest {
 	SVNUtils svnUtils = SVNUtils.getInstance();
 	String username = "jcaddel";
 	String password = System.getProperty("svn.password");
+
+	@Test
+	public void testServerSideCopy() {
+		try {
+			String src = "https://svn.kuali.org/repos/student/sandbox/enrollment/ks-api/branches/M5";
+			String dst = "https://svn.kuali.org/repos/student/sandbox/enrollment/ks-api/tags/builds/2.0/2.0.0-M5/20120919-r36068";
+			SVNCommitInfo info = svnUtils.copy(src, dst, "Automated nightly build tag", username, password);
+			long revision = info.getNewRevision();
+			log.info("Commited revision: " + revision);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
 
 	@Test
 	public void testGetExternalsFromUrl() {
