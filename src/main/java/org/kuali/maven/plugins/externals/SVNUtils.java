@@ -55,8 +55,8 @@ public class SVNUtils {
 	 * Copy <code>src</code> to <code>dst</code> creating parent directories as needed. An exception is thrown if <code>dst</code> already exists.
 	 */
 	public SVNCommitInfo copy(String src, String dst, String msg, String username, String password) {
-		SVNClientManager cm = SVNClientManager.newInstance(null, username, password);
-		SVNCopyClient client = cm.getCopyClient();
+		SVNClientManager manager = SVNClientManager.newInstance(null, username, password);
+		SVNCopyClient client = manager.getCopyClient();
 		SVNURL dstUrl = getSvnUrl(dst);
 		SVNURL srcUrl = getSvnUrl(src);
 		SVNCopySource svnCopySource = new SVNCopySource(SVNRevision.HEAD, SVNRevision.HEAD, srcUrl);
