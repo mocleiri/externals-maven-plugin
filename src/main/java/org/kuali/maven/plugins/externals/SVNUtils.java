@@ -29,6 +29,7 @@ public class SVNUtils {
 
 	private static final String EMPTY_STRING = "";
 	private static final String EXTERNALS_PROPERTY_NAME = "svn:externals";
+	private static final String EXTERNALS_COMMENT = "#";
 
 	protected static SVNUtils instance;
 
@@ -67,6 +68,9 @@ public class SVNUtils {
 		}
 	}
 
+	/**
+	 * Return the Subversion url that corresponds to the local file systems working copy
+	 */
 	public String getUrl(File workingCopyPath) {
 		SVNInfo info = getInfo(workingCopyPath);
 		return info.getURL().toDecodedString();
@@ -103,7 +107,7 @@ public class SVNUtils {
 		List<SVNExternal> externals = new ArrayList<SVNExternal>();
 		for (String token : tokens) {
 			token = token.trim();
-			if (token.startsWith("#")) {
+			if (token.startsWith(EXTERNALS_COMMENT)) {
 				continue;
 			}
 			if (StringUtils.isBlank(token)) {
