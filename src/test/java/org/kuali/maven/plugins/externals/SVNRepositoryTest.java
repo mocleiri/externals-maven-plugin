@@ -62,7 +62,7 @@ public class SVNRepositoryTest {
 	@Test
 	public void testGetLastRevision() {
 		try {
-			String url = "https://svn.kuali.org/repos/student/enrollment/aggregate/trunk";
+			String url = "https://svn.kuali.org/repos/student/sandbox/enrollment/aggregate/trunk";
 			File workingCopyPath = new File(".");
 			log.info(url + " - Last revision: " + svnUtils.getLastRevision(url));
 			log.info(workingCopyPath.getAbsolutePath() + " - Last revision: " + svnUtils.getLastRevision(workingCopyPath));
