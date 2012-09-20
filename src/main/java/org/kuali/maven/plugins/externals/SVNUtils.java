@@ -30,6 +30,8 @@ public class SVNUtils {
 	private static final String EMPTY_STRING = "";
 	private static final String EXTERNALS_PROPERTY_NAME = "svn:externals";
 	private static final String EXTERNALS_COMMENT = "#";
+	private static final String LINEFEED = "\n";
+	private static final String SPACE = " ";
 
 	protected static SVNUtils instance;
 
@@ -125,7 +127,7 @@ public class SVNUtils {
 		}
 		SVNPropertyValue value = data.getValue();
 		String s = SVNPropertyValue.getPropertyAsString(value);
-		String[] tokens = StringUtils.split(s, "\n");
+		String[] tokens = StringUtils.split(s, LINEFEED);
 		List<SVNExternal> externals = new ArrayList<SVNExternal>();
 		for (String token : tokens) {
 			token = token.trim();
@@ -135,7 +137,7 @@ public class SVNUtils {
 			if (StringUtils.isBlank(token)) {
 				continue;
 			}
-			String[] values = StringUtils.split(token, " ");
+			String[] values = StringUtils.split(token, SPACE);
 			String path = values[0];
 			String url = values[1];
 			File externalsPath = getExternalWorkingCopyPath(workingCopyPath, path);
