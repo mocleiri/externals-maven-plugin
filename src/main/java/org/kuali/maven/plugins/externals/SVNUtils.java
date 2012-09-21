@@ -4,7 +4,9 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.codehaus.plexus.util.StringUtils;
+import org.apache.commons.lang.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.tmatesoft.svn.core.SVNCommitInfo;
 import org.tmatesoft.svn.core.SVNDirEntry;
 import org.tmatesoft.svn.core.SVNException;
@@ -27,6 +29,7 @@ import org.tmatesoft.svn.core.wc.SVNWCUtil;
 
 public class SVNUtils {
 
+	private static final Logger LOGGER = LoggerFactory.getLogger(SVNUtils.class);
 	private static final String EMPTY_STRING = "";
 	private static final String EXTERNALS_PROPERTY_NAME = "svn:externals";
 	private static final String EXTERNALS_COMMENT = "#";
@@ -51,6 +54,18 @@ public class SVNUtils {
 			instance = new SVNUtils();
 		}
 		return instance;
+	}
+
+	public void showExternals(List<SVNExternal> externals) {
+		LOGGER.info("svn:externals count=" + externals.size());
+		for (SVNExternal e : externals) {
+			StringBuilder sb = new StringBuilder();
+			sb.append("[" + e.getPath());
+			sb.append(", " + e.getWorkingCopyPath());
+			sb.append(", " + e.getUrl());
+			sb.append("]");
+			LOGGER.info(sb.toString());
+		}
 	}
 
 	/**

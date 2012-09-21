@@ -31,6 +31,8 @@ public class CreateTagsMojo extends AbstractMojo {
 	public void execute() throws MojoExecutionException {
 		String url = svnUtils.getUrl(project.getBasedir());
 		getLog().info(url);
+		List<SVNExternal> externals = svnUtils.getExternals(project.getBasedir());
+		svnUtils.showExternals(externals);
 	}
 
 	public List<Mapping> getMappings() {
