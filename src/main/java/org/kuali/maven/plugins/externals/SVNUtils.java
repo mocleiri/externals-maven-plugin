@@ -57,7 +57,6 @@ public class SVNUtils {
 	}
 
 	public void showExternals(List<SVNExternal> externals) {
-		LOGGER.info("svn:externals count=" + externals.size());
 		for (SVNExternal e : externals) {
 			StringBuilder sb = new StringBuilder();
 			sb.append("[" + e.getPath());

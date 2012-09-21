@@ -33,6 +33,8 @@ public class CreateTagsMojo extends AbstractMojo {
 		getLog().info(url);
 		List<SVNExternal> externals = svnUtils.getExternals(project.getBasedir());
 		svnUtils.showExternals(externals);
+		getLog().info("externals: " + externals.size());
+		getLog().info("mappings: " + mappings.size());
 	}
 
 	public List<Mapping> getMappings() {
