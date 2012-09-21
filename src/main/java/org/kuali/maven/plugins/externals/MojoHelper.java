@@ -103,6 +103,15 @@ public class MojoHelper {
 		return buildTag;
 	}
 
+	protected String getVersion(String version, long revision) {
+		String trimmed = trimSnapshot(version);
+		StringBuilder sb = new StringBuilder();
+		sb.append(trimmed);
+		sb.append("-");
+		sb.append("r" + revision);
+		return sb.toString();
+	}
+
 	protected String getTag(String url, String version, String artifactId, long revision) {
 		String tagBase = extractor.getTagBase(url);
 		if (StringUtils.isBlank(tagBase)) {
