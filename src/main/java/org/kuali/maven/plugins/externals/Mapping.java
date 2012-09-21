@@ -24,5 +24,4 @@ public class Mapping implements Comparable<Mapping> {
 	public void setVersionProperty(String property) {
 		this.versionProperty = property;
 	}
-
 }
