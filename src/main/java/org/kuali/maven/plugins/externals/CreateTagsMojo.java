@@ -7,7 +7,6 @@ import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.project.MavenProject;
 
 /**
- * 
  * @goal createtags
  */
 public class CreateTagsMojo extends AbstractMojo {
@@ -32,6 +31,7 @@ public class CreateTagsMojo extends AbstractMojo {
 	public void execute() throws MojoExecutionException {
 		List<SVNExternal> externals = svnUtils.getExternals(project.getBasedir());
 		helper.validate(externals, mappings);
+		helper.validate(project.getProperties(), mappings);
 	}
 
 	public List<Mapping> getMappings() {

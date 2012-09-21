@@ -2,6 +2,9 @@ package org.kuali.maven.plugins.externals;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Properties;
+
+import org.codehaus.plexus.util.StringUtils;
 
 public class MojoHelper {
 
@@ -31,6 +34,23 @@ public class MojoHelper {
 			throw new IllegalArgumentException(externals.size() + " externals were detected but no mappings were supplied");
 		} else if (externals.size() != mappings.size()) {
 			throw new IllegalArgumentException("Mismatch. " + externals.size() + " externals were detected. " + mappings.size() + " mappings were supplied");
+		}
+	}
+
+	public void validate(Properties properties, List<Mapping> mappings) {
+		if (isEmpty(mappings)) {
+			return;
+		}
+		StringBuilder sb = new StringBuilder();
+		for (Mapping mapping : mappings) {
+			String key = mapping.getProperty();
+			String value = properties.getProperty(key);
+			if (StringUtils.isBlank(value)) {
+				sb.append(key + "=" + value + " ");
+			}
+		}
+		if (sb.length() != 0) {
+			throw new IllegalArgumentException("Missing property values: " + sb.toString());
 		}
 	}
 
