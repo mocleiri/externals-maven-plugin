@@ -107,7 +107,7 @@ public class SVNUtils {
 	}
 
 	public SVNCommitInfo setExternals(String url, List<SVNExternal> externals, String message) {
-		return setExternals(url, externals, null, null, null);
+		return setExternals(url, externals, message, null, null);
 	}
 
 	public SVNCommitInfo setExternals(String url, List<SVNExternal> externals, String message, String username, String password) {
