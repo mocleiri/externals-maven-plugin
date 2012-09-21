@@ -48,6 +48,11 @@
   </properties>
   <dependencies>
     <dependency>
+      <groupId>org.kuali.maven.common</groupId>
+      <artifactId>maven-kuali-common</artifactId>
+      <version>1.2.11</version>
+    </dependency>
+    <dependency>
       <groupId>org.tmatesoft.svnkit</groupId>
       <artifactId>svnkit</artifactId>
       <version>${svnkit.version}</version>

@@ -1,6 +1,7 @@
 package org.kuali.maven.plugins.externals;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -8,9 +9,12 @@ import java.util.Properties;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.maven.project.MavenProject;
+import org.kuali.maven.common.Extractor;
 
 public class MojoHelper {
 	private static final String MAVEN_SNAPSHOT_TOKEN = "SNAPSHOT";
+	SVNUtils svnUtils = SVNUtils.getInstance();
+	Extractor extractor = new Extractor();
 
 	protected static MojoHelper instance;
 
@@ -23,6 +27,35 @@ public class MojoHelper {
 			instance = new MojoHelper();
 		}
 		return instance;
+	}
+
+	public List<BuildTag> getBuildTags(MavenProject project, List<SVNExternal> externals, List<Mapping> mappings) {
+		Collections.sort(externals);
+		Collections.sort(mappings);
+		List<BuildTag> buildTags = new ArrayList<BuildTag>();
+		for (int i = 0; i < externals.size(); i++) {
+			SVNExternal external = externals.get(i);
+			Mapping mapping = mappings.get(i);
+			BuildTag buildTag = getBuildTag(project, external, mapping);
+			buildTags.add(buildTag);
+		}
+		return buildTags;
+	}
+
+	public BuildTag getBuildTag(MavenProject project, SVNExternal external, Mapping mapping) {
+		File workingCopy = external.getWorkingCopyPath();
+		String sourceUrl = svnUtils.getUrl(workingCopy);
+		long sourceRevision = svnUtils.getLastRevision(workingCopy);
+
+		String tagBase = extractor.getTagBase(sourceUrl);
+		if (StringUtils.isBlank(tagBase)) {
+			throw new IllegalArgumentException("Unable to calculate tag base from [" + sourceUrl + "]");
+		}
+
+		BuildTag buildTag = new BuildTag();
+		buildTag.setSourceUrl(sourceUrl);
+		buildTag.setSourceRevision(sourceRevision);
+		return buildTag;
 	}
 
 	public void validate(MavenProject project, List<SVNExternal> externals, List<Mapping> mappings) {
