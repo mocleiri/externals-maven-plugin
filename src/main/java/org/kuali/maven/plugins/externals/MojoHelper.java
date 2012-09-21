@@ -5,7 +5,6 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Date;
 import java.util.List;
 import java.util.Properties;
 
@@ -14,6 +13,9 @@ import org.apache.maven.project.MavenProject;
 import org.kuali.maven.common.Extractor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.core.io.DefaultResourceLoader;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.ResourceLoader;
 import org.tmatesoft.svn.core.SVNCommitInfo;
 
 public class MojoHelper {
@@ -38,7 +40,9 @@ public class MojoHelper {
 	}
 
 	public boolean exists(String url) {
-		return false;
+		ResourceLoader loader = new DefaultResourceLoader();
+		Resource resource = loader.getResource(url);
+		return resource.exists();
 	}
 
 	public void createTags(List<BuildTag> buildTags, String message) {
@@ -46,25 +50,31 @@ public class MojoHelper {
 			String src = buildTag.getSourceUrl();
 			long revision = buildTag.getSourceRevision();
 			String dst = buildTag.getTagUrl();
-			SVNCommitInfo info = svnUtils.copy(src, revision, dst, message);
-			LOG.info("Created [" + dst + "] Revision " + info.getNewRevision());
+			boolean exists = exists(dst);
+			if (exists) {
+				LOG.info("Skip existing tag [" + dst + "]");
+				buildTag.setSkipped(true);
+			} else {
+				SVNCommitInfo info = svnUtils.copy(src, revision, dst, message);
+				LOG.info("Created [" + dst + "] Revision " + info.getNewRevision());
+			}
 		}
 	}
 
-	public List<BuildTag> getBuildTags(MavenProject project, List<SVNExternal> externals, List<Mapping> mappings, Date today) {
+	public List<BuildTag> getBuildTags(MavenProject project, List<SVNExternal> externals, List<Mapping> mappings) {
 		Collections.sort(externals);
 		Collections.sort(mappings);
 		List<BuildTag> buildTags = new ArrayList<BuildTag>();
 		for (int i = 0; i < externals.size(); i++) {
 			SVNExternal external = externals.get(i);
 			Mapping mapping = mappings.get(i);
-			BuildTag buildTag = getBuildTag(project, external, mapping, today);
+			BuildTag buildTag = getBuildTag(project, external, mapping);
 			buildTags.add(buildTag);
 		}
 		return buildTags;
 	}
 
-	public BuildTag getBuildTag(MavenProject project, SVNExternal external, Mapping mapping, Date today) {
+	public BuildTag getBuildTag(MavenProject project, SVNExternal external, Mapping mapping) {
 		File workingCopy = external.getWorkingCopyPath();
 		String sourceUrl = svnUtils.getUrl(workingCopy);
 		long sourceRevision = svnUtils.getLastRevision(workingCopy);
@@ -91,8 +101,6 @@ public class MojoHelper {
 		sb.append("/");
 		sb.append(trimmed);
 		sb.append("/");
-		sb.append(sdf.format(today));
-		sb.append("-");
 		sb.append("r" + sourceRevision);
 
 		BuildTag buildTag = new BuildTag();

@@ -4,6 +4,7 @@ public class BuildTag {
 	String sourceUrl;
 	long sourceRevision;
 	String tagUrl;
+	boolean skipped;
 
 	public String getSourceUrl() {
 		return sourceUrl;
@@ -27,5 +28,13 @@ public class BuildTag {
 
 	public void setTagUrl(String tagUrl) {
 		this.tagUrl = tagUrl;
+	}
+
+	public boolean isSkipped() {
+		return skipped;
+	}
+
+	public void setSkipped(boolean skipped) {
+		this.skipped = skipped;
 	}
 }

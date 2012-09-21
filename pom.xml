@@ -48,6 +48,10 @@
   </properties>
   <dependencies>
     <dependency>
+      <groupId>org.springframework</groupId>
+      <artifactId>spring-core</artifactId>
+    </dependency>
+    <dependency>
       <groupId>org.kuali.maven.common</groupId>
       <artifactId>maven-kuali-common</artifactId>
       <version>1.2.11</version>

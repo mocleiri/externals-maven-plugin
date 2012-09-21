@@ -1,6 +1,5 @@
 package org.kuali.maven.plugins.externals;
 
-import java.util.Date;
 import java.util.List;
 
 import org.apache.maven.plugin.AbstractMojo;
@@ -35,10 +34,9 @@ public class CreateTagsMojo extends AbstractMojo {
 
 	@Override
 	public void execute() throws MojoExecutionException {
-		Date today = new Date();
 		List<SVNExternal> externals = svnUtils.getExternals(project.getBasedir());
 		helper.validate(project, externals, mappings);
-		List<BuildTag> buildTags = helper.getBuildTags(project, externals, mappings, today);
+		List<BuildTag> buildTags = helper.getBuildTags(project, externals, mappings);
 		helper.createTags(buildTags, message);
 	}
 
