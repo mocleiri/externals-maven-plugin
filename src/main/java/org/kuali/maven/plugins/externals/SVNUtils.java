@@ -10,6 +10,7 @@ import org.slf4j.LoggerFactory;
 import org.tmatesoft.svn.core.SVNCommitInfo;
 import org.tmatesoft.svn.core.SVNDirEntry;
 import org.tmatesoft.svn.core.SVNException;
+import org.tmatesoft.svn.core.SVNProperties;
 import org.tmatesoft.svn.core.SVNPropertyValue;
 import org.tmatesoft.svn.core.SVNURL;
 import org.tmatesoft.svn.core.auth.ISVNAuthenticationManager;
@@ -18,6 +19,7 @@ import org.tmatesoft.svn.core.internal.io.fs.FSRepositoryFactory;
 import org.tmatesoft.svn.core.internal.io.svn.SVNRepositoryFactoryImpl;
 import org.tmatesoft.svn.core.io.SVNRepository;
 import org.tmatesoft.svn.core.io.SVNRepositoryFactory;
+import org.tmatesoft.svn.core.wc.ISVNPropertyHandler;
 import org.tmatesoft.svn.core.wc.SVNClientManager;
 import org.tmatesoft.svn.core.wc.SVNCopyClient;
 import org.tmatesoft.svn.core.wc.SVNCopySource;
@@ -92,6 +94,24 @@ public class SVNUtils {
 		copy.setDestination(dst);
 		copy.setMessage(msg);
 		return copy(copy);
+	}
+
+	public SVNCommitInfo deleteExternals(String url) {
+		SVNClientManager manager = SVNClientManager.newInstance();
+		SVNWCClient client = manager.getWCClient();
+		String propName = EXTERNALS_PROPERTY_NAME;
+		SVNPropertyValue propValue = null;
+		SVNRevision baseRevision = SVNRevision.HEAD;
+		String commitMessage = "Delete externals";
+		SVNProperties revisionProperties = null;
+		boolean skipChecks = true;
+		ISVNPropertyHandler handler = null;
+		SVNURL svnUrl = getSvnUrl(url);
+		try {
+			return client.doSetProperty(svnUrl, propName, propValue, baseRevision, commitMessage, revisionProperties, skipChecks, handler);
+		} catch (SVNException e) {
+			throw new IllegalArgumentException(e);
+		}
 	}
 
 	public SVNCommitInfo copy(Copy copy) {

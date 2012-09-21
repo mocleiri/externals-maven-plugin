@@ -8,9 +8,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.tmatesoft.svn.core.SVNCommitInfo;
 
-public class SVNRepositoryTest {
+public class SVNUtilsTest {
 
-	private static final Logger log = LoggerFactory.getLogger(SVNRepositoryTest.class);
+	private static final Logger log = LoggerFactory.getLogger(SVNUtilsTest.class);
 	SVNUtils svnUtils = SVNUtils.getInstance();
 	String username = "jcaddel";
 	String password = System.getProperty("svn.password");
