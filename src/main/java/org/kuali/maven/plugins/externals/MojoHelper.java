@@ -1,9 +1,11 @@
 package org.kuali.maven.plugins.externals;
 
 import java.io.File;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 import java.util.Properties;
 
@@ -15,6 +17,7 @@ public class MojoHelper {
 	private static final String MAVEN_SNAPSHOT_TOKEN = "SNAPSHOT";
 	SVNUtils svnUtils = SVNUtils.getInstance();
 	Extractor extractor = new Extractor();
+	SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
 
 	protected static MojoHelper instance;
 
@@ -29,20 +32,20 @@ public class MojoHelper {
 		return instance;
 	}
 
-	public List<BuildTag> getBuildTags(MavenProject project, List<SVNExternal> externals, List<Mapping> mappings) {
+	public List<BuildTag> getBuildTags(MavenProject project, List<SVNExternal> externals, List<Mapping> mappings, Date today) {
 		Collections.sort(externals);
 		Collections.sort(mappings);
 		List<BuildTag> buildTags = new ArrayList<BuildTag>();
 		for (int i = 0; i < externals.size(); i++) {
 			SVNExternal external = externals.get(i);
 			Mapping mapping = mappings.get(i);
-			BuildTag buildTag = getBuildTag(project, external, mapping);
+			BuildTag buildTag = getBuildTag(project, external, mapping, today);
 			buildTags.add(buildTag);
 		}
 		return buildTags;
 	}
 
-	public BuildTag getBuildTag(MavenProject project, SVNExternal external, Mapping mapping) {
+	public BuildTag getBuildTag(MavenProject project, SVNExternal external, Mapping mapping, Date today) {
 		File workingCopy = external.getWorkingCopyPath();
 		String sourceUrl = svnUtils.getUrl(workingCopy);
 		long sourceRevision = svnUtils.getLastRevision(workingCopy);
@@ -52,9 +55,29 @@ public class MojoHelper {
 			throw new IllegalArgumentException("Unable to calculate tag base from [" + sourceUrl + "]");
 		}
 
+		String version = project.getProperties().getProperty(mapping.getVersionProperty());
+		Version v = parseVersion(version);
+		String trimmed = trimSnapshot(version);
+
+		StringBuilder sb = new StringBuilder();
+		sb.append(tagBase);
+		sb.append("/");
+		sb.append(mapping.getModule());
+		sb.append("-");
+		sb.append(v.getMajor());
+		sb.append(".");
+		sb.append(v.getMinor());
+		sb.append("/");
+		sb.append(trimmed);
+		sb.append("/");
+		sb.append(sdf.format(today));
+		sb.append("-");
+		sb.append("r" + sourceRevision);
+
 		BuildTag buildTag = new BuildTag();
 		buildTag.setSourceUrl(sourceUrl);
 		buildTag.setSourceRevision(sourceRevision);
+		buildTag.setTagUrl(sb.toString());
 		return buildTag;
 	}
 
@@ -165,4 +188,39 @@ public class MojoHelper {
 		return c == null || c.isEmpty();
 	}
 
+	protected Version parseVersion(String s) {
+		boolean snapshot = s.toUpperCase().endsWith("-" + MAVEN_SNAPSHOT_TOKEN);
+		Version version = new Version();
+		version.setSnapshot(snapshot);
+		String[] tokens = StringUtils.split(s, ".-");
+		if (tokens.length > 0) {
+			version.setMajor(tokens[0]);
+		}
+		if (tokens.length > 1) {
+			version.setMinor(tokens[1]);
+		}
+		if (tokens.length > 2) {
+			version.setIncremental(tokens[2]);
+		}
+		String qualifier = getQualifier(tokens);
+		version.setQualifier(qualifier);
+		return version;
+	}
+
+	protected String getQualifier(String[] tokens) {
+		if (tokens.length <= 3) {
+			return null;
+		}
+		StringBuilder sb = new StringBuilder();
+		for (int i = 3; i < tokens.length; i++) {
+			if (tokens[i].toUpperCase().equals(MAVEN_SNAPSHOT_TOKEN)) {
+				break;
+			}
+			if (i != 3) {
+				sb.append("-");
+			}
+			sb.append(tokens[i]);
+		}
+		return sb.toString();
+	}
 }
