@@ -41,10 +41,13 @@ public class MojoHelper {
 		} else if (externals.size() != modules.size()) {
 			throw new IllegalArgumentException("Mismatch. " + externals.size() + " externals were detected. " + modules.size() + " modules were detected");
 		}
-		for (SVNExternal external : externals) {
-			File workingCopy = external.getWorkingCopyPath();
-			if (!workingCopy.exists()) {
-				throw new IllegalArgumentException(workingCopy.getAbsolutePath() + " does not exist");
+		Collections.sort(modules);
+		Collections.sort(externals);
+		for (int i = 0; i < modules.size(); i++) {
+			String module1 = modules.get(i);
+			String module2 = externals.get(i).getPath();
+			if (!module1.equals(module2)) {
+				throw new IllegalArgumentException("Mismatch. " + module1 + " <> " + module2);
 			}
 		}
 	}
