@@ -4,7 +4,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Properties;
 
-import org.codehaus.plexus.util.StringUtils;
+import org.apache.commons.lang.StringUtils;
 
 public class MojoHelper {
 
@@ -42,15 +42,19 @@ public class MojoHelper {
 			return;
 		}
 		StringBuilder sb = new StringBuilder();
+		int count = 0;
 		for (Mapping mapping : mappings) {
 			String key = mapping.getProperty();
 			String value = properties.getProperty(key);
 			if (StringUtils.isBlank(value)) {
-				sb.append(key + "=" + value + " ");
+				if (count++ != 0) {
+					sb.append(", ");
+				}
+				sb.append(key);
 			}
 		}
 		if (sb.length() != 0) {
-			throw new IllegalArgumentException("Missing property values: " + sb.toString());
+			throw new IllegalArgumentException("Missing values for [" + sb.toString() + "]");
 		}
 	}
 
