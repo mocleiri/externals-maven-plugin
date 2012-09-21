@@ -1,6 +1,7 @@
 package org.kuali.maven.plugins.externals;
 
 public class BuildTag {
+
 	String sourceUrl;
 	long sourceRevision;
 	String tagUrl;
