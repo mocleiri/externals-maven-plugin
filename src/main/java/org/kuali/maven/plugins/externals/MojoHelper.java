@@ -27,6 +27,26 @@ public class MojoHelper {
 	public void validate(MavenProject project, List<SVNExternal> externals, List<Mapping> mappings) {
 		validate(externals, mappings);
 		validate(project, mappings);
+		validateProjectModules(project, externals);
+	}
+
+	public void validateProjectModules(MavenProject project, List<SVNExternal> externals) {
+		List<String> modules = project.getModules();
+		if (isEmpty(modules) && isEmpty(externals)) {
+			return;
+		} else if (isEmpty(externals) && !isEmpty(modules)) {
+			throw new IllegalArgumentException("No externals detected but " + modules.size() + " modules were detected");
+		} else if (!isEmpty(externals) && isEmpty(modules)) {
+			throw new IllegalArgumentException(externals.size() + " externals were detected but no modules were detected");
+		} else if (externals.size() != modules.size()) {
+			throw new IllegalArgumentException("Mismatch. " + externals.size() + " externals were detected. " + modules.size() + " modules were detected");
+		}
+		for (SVNExternal external : externals) {
+			File workingCopy = external.getWorkingCopyPath();
+			if (!workingCopy.exists()) {
+				throw new IllegalArgumentException(workingCopy.getAbsolutePath() + " does not exist");
+			}
+		}
 	}
 
 	public void validate(List<SVNExternal> externals, List<Mapping> mappings) {

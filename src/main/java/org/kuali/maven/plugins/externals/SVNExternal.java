@@ -7,11 +7,16 @@ import java.io.File;
  * 
  * 
  */
-public class SVNExternal {
+public class SVNExternal implements Comparable<SVNExternal> {
 
 	String url;
 	String path;
 	File workingCopyPath;
+
+	@Override
+	public int compareTo(SVNExternal other) {
+		return path.compareTo(other.getPath());
+	}
 
 	public String getUrl() {
 		return url;
@@ -36,4 +41,5 @@ public class SVNExternal {
 	public void setPath(String path) {
 		this.path = path;
 	}
+
 }
