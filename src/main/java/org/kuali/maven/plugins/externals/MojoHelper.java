@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Properties;
 
 import org.apache.commons.lang.StringUtils;
+import org.apache.maven.project.MavenProject;
 
 public class MojoHelper {
 
@@ -35,6 +36,11 @@ public class MojoHelper {
 		} else if (externals.size() != mappings.size()) {
 			throw new IllegalArgumentException("Mismatch. " + externals.size() + " externals were detected. " + mappings.size() + " mappings were supplied");
 		}
+	}
+
+	public void validate(MavenProject project, List<Mapping> mappings) {
+		validate(project.getProperties(), mappings);
+		List<String> modules = project.getModules();
 	}
 
 	public void validate(Properties properties, List<Mapping> mappings) {

@@ -1,15 +1,15 @@
 package org.kuali.maven.plugins.externals;
 
 public class Mapping {
-	String path;
+	String module;
 	String property;
 
-	public String getPath() {
-		return path;
+	public String getModule() {
+		return module;
 	}
 
-	public void setPath(String path) {
-		this.path = path;
+	public void setModule(String module) {
+		this.module = module;
 	}
 
 	public String getProperty() {
@@ -19,4 +19,5 @@ public class Mapping {
 	public void setProperty(String property) {
 		this.property = property;
 	}
+
 }
