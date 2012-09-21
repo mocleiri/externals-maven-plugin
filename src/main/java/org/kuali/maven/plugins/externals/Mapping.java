@@ -1,8 +1,13 @@
 package org.kuali.maven.plugins.externals;
 
-public class Mapping {
+public class Mapping implements Comparable<Mapping> {
 	String module;
 	String versionProperty;
+
+	@Override
+	public int compareTo(Mapping mapping) {
+		return module.compareTo(mapping.getModule());
+	}
 
 	public String getModule() {
 		return module;
