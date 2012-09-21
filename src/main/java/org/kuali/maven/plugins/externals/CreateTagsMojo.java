@@ -36,8 +36,10 @@ public class CreateTagsMojo extends AbstractMojo {
 	public void execute() throws MojoExecutionException {
 		List<SVNExternal> externals = svnUtils.getExternals(project.getBasedir());
 		helper.validate(project, externals, mappings);
-		List<BuildTag> buildTags = helper.getBuildTags(project, externals, mappings);
-		helper.createTags(buildTags, message);
+		BuildTag rootTag = helper.getBuildTag(project);
+		List<BuildTag> moduleTags = helper.getBuildTags(project, externals, mappings);
+		helper.createTags(moduleTags, message);
+		helper.createTag(rootTag, message);
 	}
 
 	public List<Mapping> getMappings() {

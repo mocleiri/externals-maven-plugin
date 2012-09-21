@@ -6,7 +6,6 @@ public class BuildTag {
 	long sourceRevision;
 	String tagUrl;
 	boolean skipped;
-
 	public String getSourceUrl() {
 		return sourceUrl;
 	}

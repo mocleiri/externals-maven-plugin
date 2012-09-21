@@ -1,7 +1,6 @@
 package org.kuali.maven.plugins.externals;
 
 import java.io.File;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -24,7 +23,6 @@ public class MojoHelper {
 
 	SVNUtils svnUtils = SVNUtils.getInstance();
 	Extractor extractor = new Extractor();
-	SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
 
 	protected static MojoHelper instance;
 
@@ -39,10 +37,18 @@ public class MojoHelper {
 		return instance;
 	}
 
+	public List<SVNExternal> getNewExternals(List<BuildTag> buildTags, List<SVNExternal> externals, List<Mapping> mappings) {
+		return null;
+	}
+
 	public boolean exists(String url) {
 		ResourceLoader loader = new DefaultResourceLoader();
 		Resource resource = loader.getResource(url);
 		return resource.exists();
+	}
+
+	public void createTag(BuildTag buildTag, String message) {
+		createTags(Collections.singletonList(buildTag), message);
 	}
 
 	public void createTags(List<BuildTag> buildTags, String message) {
@@ -65,7 +71,6 @@ public class MojoHelper {
 		Collections.sort(externals);
 		Collections.sort(mappings);
 		List<BuildTag> buildTags = new ArrayList<BuildTag>();
-		buildTags.add(getBuildTag(project));
 		for (int i = 0; i < externals.size(); i++) {
 			SVNExternal external = externals.get(i);
 			Mapping mapping = mappings.get(i);
