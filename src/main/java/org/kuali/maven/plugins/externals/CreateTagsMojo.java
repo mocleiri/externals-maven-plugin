@@ -35,7 +35,8 @@ public class CreateTagsMojo extends AbstractMojo {
 		helper.validate(project, externals, mappings);
 		List<BuildTag> buildTags = helper.getBuildTags(project, externals, mappings, today);
 		for (BuildTag buildTag : buildTags) {
-			getLog().info(buildTag.getSourceUrl() + "@" + buildTag.getSourceRevision() + " " + buildTag.getTagUrl());
+			getLog().info("From: " + buildTag.getSourceUrl() + "@" + buildTag.getSourceRevision());
+			getLog().info("  To: " + buildTag.getTagUrl());
 		}
 	}
 
