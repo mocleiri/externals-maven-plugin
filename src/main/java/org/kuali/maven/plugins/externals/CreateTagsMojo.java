@@ -29,6 +29,8 @@ public class CreateTagsMojo extends AbstractMojo {
 
 	@Override
 	public void execute() throws MojoExecutionException {
+		String url = svnUtils.getUrl(project.getBasedir());
+		getLog().info(url);
 	}
 
 	public List<Mapping> getMappings() {
