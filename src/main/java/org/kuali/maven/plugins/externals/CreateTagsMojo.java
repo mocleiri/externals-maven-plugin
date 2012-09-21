@@ -5,11 +5,9 @@ import org.apache.maven.plugin.MojoExecutionException;
 
 /**
  * 
- * @goal getrevision
- * 
- * @author jeffcaddel
+ * @goal createtags
  */
-public class GetRevisionMojo extends AbstractMojo {
+public class CreateTagsMojo extends AbstractMojo {
 
 	@Override
 	public void execute() throws MojoExecutionException {
