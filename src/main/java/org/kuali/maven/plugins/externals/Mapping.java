@@ -2,7 +2,7 @@ package org.kuali.maven.plugins.externals;
 
 public class Mapping {
 	String module;
-	String property;
+	String versionProperty;
 
 	public String getModule() {
 		return module;
@@ -12,12 +12,12 @@ public class Mapping {
 		this.module = module;
 	}
 
-	public String getProperty() {
-		return property;
+	public String getVersionProperty() {
+		return versionProperty;
 	}
 
-	public void setProperty(String property) {
-		this.property = property;
+	public void setVersionProperty(String property) {
+		this.versionProperty = property;
 	}
 
 }

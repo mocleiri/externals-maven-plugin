@@ -50,7 +50,7 @@ public class MojoHelper {
 		StringBuilder sb = new StringBuilder();
 		int count = 0;
 		for (Mapping mapping : mappings) {
-			String key = mapping.getProperty();
+			String key = mapping.getVersionProperty();
 			String value = properties.getProperty(key);
 			if (StringUtils.isBlank(value)) {
 				if (count++ != 0) {
