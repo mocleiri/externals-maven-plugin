@@ -12,9 +12,14 @@ import java.util.Properties;
 import org.apache.commons.lang.StringUtils;
 import org.apache.maven.project.MavenProject;
 import org.kuali.maven.common.Extractor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.tmatesoft.svn.core.SVNCommitInfo;
 
 public class MojoHelper {
+	private static final Logger LOG = LoggerFactory.getLogger(MojoHelper.class);
 	private static final String MAVEN_SNAPSHOT_TOKEN = "SNAPSHOT";
+
 	SVNUtils svnUtils = SVNUtils.getInstance();
 	Extractor extractor = new Extractor();
 	SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
@@ -30,6 +35,17 @@ public class MojoHelper {
 			instance = new MojoHelper();
 		}
 		return instance;
+	}
+
+	public void createTags(List<BuildTag> buildTags) {
+		for (BuildTag buildTag : buildTags) {
+			String src = buildTag.getSourceUrl();
+			long revision = buildTag.getSourceRevision();
+			String dst = buildTag.getTagUrl();
+			SVNCommitInfo info = svnUtils.copy(src, revision, dst);
+			LOG.info("Created " + dst);
+			LOG.info("Committed revision " + info.getNewRevision());
+		}
 	}
 
 	public List<BuildTag> getBuildTags(MavenProject project, List<SVNExternal> externals, List<Mapping> mappings, Date today) {
