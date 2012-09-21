@@ -65,6 +65,7 @@ public class MojoHelper {
 		Collections.sort(externals);
 		Collections.sort(mappings);
 		List<BuildTag> buildTags = new ArrayList<BuildTag>();
+		buildTags.add(getBuildTag(project));
 		for (int i = 0; i < externals.size(); i++) {
 			SVNExternal external = externals.get(i);
 			Mapping mapping = mappings.get(i);
@@ -74,17 +75,40 @@ public class MojoHelper {
 		return buildTags;
 	}
 
+	public BuildTag getBuildTag(MavenProject project) {
+		File workingCopy = project.getBasedir();
+		String sourceUrl = svnUtils.getUrl(workingCopy);
+		long sourceRevision = svnUtils.getLastRevision(workingCopy);
+		String version = project.getVersion();
+		String tag = getTag(sourceUrl, version, project.getArtifactId(), sourceRevision);
+
+		BuildTag buildTag = new BuildTag();
+		buildTag.setSourceUrl(sourceUrl);
+		buildTag.setSourceRevision(sourceRevision);
+		buildTag.setTagUrl(tag);
+		return buildTag;
+	}
+
 	public BuildTag getBuildTag(MavenProject project, SVNExternal external, Mapping mapping) {
 		File workingCopy = external.getWorkingCopyPath();
 		String sourceUrl = svnUtils.getUrl(workingCopy);
 		long sourceRevision = svnUtils.getLastRevision(workingCopy);
+		String version = project.getProperties().getProperty(mapping.getVersionProperty());
+		String tag = getTag(sourceUrl, version, mapping.getModule(), sourceRevision);
 
-		String tagBase = extractor.getTagBase(sourceUrl);
+		BuildTag buildTag = new BuildTag();
+		buildTag.setSourceUrl(sourceUrl);
+		buildTag.setSourceRevision(sourceRevision);
+		buildTag.setTagUrl(tag);
+		return buildTag;
+	}
+
+	protected String getTag(String url, String version, String artifactId, long revision) {
+		String tagBase = extractor.getTagBase(url);
 		if (StringUtils.isBlank(tagBase)) {
-			throw new IllegalArgumentException("Unable to calculate tag base from [" + sourceUrl + "]");
+			throw new IllegalArgumentException("Unable to calculate tag base from [" + url + "]");
 		}
 
-		String version = project.getProperties().getProperty(mapping.getVersionProperty());
 		Version v = parseVersion(version);
 		String trimmed = trimSnapshot(version);
 
@@ -93,7 +117,7 @@ public class MojoHelper {
 		sb.append("/");
 		sb.append("builds");
 		sb.append("/");
-		sb.append(mapping.getModule());
+		sb.append(artifactId);
 		sb.append("-");
 		sb.append(v.getMajor());
 		sb.append(".");
@@ -101,13 +125,8 @@ public class MojoHelper {
 		sb.append("/");
 		sb.append(trimmed);
 		sb.append("/");
-		sb.append("r" + sourceRevision);
-
-		BuildTag buildTag = new BuildTag();
-		buildTag.setSourceUrl(sourceUrl);
-		buildTag.setSourceRevision(sourceRevision);
-		buildTag.setTagUrl(sb.toString());
-		return buildTag;
+		sb.append("r" + revision);
+		return sb.toString();
 	}
 
 	public void validate(MavenProject project, List<SVNExternal> externals, List<Mapping> mappings) {
