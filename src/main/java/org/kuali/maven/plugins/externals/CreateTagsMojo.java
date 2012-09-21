@@ -29,20 +29,33 @@ public class CreateTagsMojo extends AbstractMojo {
 	private List<Mapping> mappings;
 
 	/**
-	 * @parameter expression="${externals.message}"
+	 * @parameter expression="${svn.tagMessage}"
 	 */
-	private String message;
+	private String tagMessage;
+
+	/**
+	 * @parameter expression="${svn.externalsMessage}"
+	 */
+	private String externalsMessage;
 
 	@Override
 	public void execute() throws MojoExecutionException {
+		// Extract svn:externals info from the root of the checkout
 		List<SVNExternal> externals = svnUtils.getExternals(project.getBasedir());
+		// Make sure the modules listed in the pom match the svn:externals definitions and the mappings provided in the plugin config
 		helper.validate(project, externals, mappings);
+		// Calculate the build tag for the root
 		BuildTag rootTag = helper.getBuildTag(project);
+		// Calculate build tags for each module
 		List<BuildTag> moduleTags = helper.getBuildTags(project, externals, mappings);
-		helper.createTags(moduleTags, message);
-		helper.createTag(rootTag, message);
+		// Create new svn:externals definitions based on the newly created tags
 		List<SVNExternal> newExternals = helper.getExternals(moduleTags, mappings);
-		SVNCommitInfo info = svnUtils.setExternals(rootTag.getTagUrl(), newExternals);
+		// Create the module tags
+		helper.createTags(moduleTags, tagMessage);
+		// Create the root tag
+		helper.createTag(rootTag, tagMessage);
+		// Update svn:externals definitions on the root tag so they point to the new module tags
+		SVNCommitInfo info = svnUtils.setExternals(rootTag.getTagUrl(), newExternals, externalsMessage);
 		getLog().info("Set " + newExternals.size() + " externals @ " + rootTag.getTagUrl());
 		getLog().info("Committed revision " + info.getNewRevision());
 	}
@@ -59,12 +72,20 @@ public class CreateTagsMojo extends AbstractMojo {
 		return project;
 	}
 
-	public String getMessage() {
-		return message;
+	public String getTagMessage() {
+		return tagMessage;
 	}
 
-	public void setMessage(String message) {
-		this.message = message;
+	public void setTagMessage(String message) {
+		this.tagMessage = message;
+	}
+
+	public String getExternalsMessage() {
+		return externalsMessage;
+	}
+
+	public void setExternalsMessage(String externalsMessage) {
+		this.externalsMessage = externalsMessage;
 	}
 
 }
