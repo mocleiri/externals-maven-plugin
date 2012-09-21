@@ -13,6 +13,7 @@ import org.apache.maven.project.MavenProject;
 public class CreateTagsMojo extends AbstractMojo {
 
 	SVNUtils svnUtils = SVNUtils.getInstance();
+	MojoHelper helper = MojoHelper.getInstance();
 
 	/**
 	 * The Maven project object
@@ -23,7 +24,6 @@ public class CreateTagsMojo extends AbstractMojo {
 	private MavenProject project;
 
 	/**
-	 * 
 	 * @parameter
 	 */
 	private List<Mapping> mappings;
@@ -31,6 +31,7 @@ public class CreateTagsMojo extends AbstractMojo {
 	@Override
 	public void execute() throws MojoExecutionException {
 		List<SVNExternal> externals = svnUtils.getExternals(project.getBasedir());
+		helper.validate(externals, mappings);
 	}
 
 	public List<Mapping> getMappings() {
