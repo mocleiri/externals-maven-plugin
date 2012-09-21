@@ -16,6 +16,22 @@ public class SVNUtilsTest {
 	String password = System.getProperty("svn.password");
 
 	@Test
+	public void testDeleteExternals() {
+		try {
+			String url = "https://svn.kuali.org/repos/student/sandbox/enrollment/aggregate/tags/builds/student-2.0/2.0.0/r36447";
+			List<SVNExternal> externals1 = svnUtils.getExternals(url);
+			log.info("externals 1 - " + externals1.size());
+			SVNCommitInfo info = svnUtils.deleteExternals(url);
+			long newRevision = info.getNewRevision();
+			log.info("Commited revision: " + newRevision);
+			List<SVNExternal> externals2 = svnUtils.getExternals(url);
+			log.info("externals 2 - " + externals2.size());
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+
+	// @Test
 	public void testServerSideCopy() {
 		try {
 			long revision = 36416;

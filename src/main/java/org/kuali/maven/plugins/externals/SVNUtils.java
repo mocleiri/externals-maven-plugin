@@ -10,7 +10,6 @@ import org.slf4j.LoggerFactory;
 import org.tmatesoft.svn.core.SVNCommitInfo;
 import org.tmatesoft.svn.core.SVNDirEntry;
 import org.tmatesoft.svn.core.SVNException;
-import org.tmatesoft.svn.core.SVNProperties;
 import org.tmatesoft.svn.core.SVNPropertyValue;
 import org.tmatesoft.svn.core.SVNURL;
 import org.tmatesoft.svn.core.auth.ISVNAuthenticationManager;
@@ -19,7 +18,6 @@ import org.tmatesoft.svn.core.internal.io.fs.FSRepositoryFactory;
 import org.tmatesoft.svn.core.internal.io.svn.SVNRepositoryFactoryImpl;
 import org.tmatesoft.svn.core.io.SVNRepository;
 import org.tmatesoft.svn.core.io.SVNRepositoryFactory;
-import org.tmatesoft.svn.core.wc.ISVNPropertyHandler;
 import org.tmatesoft.svn.core.wc.SVNClientManager;
 import org.tmatesoft.svn.core.wc.SVNCopyClient;
 import org.tmatesoft.svn.core.wc.SVNCopySource;
@@ -35,6 +33,8 @@ public class SVNUtils {
 	private static final String EMPTY_STRING = "";
 	private static final String EXTERNALS_PROPERTY_NAME = "svn:externals";
 	private static final String EXTERNALS_COMMENT = "#";
+	private static final String DELETE_EXTERNALS_COMMIT_MESSAGE = "Delete externals";
+	private static final String CREATE_EXTERNALS_COMMIT_MESSAGE = "Create externals";
 	private static final String LINEFEED = "\n";
 	private static final String SPACE = " ";
 
@@ -76,6 +76,9 @@ public class SVNUtils {
 		return copy(src, null, dst, null);
 	}
 
+	/**
+	 * Copy <code>src</code> to <code>dst</code> creating parent directories as needed. An exception is thrown if <code>dst</code> already exists.
+	 */
 	public SVNCommitInfo copy(String src, String dst, String msg) {
 		return copy(src, null, dst, msg);
 	}
@@ -87,6 +90,9 @@ public class SVNUtils {
 		return copy(src, revision, dst, null);
 	}
 
+	/**
+	 * Copy <code>src</code> at the indicated revision to <code>dst</code> creating parent directories as needed. An exception is thrown if <code>dst</code> already exists.
+	 */
 	public SVNCommitInfo copy(String src, Long revision, String dst, String msg) {
 		Copy copy = new Copy();
 		copy.setSource(src);
@@ -96,21 +102,48 @@ public class SVNUtils {
 		return copy(copy);
 	}
 
-	public SVNCommitInfo deleteExternals(String url) {
-		SVNClientManager manager = SVNClientManager.newInstance();
+	public SVNCommitInfo createExternals(String url, List<SVNExternal> externals) {
+		return createExternals(url, externals, null);
+	}
+
+	public SVNCommitInfo createExternals(String url, List<SVNExternal> externals, String message) {
+		return createExternals(url, externals, null, null, null);
+	}
+
+	public SVNCommitInfo createExternals(String url, List<SVNExternal> externals, String message, String username, String password) {
+		SVNClientManager manager = SVNClientManager.newInstance(null, username, password);
 		SVNWCClient client = manager.getWCClient();
-		String propName = EXTERNALS_PROPERTY_NAME;
-		SVNPropertyValue propValue = null;
-		SVNRevision baseRevision = SVNRevision.HEAD;
-		String commitMessage = "Delete externals";
-		SVNProperties revisionProperties = null;
-		boolean skipChecks = true;
-		ISVNPropertyHandler handler = null;
+		String commitMessage = StringUtils.isBlank(message) ? CREATE_EXTERNALS_COMMIT_MESSAGE : message;
+		SVNURL svnUrl = getSvnUrl(url);
+		StringBuilder sb = new StringBuilder();
+		for (SVNExternal external : externals) {
+			sb.append(external.getPath() + " " + external.getUrl() + "\n");
+		}
+		SVNPropertyValue value = SVNPropertyValue.create(sb.toString());
+		try {
+			return client.doSetProperty(svnUrl, EXTERNALS_PROPERTY_NAME, value, SVNRevision.HEAD, commitMessage, null, true, null);
+		} catch (SVNException e) {
+			throw new IllegalStateException(e);
+		}
+	}
+
+	public SVNCommitInfo deleteExternals(String url) {
+		return deleteExternals(url, null);
+	}
+
+	public SVNCommitInfo deleteExternals(String url, String message) {
+		return deleteExternals(url, message, null, null);
+	}
+
+	public SVNCommitInfo deleteExternals(String url, String message, String username, String password) {
+		SVNClientManager manager = SVNClientManager.newInstance(null, username, password);
+		SVNWCClient client = manager.getWCClient();
+		String commitMessage = StringUtils.isBlank(message) ? DELETE_EXTERNALS_COMMIT_MESSAGE : message;
 		SVNURL svnUrl = getSvnUrl(url);
 		try {
-			return client.doSetProperty(svnUrl, propName, propValue, baseRevision, commitMessage, revisionProperties, skipChecks, handler);
+			return client.doSetProperty(svnUrl, EXTERNALS_PROPERTY_NAME, null, SVNRevision.HEAD, commitMessage, null, true, null);
 		} catch (SVNException e) {
-			throw new IllegalArgumentException(e);
+			throw new IllegalStateException(e);
 		}
 	}
 
