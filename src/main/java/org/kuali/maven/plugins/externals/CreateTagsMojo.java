@@ -24,17 +24,13 @@ public class CreateTagsMojo extends AbstractMojo {
 
 	/**
 	 * 
+	 * @parameter
 	 */
 	private List<Mapping> mappings;
 
 	@Override
 	public void execute() throws MojoExecutionException {
-		String url = svnUtils.getUrl(project.getBasedir());
-		getLog().info(url);
 		List<SVNExternal> externals = svnUtils.getExternals(project.getBasedir());
-		svnUtils.showExternals(externals);
-		getLog().info("externals: " + externals.size());
-		getLog().info("mappings: " + mappings.size());
 	}
 
 	public List<Mapping> getMappings() {
