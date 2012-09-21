@@ -37,8 +37,17 @@ public class MojoHelper {
 		return instance;
 	}
 
-	public List<SVNExternal> getNewExternals(List<BuildTag> buildTags, List<SVNExternal> externals, List<Mapping> mappings) {
-		return null;
+	public List<SVNExternal> getExternals(List<BuildTag> moduleTags, List<Mapping> mappings) {
+		List<SVNExternal> externals = new ArrayList<SVNExternal>();
+		for (int i = 0; i < mappings.size(); i++) {
+			Mapping mapping = mappings.get(i);
+			BuildTag moduleTag = moduleTags.get(i);
+			SVNExternal external = new SVNExternal();
+			external.setPath(mapping.getModule());
+			external.setUrl(moduleTag.getTagUrl());
+			externals.add(external);
+		}
+		return externals;
 	}
 
 	public boolean exists(String url) {

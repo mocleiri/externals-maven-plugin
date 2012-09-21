@@ -5,6 +5,7 @@ import java.util.List;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.project.MavenProject;
+import org.tmatesoft.svn.core.SVNCommitInfo;
 
 /**
  * @goal createtags
@@ -40,6 +41,10 @@ public class CreateTagsMojo extends AbstractMojo {
 		List<BuildTag> moduleTags = helper.getBuildTags(project, externals, mappings);
 		helper.createTags(moduleTags, message);
 		helper.createTag(rootTag, message);
+		List<SVNExternal> newExternals = helper.getExternals(moduleTags, mappings);
+		SVNCommitInfo info = svnUtils.setExternals(rootTag.getTagUrl(), newExternals);
+		getLog().info("Set " + newExternals.size() + " externals @ " + rootTag.getTagUrl());
+		getLog().info("Committed revision " + info.getNewRevision());
 	}
 
 	public List<Mapping> getMappings() {

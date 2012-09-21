@@ -102,15 +102,15 @@ public class SVNUtils {
 		return copy(copy);
 	}
 
-	public SVNCommitInfo createExternals(String url, List<SVNExternal> externals) {
-		return createExternals(url, externals, null);
+	public SVNCommitInfo setExternals(String url, List<SVNExternal> externals) {
+		return setExternals(url, externals, null);
 	}
 
-	public SVNCommitInfo createExternals(String url, List<SVNExternal> externals, String message) {
-		return createExternals(url, externals, null, null, null);
+	public SVNCommitInfo setExternals(String url, List<SVNExternal> externals, String message) {
+		return setExternals(url, externals, null, null, null);
 	}
 
-	public SVNCommitInfo createExternals(String url, List<SVNExternal> externals, String message, String username, String password) {
+	public SVNCommitInfo setExternals(String url, List<SVNExternal> externals, String message, String username, String password) {
 		SVNClientManager manager = SVNClientManager.newInstance(null, username, password);
 		SVNWCClient client = manager.getWCClient();
 		String commitMessage = StringUtils.isBlank(message) ? CREATE_EXTERNALS_COMMIT_MESSAGE : message;
