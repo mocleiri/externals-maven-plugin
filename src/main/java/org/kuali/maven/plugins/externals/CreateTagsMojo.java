@@ -28,13 +28,18 @@ public class CreateTagsMojo extends AbstractMojo {
 	 */
 	private List<Mapping> mappings;
 
+	/**
+	 * @parameter expression="${externals.message}"
+	 */
+	private String message;
+
 	@Override
 	public void execute() throws MojoExecutionException {
 		Date today = new Date();
 		List<SVNExternal> externals = svnUtils.getExternals(project.getBasedir());
 		helper.validate(project, externals, mappings);
 		List<BuildTag> buildTags = helper.getBuildTags(project, externals, mappings, today);
-		helper.createTags(buildTags);
+		helper.createTags(buildTags, message);
 	}
 
 	public List<Mapping> getMappings() {
@@ -47,6 +52,14 @@ public class CreateTagsMojo extends AbstractMojo {
 
 	public MavenProject getProject() {
 		return project;
+	}
+
+	public String getMessage() {
+		return message;
+	}
+
+	public void setMessage(String message) {
+		this.message = message;
 	}
 
 }

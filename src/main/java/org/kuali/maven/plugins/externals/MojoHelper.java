@@ -37,14 +37,17 @@ public class MojoHelper {
 		return instance;
 	}
 
-	public void createTags(List<BuildTag> buildTags) {
+	public boolean exists(String url) {
+		return false;
+	}
+
+	public void createTags(List<BuildTag> buildTags, String message) {
 		for (BuildTag buildTag : buildTags) {
 			String src = buildTag.getSourceUrl();
 			long revision = buildTag.getSourceRevision();
 			String dst = buildTag.getTagUrl();
-			SVNCommitInfo info = svnUtils.copy(src, revision, dst);
-			LOG.info("Created " + dst);
-			LOG.info("Committed revision " + info.getNewRevision());
+			SVNCommitInfo info = svnUtils.copy(src, revision, dst, message);
+			LOG.info("Created [" + dst + "] Revision " + info.getNewRevision());
 		}
 	}
 
@@ -77,6 +80,8 @@ public class MojoHelper {
 
 		StringBuilder sb = new StringBuilder();
 		sb.append(tagBase);
+		sb.append("/");
+		sb.append("builds");
 		sb.append("/");
 		sb.append(mapping.getModule());
 		sb.append("-");
