@@ -70,12 +70,45 @@ public class SVNUtils {
 	/**
 	 * Copy <code>src</code> to <code>dst</code> creating parent directories as needed. An exception is thrown if <code>dst</code> already exists.
 	 */
-	public SVNCommitInfo copy(String src, String dst, String msg, String username, String password) {
-		SVNClientManager manager = SVNClientManager.newInstance(null, username, password);
+	public SVNCommitInfo copy(String src, String dst) {
+		return copy(src, null, dst, null);
+	}
+
+	public SVNCommitInfo copy(String src, String dst, String msg) {
+		return copy(src, null, dst, msg);
+	}
+
+	/**
+	 * Copy <code>src</code> at the indicated revision to <code>dst</code> creating parent directories as needed. An exception is thrown if <code>dst</code> already exists.
+	 */
+	public SVNCommitInfo copy(String src, Long revision, String dst) {
+		return copy(src, revision, dst, null);
+	}
+
+	public SVNCommitInfo copy(String src, Long revision, String dst, String msg) {
+		Copy copy = new Copy();
+		copy.setSource(src);
+		copy.setRevision(revision);
+		copy.setDestination(dst);
+		copy.setMessage(msg);
+		return copy(copy);
+	}
+
+	public SVNCommitInfo copy(Copy copy) {
+		SVNClientManager manager = SVNClientManager.newInstance(null, copy.getUsername(), copy.getPassword());
 		SVNCopyClient client = manager.getCopyClient();
-		SVNURL dstUrl = getSvnUrl(dst);
-		SVNURL srcUrl = getSvnUrl(src);
-		SVNCopySource svnCopySource = new SVNCopySource(SVNRevision.HEAD, SVNRevision.HEAD, srcUrl);
+		SVNURL dstUrl = getSvnUrl(copy.getDestination());
+		SVNURL srcUrl = getSvnUrl(copy.getSource());
+		SVNRevision revision = SVNRevision.HEAD;
+		if (copy.getRevision() != null) {
+			revision = SVNRevision.create(copy.getRevision());
+		}
+		String msg = copy.getMessage();
+		if (StringUtils.isBlank(msg)) {
+			String r = (copy.getRevision() != null) ? "@" + revision : "";
+			msg = "Copy " + copy.getSource() + r + " to " + copy.getDestination();
+		}
+		SVNCopySource svnCopySource = new SVNCopySource(SVNRevision.HEAD, revision, srcUrl);
 		SVNCopySource[] sources = new SVNCopySource[] { svnCopySource };
 		try {
 			return client.doCopy(sources, dstUrl, false, true, true, msg, null);

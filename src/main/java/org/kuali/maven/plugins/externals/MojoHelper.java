@@ -10,6 +10,7 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.maven.project.MavenProject;
 
 public class MojoHelper {
+	private static final String MAVEN_SNAPSHOT_TOKEN = "SNAPSHOT";
 
 	protected static MojoHelper instance;
 
@@ -115,6 +116,15 @@ public class MojoHelper {
 		}
 		if (sb.length() != 0) {
 			throw new IllegalArgumentException("Missing values for [" + sb.toString() + "]");
+		}
+	}
+
+	public String trimSnapshot(String version) {
+		if (version.toUpperCase().endsWith("-" + MAVEN_SNAPSHOT_TOKEN)) {
+			int length = MAVEN_SNAPSHOT_TOKEN.length() + 1;
+			return StringUtils.left(version, version.length() - length);
+		} else {
+			return version;
 		}
 	}
 
