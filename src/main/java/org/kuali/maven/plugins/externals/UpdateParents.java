@@ -2,7 +2,6 @@ package org.kuali.maven.plugins.externals;
 
 import static org.apache.commons.io.filefilter.FileFilterUtils.and;
 import static org.apache.commons.io.filefilter.FileFilterUtils.directoryFileFilter;
-import static org.apache.commons.io.filefilter.FileFilterUtils.makeSVNAware;
 import static org.apache.commons.io.filefilter.FileFilterUtils.nameFileFilter;
 import static org.apache.commons.io.filefilter.FileFilterUtils.notFileFilter;
 
@@ -62,19 +61,14 @@ public class UpdateParents extends AbstractMojo {
 
 	}
 
-	protected IOFileFilter makeDirAware(IOFileFilter filter, String dir) {
-		IOFileFilter dirFilter = notFileFilter(and(directoryFileFilter(), nameFileFilter(dir)));
-		if (filter == null) {
-			return dirFilter;
-		} else {
-			return and(filter, dirFilter);
-		}
+	protected IOFileFilter makeDirAware(String dir) {
+		return notFileFilter(and(directoryFileFilter(), nameFileFilter(dir)));
 	}
 
 	protected IOFileFilter makeMvnAware() {
-		IOFileFilter sourceFilter = makeDirAware(null, "src");
-		IOFileFilter targetFilter = makeDirAware(null, "target");
-		IOFileFilter svnFilter = makeSVNAware(null);
+		IOFileFilter sourceFilter = makeDirAware("src");
+		IOFileFilter targetFilter = makeDirAware("target");
+		IOFileFilter svnFilter = makeDirAware(".svn");
 		return FileFilterUtils.and(sourceFilter, targetFilter, svnFilter);
 	}
 
