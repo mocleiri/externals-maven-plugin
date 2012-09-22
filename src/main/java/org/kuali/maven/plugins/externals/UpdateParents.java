@@ -61,14 +61,14 @@ public class UpdateParents extends AbstractMojo {
 
 	}
 
-	protected IOFileFilter makeDirAware(String dir) {
+	protected IOFileFilter ignoreDirectory(String dir) {
 		return notFileFilter(and(directoryFileFilter(), nameFileFilter(dir)));
 	}
 
 	protected IOFileFilter makeMvnAware() {
-		IOFileFilter sourceFilter = makeDirAware("src");
-		IOFileFilter targetFilter = makeDirAware("target");
-		IOFileFilter svnFilter = makeDirAware(".svn");
+		IOFileFilter sourceFilter = ignoreDirectory("src");
+		IOFileFilter targetFilter = ignoreDirectory("target");
+		IOFileFilter svnFilter = ignoreDirectory(".svn");
 		return FileFilterUtils.and(sourceFilter, targetFilter, svnFilter);
 	}
 
