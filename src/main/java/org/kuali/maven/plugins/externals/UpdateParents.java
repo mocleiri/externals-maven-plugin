@@ -51,7 +51,7 @@ public class UpdateParents extends AbstractMojo {
 	public void execute() throws MojoExecutionException {
 		File dir = project.getBasedir();
 		IOFileFilter fileFilter = nameFileFilter("pom.xml");
-		IOFileFilter dirFilter = makeMvnAware();
+		IOFileFilter dirFilter = ignoreDirectories();
 		Collection<File> c = FileUtils.listFiles(dir, fileFilter, dirFilter);
 		List<File> files = new ArrayList<File>(c);
 		Collections.sort(files);
@@ -65,11 +65,12 @@ public class UpdateParents extends AbstractMojo {
 		return notFileFilter(and(directoryFileFilter(), nameFileFilter(dir)));
 	}
 
-	protected IOFileFilter makeMvnAware() {
+	protected IOFileFilter ignoreDirectories() {
 		IOFileFilter sourceFilter = ignoreDirectory("src");
 		IOFileFilter targetFilter = ignoreDirectory("target");
 		IOFileFilter svnFilter = ignoreDirectory(".svn");
-		return FileFilterUtils.and(sourceFilter, targetFilter, svnFilter);
+		IOFileFilter gitFilter = ignoreDirectory(".git");
+		return FileFilterUtils.and(sourceFilter, targetFilter, svnFilter, gitFilter);
 	}
 
 	public String getParentGroupId() {
