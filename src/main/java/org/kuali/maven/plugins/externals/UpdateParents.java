@@ -7,7 +7,6 @@ import static org.apache.commons.io.filefilter.FileFilterUtils.notFileFilter;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
@@ -52,8 +51,7 @@ public class UpdateParents extends AbstractMojo {
 		File dir = project.getBasedir();
 		IOFileFilter fileFilter = nameFileFilter("pom.xml");
 		IOFileFilter dirFilter = ignoreDirectories();
-		Collection<File> c = FileUtils.listFiles(dir, fileFilter, dirFilter);
-		List<File> files = new ArrayList<File>(c);
+		List<File> files = new ArrayList<File>(FileUtils.listFiles(dir, fileFilter, dirFilter));
 		Collections.sort(files);
 		for (File file : files) {
 			getLog().info(file.getAbsolutePath());
