@@ -1,32 +1,13 @@
 package org.kuali.maven.plugins.externals;
 
 import java.io.File;
-import java.util.List;
 
 public class Project {
-	Project parent;
-	List<Project> modules;
 	String groupId;
 	String artifactId;
 	String version;
 	File pom;
 	String pomContents;
-
-	public Project getParent() {
-		return parent;
-	}
-
-	public void setParent(Project parent) {
-		this.parent = parent;
-	}
-
-	public List<Project> getModules() {
-		return modules;
-	}
-
-	public void setModules(List<Project> modules) {
-		this.modules = modules;
-	}
 
 	public String getGroupId() {
 		return groupId;
@@ -67,4 +48,5 @@ public class Project {
 	public void setPomContents(String pomContents) {
 		this.pomContents = pomContents;
 	}
+
 }

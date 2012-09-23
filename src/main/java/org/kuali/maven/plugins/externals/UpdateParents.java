@@ -32,25 +32,20 @@ public class UpdateParents extends AbstractMojo {
 	private MavenProject project;
 
 	/**
-	 * @parameter expression="${svn.parentGroupId}"
+	 * @parameter expression="${svn.pomFiles}" default-value="pom.xml"
 	 */
-	private String parentGroupId;
+	private String pomFiles;
 
 	/**
-	 * @parameter expression="${svn.parentArtifactId}"
+	 * @parameter expression="${svn.ignoreDirectories}" default-value="src,target,.svn,.git"
 	 */
-	private String parentArtifactId;
-
-	/**
-	 * @parameter expression="${svn.newParentVersion}"
-	 */
-	private String newParentVersion;
+	private String ignoreDirectories;
 
 	@Override
 	public void execute() throws MojoExecutionException {
 		File dir = project.getBasedir();
-		IOFileFilter fileFilter = nameFileFilter("pom.xml");
-		IOFileFilter dirFilter = ignoreDirectories();
+		IOFileFilter fileFilter = nameFileFilter(pomFiles);
+		IOFileFilter dirFilter = getIgnoreDirectoriesFilter(ignoreDirectories);
 		List<File> files = new ArrayList<File>(FileUtils.listFiles(dir, fileFilter, dirFilter));
 		Collections.sort(files);
 		for (File file : files) {
@@ -59,40 +54,37 @@ public class UpdateParents extends AbstractMojo {
 
 	}
 
-	protected IOFileFilter ignoreDirectory(String dir) {
+	protected IOFileFilter getIgnoreDirectoryFilter(String dir) {
 		return notFileFilter(and(directoryFileFilter(), nameFileFilter(dir)));
 	}
 
-	protected IOFileFilter ignoreDirectories() {
-		IOFileFilter sourceFilter = ignoreDirectory("src");
-		IOFileFilter targetFilter = ignoreDirectory("target");
-		IOFileFilter svnFilter = ignoreDirectory(".svn");
-		IOFileFilter gitFilter = ignoreDirectory(".git");
-		return FileFilterUtils.and(sourceFilter, targetFilter, svnFilter, gitFilter);
+	protected IOFileFilter getIgnoreDirectoriesFilter(String csv) {
+		return getIgnoreDirectoriesFilter(csv.split(","));
 	}
 
-	public String getParentGroupId() {
-		return parentGroupId;
+	protected IOFileFilter getIgnoreDirectoriesFilter(String... directories) {
+		IOFileFilter[] filters = new IOFileFilter[directories.length];
+		for (int i = 0; i < filters.length; i++) {
+			String dir = directories[i].trim();
+			filters[i] = getIgnoreDirectoryFilter(dir);
+		}
+		return FileFilterUtils.and(filters);
 	}
 
-	public void setParentGroupId(String parentGroupId) {
-		this.parentGroupId = parentGroupId;
+	public String getPomFiles() {
+		return pomFiles;
 	}
 
-	public String getParentArtifactId() {
-		return parentArtifactId;
+	public void setPomFiles(String pomFiles) {
+		this.pomFiles = pomFiles;
 	}
 
-	public void setParentArtifactId(String parentArtifactId) {
-		this.parentArtifactId = parentArtifactId;
+	public String getIgnoreDirectories() {
+		return ignoreDirectories;
 	}
 
-	public String getNewParentVersion() {
-		return newParentVersion;
-	}
-
-	public void setNewParentVersion(String newParentVersion) {
-		this.newParentVersion = newParentVersion;
+	public void setIgnoreDirectories(String ignoreDirectories) {
+		this.ignoreDirectories = ignoreDirectories;
 	}
 
 }
