@@ -1,12 +1,26 @@
 package org.kuali.maven.plugins.externals;
 
+import static org.apache.commons.io.filefilter.FileFilterUtils.and;
+import static org.apache.commons.io.filefilter.FileFilterUtils.directoryFileFilter;
+import static org.apache.commons.io.filefilter.FileFilterUtils.nameFileFilter;
+import static org.apache.commons.io.filefilter.FileFilterUtils.notFileFilter;
+
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 
+import javax.swing.tree.DefaultMutableTreeNode;
+
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.filefilter.FileFilterUtils;
+import org.apache.commons.io.filefilter.IOFileFilter;
 import org.apache.commons.lang.StringUtils;
 import org.apache.maven.project.MavenProject;
 import org.kuali.maven.common.Extractor;
@@ -18,7 +32,7 @@ import org.springframework.core.io.ResourceLoader;
 import org.tmatesoft.svn.core.SVNCommitInfo;
 
 public class MojoHelper {
-	private static final Logger LOG = LoggerFactory.getLogger(MojoHelper.class);
+	private static final Logger logger = LoggerFactory.getLogger(MojoHelper.class);
 	private static final String MAVEN_SNAPSHOT_TOKEN = "SNAPSHOT";
 
 	SVNUtils svnUtils = SVNUtils.getInstance();
@@ -35,6 +49,94 @@ public class MojoHelper {
 			instance = new MojoHelper();
 		}
 		return instance;
+	}
+
+	public void display(DefaultMutableTreeNode node, File basedir, String pomFile) {
+		Project project = (Project) node.getUserObject();
+		File file = project.getPom();
+		String filePath = file.getAbsolutePath();
+		String displayPath = filePath.replace(basedir.getAbsolutePath(), "");
+		displayPath = displayPath.replace(pomFile, "");
+		if (!node.isRoot()) {
+			displayPath = displayPath.substring(0, displayPath.length() - 1);
+		}
+		int level = node.getLevel();
+		StringBuilder sb = new StringBuilder();
+		sb.append(StringUtils.repeat(" ", level));
+		sb.append(displayPath);
+		logger.info(sb.toString());
+		Enumeration<?> children = node.children();
+		while (children.hasMoreElements()) {
+			DefaultMutableTreeNode child = (DefaultMutableTreeNode) children.nextElement();
+			display(child, basedir, pomFile);
+		}
+	}
+
+	protected List<DefaultMutableTreeNode> getNodes(List<File> files) {
+		List<DefaultMutableTreeNode> nodes = new ArrayList<DefaultMutableTreeNode>();
+		for (File file : files) {
+			String pomContents = read(file);
+			Project project = new Project();
+			project.setPom(file);
+			project.setPomContents(pomContents);
+			DefaultMutableTreeNode node = new DefaultMutableTreeNode(project);
+			nodes.add(node);
+		}
+		return nodes;
+	}
+
+	public Map<String, DefaultMutableTreeNode> getMap(List<DefaultMutableTreeNode> nodes) {
+		Map<String, DefaultMutableTreeNode> map = new HashMap<String, DefaultMutableTreeNode>();
+		for (DefaultMutableTreeNode node : nodes) {
+			Project project = (Project) node.getUserObject();
+			File file = project.getPom();
+			map.put(file.getAbsolutePath(), node);
+		}
+		return map;
+	}
+
+	public DefaultMutableTreeNode getTree(File basedir, List<DefaultMutableTreeNode> nodes, String pomFile) {
+		Map<String, DefaultMutableTreeNode> map = getMap(nodes);
+		String rootPath = basedir + File.separator + pomFile;
+		DefaultMutableTreeNode root = map.get(rootPath);
+		for (DefaultMutableTreeNode child : nodes) {
+			Project project = (Project) child.getUserObject();
+			File pom = project.getPom();
+			File pomDir = new File(pom.getAbsolutePath().replace(pomFile, ""));
+			File parentPom = new File(pomDir.getParentFile(), pomFile);
+			String parentPomPath = parentPom.getAbsolutePath();
+			DefaultMutableTreeNode parent = map.get(parentPomPath);
+			if (parent == null) {
+				continue;
+			}
+			parent.add(child);
+		}
+		return root;
+	}
+
+	protected IOFileFilter getIgnoreDirectoryFilter(String dir) {
+		return notFileFilter(and(directoryFileFilter(), nameFileFilter(dir)));
+	}
+
+	protected IOFileFilter getIgnoreDirectoriesFilter(String csv) {
+		return getIgnoreDirectoriesFilter(csv.split(","));
+	}
+
+	protected IOFileFilter getIgnoreDirectoriesFilter(String... directories) {
+		IOFileFilter[] filters = new IOFileFilter[directories.length];
+		for (int i = 0; i < filters.length; i++) {
+			String dir = directories[i].trim();
+			filters[i] = getIgnoreDirectoryFilter(dir);
+		}
+		return FileFilterUtils.and(filters);
+	}
+
+	public List<File> getPoms(File basedir, String pomFile, String ignoreDirectoriesCSV) {
+		IOFileFilter fileFilter = nameFileFilter(pomFile);
+		IOFileFilter dirFilter = getIgnoreDirectoriesFilter(ignoreDirectoriesCSV);
+		List<File> files = new ArrayList<File>(FileUtils.listFiles(basedir, fileFilter, dirFilter));
+		Collections.sort(files);
+		return files;
 	}
 
 	public List<SVNExternal> getExternals(List<BuildTag> moduleTags, List<Mapping> mappings) {
@@ -67,11 +169,11 @@ public class MojoHelper {
 			String dst = buildTag.getTagUrl();
 			boolean exists = exists(dst);
 			if (exists) {
-				LOG.info("Skip existing tag [" + dst + "]");
+				logger.info("Skip existing tag [" + dst + "]");
 				buildTag.setSkipped(true);
 			} else {
 				SVNCommitInfo info = svnUtils.copy(src, revision, dst, message);
-				LOG.info("Created [" + dst + "] Revision " + info.getNewRevision());
+				logger.info("Created [" + dst + "] Revision " + info.getNewRevision());
 			}
 		}
 	}
@@ -293,5 +395,13 @@ public class MojoHelper {
 			sb.append(tokens[i]);
 		}
 		return sb.toString();
+	}
+
+	protected String read(File file) {
+		try {
+			return FileUtils.readFileToString(file);
+		} catch (IOException e) {
+			throw new IllegalStateException(e);
+		}
 	}
 }

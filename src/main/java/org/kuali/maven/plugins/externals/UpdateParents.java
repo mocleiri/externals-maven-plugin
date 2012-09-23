@@ -1,18 +1,10 @@
 package org.kuali.maven.plugins.externals;
 
-import static org.apache.commons.io.filefilter.FileFilterUtils.and;
-import static org.apache.commons.io.filefilter.FileFilterUtils.directoryFileFilter;
-import static org.apache.commons.io.filefilter.FileFilterUtils.nameFileFilter;
-import static org.apache.commons.io.filefilter.FileFilterUtils.notFileFilter;
-
 import java.io.File;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
-import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.filefilter.FileFilterUtils;
-import org.apache.commons.io.filefilter.IOFileFilter;
+import javax.swing.tree.DefaultMutableTreeNode;
+
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.project.MavenProject;
@@ -22,6 +14,7 @@ import org.apache.maven.project.MavenProject;
  * @aggregator
  */
 public class UpdateParents extends AbstractMojo {
+	MojoHelper helper = new MojoHelper();
 
 	/**
 	 * The Maven project object
@@ -32,9 +25,9 @@ public class UpdateParents extends AbstractMojo {
 	private MavenProject project;
 
 	/**
-	 * @parameter expression="${svn.pomFiles}" default-value="pom.xml"
+	 * @parameter expression="${svn.pom}" default-value="pom.xml"
 	 */
-	private String pomFiles;
+	private String pom;
 
 	/**
 	 * @parameter expression="${svn.ignoreDirectories}" default-value="src,target,.svn,.git"
@@ -43,40 +36,21 @@ public class UpdateParents extends AbstractMojo {
 
 	@Override
 	public void execute() throws MojoExecutionException {
-		File dir = project.getBasedir();
-		IOFileFilter fileFilter = nameFileFilter(pomFiles);
-		IOFileFilter dirFilter = getIgnoreDirectoriesFilter(ignoreDirectories);
-		List<File> files = new ArrayList<File>(FileUtils.listFiles(dir, fileFilter, dirFilter));
-		Collections.sort(files);
+		List<File> files = helper.getPoms(project.getBasedir(), pom, ignoreDirectories);
 		for (File file : files) {
 			getLog().info(file.getAbsolutePath());
 		}
-
+		List<DefaultMutableTreeNode> nodes = helper.getNodes(files);
+		DefaultMutableTreeNode node = helper.getTree(project.getBasedir(), nodes, pom);
+		helper.display(node, project.getBasedir(), pom);
 	}
 
-	protected IOFileFilter getIgnoreDirectoryFilter(String dir) {
-		return notFileFilter(and(directoryFileFilter(), nameFileFilter(dir)));
+	public String getPom() {
+		return pom;
 	}
 
-	protected IOFileFilter getIgnoreDirectoriesFilter(String csv) {
-		return getIgnoreDirectoriesFilter(csv.split(","));
-	}
-
-	protected IOFileFilter getIgnoreDirectoriesFilter(String... directories) {
-		IOFileFilter[] filters = new IOFileFilter[directories.length];
-		for (int i = 0; i < filters.length; i++) {
-			String dir = directories[i].trim();
-			filters[i] = getIgnoreDirectoryFilter(dir);
-		}
-		return FileFilterUtils.and(filters);
-	}
-
-	public String getPomFiles() {
-		return pomFiles;
-	}
-
-	public void setPomFiles(String pomFiles) {
-		this.pomFiles = pomFiles;
+	public void setPom(String pomFiles) {
+		this.pom = pomFiles;
 	}
 
 	public String getIgnoreDirectories() {
