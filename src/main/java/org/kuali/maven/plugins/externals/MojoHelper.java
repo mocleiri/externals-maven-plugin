@@ -51,25 +51,31 @@ public class MojoHelper {
 		return instance;
 	}
 
-	public void display(DefaultMutableTreeNode node, File basedir, String pomFile) {
+	public String getDisplayString(DefaultMutableTreeNode node, File basedir, String pomFile) {
 		Project project = (Project) node.getUserObject();
-		File file = project.getPom();
-		String filePath = file.getAbsolutePath();
-		String displayPath = filePath.replace(basedir.getAbsolutePath(), "");
+		File pom = project.getPom();
+		String pomPath = pom.getAbsolutePath();
+		String displayPath = pomPath.replace(basedir.getAbsolutePath(), "");
 		displayPath = displayPath.replace(pomFile, "");
 		if (!node.isRoot()) {
 			displayPath = displayPath.substring(0, displayPath.length() - 1);
+			int pos = displayPath.lastIndexOf(File.separator);
+			displayPath = displayPath.substring(pos);
+			displayPath = displayPath.replace("/", "");
+		} else {
+			displayPath = displayPath.replace("/", "/");
 		}
 		int level = node.getLevel();
 		StringBuilder sb = new StringBuilder();
 		sb.append(StringUtils.repeat(" ", level));
 		sb.append(displayPath);
-		logger.info(sb.toString());
+		sb.append("\n");
 		Enumeration<?> children = node.children();
 		while (children.hasMoreElements()) {
 			DefaultMutableTreeNode child = (DefaultMutableTreeNode) children.nextElement();
-			display(child, basedir, pomFile);
+			sb.append(getDisplayString(child, basedir, pomFile));
 		}
+		return sb.toString();
 	}
 
 	protected List<DefaultMutableTreeNode> getNodes(List<File> files) {
@@ -97,20 +103,19 @@ public class MojoHelper {
 
 	public DefaultMutableTreeNode getTree(File basedir, List<DefaultMutableTreeNode> nodes, String pomFile) {
 		Map<String, DefaultMutableTreeNode> map = getMap(nodes);
-		String rootPath = basedir + File.separator + pomFile;
-		DefaultMutableTreeNode root = map.get(rootPath);
 		for (DefaultMutableTreeNode child : nodes) {
 			Project project = (Project) child.getUserObject();
 			File pom = project.getPom();
-			File pomDir = new File(pom.getAbsolutePath().replace(pomFile, ""));
+			File pomDir = pom.getParentFile();
 			File parentPom = new File(pomDir.getParentFile(), pomFile);
 			String parentPomPath = parentPom.getAbsolutePath();
 			DefaultMutableTreeNode parent = map.get(parentPomPath);
-			if (parent == null) {
-				continue;
+			if (parent != null) {
+				parent.add(child);
 			}
-			parent.add(child);
 		}
+		String rootPom = basedir + File.separator + pomFile;
+		DefaultMutableTreeNode root = map.get(rootPom);
 		return root;
 	}
 

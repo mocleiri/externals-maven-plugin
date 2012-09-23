@@ -27,7 +27,8 @@ public class MojoHelperTest {
 			Map<String, DefaultMutableTreeNode> map = helper.getMap(nodes);
 			logger.info("map.size()=" + map.size());
 			DefaultMutableTreeNode tree = helper.getTree(BASEDIR, nodes, POM);
-			helper.display(tree, BASEDIR, POM);
+			String s = helper.getDisplayString(tree, BASEDIR, POM);
+			logger.info("Maven Structure:\n" + s);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

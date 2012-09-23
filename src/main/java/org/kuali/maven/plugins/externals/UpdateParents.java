@@ -42,7 +42,7 @@ public class UpdateParents extends AbstractMojo {
 		}
 		List<DefaultMutableTreeNode> nodes = helper.getNodes(files);
 		DefaultMutableTreeNode node = helper.getTree(project.getBasedir(), nodes, pom);
-		helper.display(node, project.getBasedir(), pom);
+		getLog().info(helper.getDisplayString(node, project.getBasedir(), pom));
 	}
 
 	public String getPom() {
