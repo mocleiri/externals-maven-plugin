@@ -8,8 +8,6 @@ public class Project {
 	GAV gav;
 	File pom;
 	String pomContents;
-	BuildTag buildTag;
-
 	public GAV getParent() {
 		return parent;
 	}
@@ -40,13 +38,5 @@ public class Project {
 
 	public void setPomContents(String pomContents) {
 		this.pomContents = pomContents;
-	}
-
-	public BuildTag getBuildTag() {
-		return buildTag;
-	}
-
-	public void setBuildTag(BuildTag buildTag) {
-		this.buildTag = buildTag;
 	}
 }
