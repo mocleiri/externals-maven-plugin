@@ -93,7 +93,7 @@ public class XMLUtils {
 		}
 	}
 
-	protected GAV getGAV(NodeList nodeList) {
+	public GAV getGAV(NodeList nodeList) {
 		GAV gav = new GAV();
 		int childCount = nodeList.getLength();
 		for (int i = 0; i < childCount; i++) {
@@ -111,7 +111,7 @@ public class XMLUtils {
 		return gav;
 	}
 
-	protected GAV getParentGav(Document document) {
+	public GAV getParentGav(Document document) {
 		NodeList nodeList = document.getElementsByTagName("parent");
 		if (nodeList == null || nodeList.getLength() == 0) {
 			return null;

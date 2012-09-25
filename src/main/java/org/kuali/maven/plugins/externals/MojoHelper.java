@@ -36,6 +36,7 @@ public class MojoHelper {
 	private static final String MAVEN_SNAPSHOT_TOKEN = "SNAPSHOT";
 
 	SVNUtils svnUtils = SVNUtils.getInstance();
+	XMLUtils xmlUtils = new XMLUtils();
 	Extractor extractor = new Extractor();
 
 	protected static MojoHelper instance;
@@ -82,9 +83,13 @@ public class MojoHelper {
 		List<DefaultMutableTreeNode> nodes = new ArrayList<DefaultMutableTreeNode>();
 		for (File file : files) {
 			String pomContents = read(file);
+			GAV parent = xmlUtils.getParentGAV(pomContents);
+			GAV gav = xmlUtils.getGAV(pomContents, parent);
 			Project project = new Project();
 			project.setPom(file);
 			project.setPomContents(pomContents);
+			project.setGav(gav);
+			project.setParent(parent);
 			DefaultMutableTreeNode node = new DefaultMutableTreeNode(project);
 			nodes.add(node);
 		}
