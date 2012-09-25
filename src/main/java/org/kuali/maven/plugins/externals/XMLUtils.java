@@ -55,14 +55,14 @@ public class XMLUtils {
 		Document document = getDocument(xml);
 		NodeList nodeList = document.getChildNodes();
 		if (nodeList == null || nodeList.getLength() == 0) {
-			throw new IllegalArgumentException("Invalid xml for a Maven pom: " + xml);
+			throw new IllegalArgumentException("Invalid xml for a Maven pom:\n " + xml);
 		}
 		if (nodeList.getLength() > 1) {
-			throw new IllegalArgumentException("Invalid xml for a Maven pom.  Expected exactly 1 top level node: " + xml);
+			throw new IllegalArgumentException("Invalid xml for a Maven pom.  Expected exactly 1 top level node:\n " + xml);
 		}
 		Node projectNode = nodeList.item(0);
 		if (!projectNode.getNodeName().equals("project")) {
-			throw new IllegalArgumentException("Invalid xml for a Maven pom.  Must start with a <project> tag: " + xml);
+			throw new IllegalArgumentException("Invalid xml for a Maven pom.  Must start with a <project> tag:\n " + xml);
 		}
 		GAV gav = getGAV(projectNode.getChildNodes());
 		update(gav, parent);
