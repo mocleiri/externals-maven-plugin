@@ -212,25 +212,26 @@ public class MojoHelper {
 		}
 	}
 
-	public List<BuildTag> getBuildTags(MavenProject project, List<SVNExternal> externals, List<Mapping> mappings) {
+	public List<BuildTag> getBuildTags(MavenProject project, List<SVNExternal> externals, List<Mapping> mappings, TagStyle tagStyle) {
 		Collections.sort(externals);
 		Collections.sort(mappings);
 		List<BuildTag> buildTags = new ArrayList<BuildTag>();
 		for (int i = 0; i < externals.size(); i++) {
 			SVNExternal external = externals.get(i);
 			Mapping mapping = mappings.get(i);
-			BuildTag buildTag = getBuildTag(project, external, mapping);
+			BuildTag buildTag = getBuildTag(project, external, mapping, tagStyle);
 			buildTags.add(buildTag);
 		}
 		return buildTags;
 	}
 
-	public BuildTag getBuildTag(MavenProject project) {
+	public BuildTag getBuildTag(MavenProject project, TagStyle tagStyle) {
 		File workingCopy = project.getBasedir();
 		String sourceUrl = svnUtils.getUrl(workingCopy);
 		long sourceRevision = svnUtils.getLastRevision(workingCopy);
 		String version = project.getVersion();
-		String tag = getTag(sourceUrl, version, project.getArtifactId(), sourceRevision);
+
+		String tag = getTag(sourceUrl, version, project.getArtifactId(), sourceRevision, tagStyle);
 
 		BuildTag buildTag = new BuildTag();
 		buildTag.setSourceUrl(sourceUrl);
@@ -239,12 +240,12 @@ public class MojoHelper {
 		return buildTag;
 	}
 
-	public BuildTag getBuildTag(MavenProject project, SVNExternal external, Mapping mapping) {
+	public BuildTag getBuildTag(MavenProject project, SVNExternal external, Mapping mapping, TagStyle tagStyle) {
 		File workingCopy = external.getWorkingCopyPath();
 		String sourceUrl = svnUtils.getUrl(workingCopy);
 		long sourceRevision = svnUtils.getLastRevision(workingCopy);
 		String version = project.getProperties().getProperty(mapping.getVersionProperty());
-		String tag = getTag(sourceUrl, version, mapping.getModule(), sourceRevision);
+		String tag = getTag(sourceUrl, version, mapping.getModule(), sourceRevision, tagStyle);
 
 		BuildTag buildTag = new BuildTag();
 		buildTag.setSourceUrl(sourceUrl);
@@ -262,7 +263,46 @@ public class MojoHelper {
 		return sb.toString();
 	}
 
-	protected String getTag(String url, String version, String artifactId, long revision) {
+	public String getTag(String url, String version, String artifactId, long revision, TagStyle tagStyle) {
+		switch (tagStyle) {
+		case REVISION:
+			return getRevisionTag(url, version, artifactId, revision);
+		case BUILDNUMBER:
+			int buildNumber = getBuildNumber();
+			return getBuildNumberTag(url, version, artifactId, buildNumber);
+		default:
+			throw new IllegalArgumentException(tagStyle + " is unknown");
+		}
+	}
+
+	protected int getBuildNumber() {
+		Map<String, String> env = System.getenv();
+		String buildNumber = env.get("BUILD_NUMBER");
+		if (StringUtils.isBlank(buildNumber)) {
+			logger.warn("env.BUILD_NUMBER is blank");
+			return 0;
+		} else {
+			return new Integer(buildNumber);
+		}
+	}
+
+	public String getBuildNumberTag(String url, String version, String artifactId, int buildNumber) {
+		StringBuilder sb = new StringBuilder();
+		sb.append(getBaseTag(url, version, artifactId));
+		sb.append("/");
+		sb.append("build-" + buildNumber);
+		return sb.toString();
+	}
+
+	public String getRevisionTag(String url, String version, String artifactId, long revision) {
+		StringBuilder sb = new StringBuilder();
+		sb.append(getBaseTag(url, version, artifactId));
+		sb.append("/");
+		sb.append("r" + revision);
+		return sb.toString();
+	}
+
+	protected String getBaseTag(String url, String version, String artifactId) {
 		String tagBase = extractor.getTagBase(url);
 		if (StringUtils.isBlank(tagBase)) {
 			throw new IllegalArgumentException("Unable to calculate tag base from [" + url + "]");
@@ -283,8 +323,6 @@ public class MojoHelper {
 		sb.append(v.getMinor());
 		sb.append("/");
 		sb.append(trimmed);
-		sb.append("/");
-		sb.append("r" + revision);
 		return sb.toString();
 	}
 

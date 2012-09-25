@@ -34,6 +34,11 @@ public class CreateTagsMojo extends AbstractMojo {
 	private String tagMessage;
 
 	/**
+	 * @parameter expression="${svn.tagStyle}"
+	 */
+	private TagStyle tagStyle;
+
+	/**
 	 * @parameter expression="${svn.externalsMessage}"
 	 */
 	private String externalsMessage;
@@ -45,9 +50,9 @@ public class CreateTagsMojo extends AbstractMojo {
 		// Make sure the modules listed in the pom match the svn:externals definitions and the mappings provided in the plugin config
 		helper.validate(project, externals, mappings);
 		// Calculate the build tag for the root
-		BuildTag rootTag = helper.getBuildTag(project);
+		BuildTag rootTag = helper.getBuildTag(project, tagStyle);
 		// Calculate build tags for each module
-		List<BuildTag> moduleTags = helper.getBuildTags(project, externals, mappings);
+		List<BuildTag> moduleTags = helper.getBuildTags(project, externals, mappings, tagStyle);
 		// Create new svn:externals definitions based on the newly created tags
 		List<SVNExternal> newExternals = helper.getExternals(moduleTags, mappings);
 		// Create the module tags
@@ -86,6 +91,14 @@ public class CreateTagsMojo extends AbstractMojo {
 
 	public void setExternalsMessage(String externalsMessage) {
 		this.externalsMessage = externalsMessage;
+	}
+
+	public TagStyle getTagStyle() {
+		return tagStyle;
+	}
+
+	public void setTagStyle(TagStyle tagStyle) {
+		this.tagStyle = tagStyle;
 	}
 
 }
