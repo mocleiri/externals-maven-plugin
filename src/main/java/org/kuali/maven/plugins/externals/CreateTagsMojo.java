@@ -1,6 +1,9 @@
 package org.kuali.maven.plugins.externals;
 
+import java.io.File;
 import java.util.List;
+
+import javax.swing.tree.DefaultMutableTreeNode;
 
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
@@ -14,6 +17,16 @@ public class CreateTagsMojo extends AbstractMojo {
 
 	SVNUtils svnUtils = SVNUtils.getInstance();
 	MojoHelper helper = MojoHelper.getInstance();
+
+	/**
+	 * @parameter expression="${svn.pom}" default-value="pom.xml"
+	 */
+	private String pom;
+
+	/**
+	 * @parameter expression="${svn.ignoreDirectories}" default-value="src,target,.svn,.git"
+	 */
+	private String ignoreDirectories;
 
 	/**
 	 * The Maven project object
@@ -47,6 +60,9 @@ public class CreateTagsMojo extends AbstractMojo {
 
 	@Override
 	public void execute() throws MojoExecutionException {
+		List<File> files = helper.getPoms(project.getBasedir(), pom, ignoreDirectories);
+		List<DefaultMutableTreeNode> nodes = helper.getNodes(files);
+		DefaultMutableTreeNode node = helper.getTree(project.getBasedir(), nodes, pom);
 		// Extract svn:externals info from the root of the checkout
 		List<SVNExternal> externals = svnUtils.getExternals(project.getBasedir());
 		// Make sure the modules listed in the pom match the svn:externals definitions and the mappings provided in the plugin config
