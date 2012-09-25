@@ -63,6 +63,46 @@ public class XMLUtils {
 		}
 	}
 
+	public GAV getParentGAV(String xml) {
+		Document document = getDocument(xml);
+		return getParentGav(document);
+	}
+
+	public GAV getGAV(String xml) {
+		Document document = getDocument(xml);
+		return getGAV(document.getChildNodes().item(0).getChildNodes());
+	}
+
+	public Document getDocument(String xml) {
+		try {
+			Reader reader = new StringReader(xml);
+			InputSource src = new InputSource(reader);
+			DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+			DocumentBuilder builder = factory.newDocumentBuilder();
+			return builder.parse(src);
+		} catch (Exception e) {
+			throw new IllegalStateException(e);
+		}
+	}
+
+	protected GAV getGAV(NodeList nodeList) {
+		GAV gav = new GAV();
+		int childCount = nodeList.getLength();
+		for (int i = 0; i < childCount; i++) {
+			Node node = nodeList.item(i);
+			if (node.getNodeName().equals("groupId")) {
+				gav.setGroupId(node.getTextContent().trim());
+			}
+			if (node.getNodeName().equals("artifactId")) {
+				gav.setArtifactId(node.getTextContent().trim());
+			}
+			if (node.getNodeName().equals("version")) {
+				gav.setVersion(node.getTextContent().trim());
+			}
+		}
+		return gav;
+	}
+
 	protected GAV getParentGav(Document document) {
 		NodeList nodeList = document.getElementsByTagName("parent");
 		if (nodeList == null || nodeList.getLength() == 0) {
@@ -71,15 +111,9 @@ public class XMLUtils {
 		if (nodeList.getLength() > 1) {
 			throw new IllegalStateException("There should only be one <parent> tag in a pom");
 		}
-		logger.info(getDisplayString(nodeList, -1));
 		Node parentNode = nodeList.item(0);
-		NodeList parentNodeList = parentNode.getChildNodes();
-		int childCount = parentNodeList.getLength();
-		for (int i = 0; i < childCount; i++) {
-			Node node = parentNodeList.item(i);
-			logger.info(getDisplayString(node));
-		}
-		return null;
+		NodeList gavNodeList = parentNode.getChildNodes();
+		return getGAV(gavNodeList);
 	}
 
 	protected String getDisplayString(NodeList nodeList, int level) {
