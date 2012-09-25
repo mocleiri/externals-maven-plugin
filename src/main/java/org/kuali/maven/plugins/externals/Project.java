@@ -3,34 +3,26 @@ package org.kuali.maven.plugins.externals;
 import java.io.File;
 
 public class Project {
-	String groupId;
-	String artifactId;
-	String version;
+
+	GAV parent;
+	GAV gav;
 	File pom;
 	String pomContents;
 
-	public String getGroupId() {
-		return groupId;
+	public GAV getParent() {
+		return parent;
 	}
 
-	public void setGroupId(String groupId) {
-		this.groupId = groupId;
+	public void setParent(GAV parent) {
+		this.parent = parent;
 	}
 
-	public String getArtifactId() {
-		return artifactId;
+	public GAV getGav() {
+		return gav;
 	}
 
-	public void setArtifactId(String artifactId) {
-		this.artifactId = artifactId;
-	}
-
-	public String getVersion() {
-		return version;
-	}
-
-	public void setVersion(String version) {
-		this.version = version;
+	public void setGav(GAV gav) {
+		this.gav = gav;
 	}
 
 	public File getPom() {
@@ -48,5 +40,4 @@ public class Project {
 	public void setPomContents(String pomContents) {
 		this.pomContents = pomContents;
 	}
-
 }
