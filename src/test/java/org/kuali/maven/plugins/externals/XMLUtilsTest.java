@@ -26,13 +26,9 @@ public class XMLUtilsTest {
 			String newXml = xmlUtils.format(oldXml);
 			logger.info(newXml);
 			GAV parent = xmlUtils.getParentGAV(newXml);
-			logger.info(parent.getGroupId());
-			logger.info(parent.getArtifactId());
-			logger.info(parent.getVersion());
 			GAV gav = xmlUtils.getGAV(newXml);
-			logger.info(gav.getGroupId());
-			logger.info(gav.getArtifactId());
-			logger.info(gav.getVersion());
+			logger.info(parent.getGroupId() + ":" + parent.getArtifactId() + ":" + parent.getVersion());
+			logger.info(gav.getGroupId() + ":" + gav.getArtifactId() + ":" + gav.getVersion());
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
