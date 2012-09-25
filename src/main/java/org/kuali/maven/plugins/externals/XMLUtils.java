@@ -102,13 +102,13 @@ public class XMLUtils {
 		for (int i = 0; i < childCount; i++) {
 			Node node = nodeList.item(i);
 			if (node.getNodeName().equals("groupId")) {
-				gav.setGroupId(node.getTextContent().trim());
+				gav.setGroupId(nullSafeTrim(node.getTextContent()));
 			}
 			if (node.getNodeName().equals("artifactId")) {
-				gav.setArtifactId(node.getTextContent().trim());
+				gav.setArtifactId(nullSafeTrim(node.getTextContent()));
 			}
 			if (node.getNodeName().equals("version")) {
-				gav.setVersion(node.getTextContent().trim());
+				gav.setVersion(nullSafeTrim(node.getTextContent()));
 			}
 		}
 		return gav;
@@ -160,6 +160,14 @@ public class XMLUtils {
 		sb.append(flatten(value));
 		sb.append("]");
 		return sb.toString();
+	}
+
+	protected String nullSafeTrim(String s) {
+		if (s == null) {
+			return null;
+		} else {
+			return s.trim();
+		}
 	}
 
 	protected String flatten(String s) {
