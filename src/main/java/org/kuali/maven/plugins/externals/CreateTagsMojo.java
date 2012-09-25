@@ -34,16 +34,16 @@ public class CreateTagsMojo extends AbstractMojo {
 	private String tagMessage;
 
 	/**
+	 * @parameter expression="${svn.externalsMessage}"
+	 */
+	private String externalsMessage;
+
+	/**
 	 * Either <code>BUILDNUMBER</code> or <code>REVISION</code>
 	 * 
 	 * @parameter expression="${svn.tagStyle}" default-value="REVISION"
 	 */
 	private TagStyle tagStyle;
-
-	/**
-	 * @parameter expression="${svn.externalsMessage}"
-	 */
-	private String externalsMessage;
 
 	@Override
 	public void execute() throws MojoExecutionException {
