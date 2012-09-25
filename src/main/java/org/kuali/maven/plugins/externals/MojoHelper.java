@@ -34,6 +34,7 @@ import org.tmatesoft.svn.core.SVNCommitInfo;
 public class MojoHelper {
 	private static final Logger logger = LoggerFactory.getLogger(MojoHelper.class);
 	private static final String MAVEN_SNAPSHOT_TOKEN = "SNAPSHOT";
+	private static final String BUILD_NUMBER_ENVIRONMENT_VARIABLE = "BUILD_NUMBER";
 
 	SVNUtils svnUtils = SVNUtils.getInstance();
 	XMLUtils xmlUtils = new XMLUtils();
@@ -278,9 +279,9 @@ public class MojoHelper {
 
 	protected int getBuildNumber() {
 		Map<String, String> env = System.getenv();
-		String buildNumber = env.get("BUILD_NUMBER");
+		String buildNumber = env.get(BUILD_NUMBER_ENVIRONMENT_VARIABLE);
 		if (StringUtils.isBlank(buildNumber)) {
-			logger.warn("env.BUILD_NUMBER is blank");
+			logger.warn("env." + BUILD_NUMBER_ENVIRONMENT_VARIABLE + " is blank");
 			return 0;
 		} else {
 			return new Integer(buildNumber);
