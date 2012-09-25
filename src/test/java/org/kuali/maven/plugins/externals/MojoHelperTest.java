@@ -2,7 +2,6 @@ package org.kuali.maven.plugins.externals;
 
 import java.io.File;
 import java.util.List;
-import java.util.Map;
 
 import javax.swing.tree.DefaultMutableTreeNode;
 
@@ -23,9 +22,6 @@ public class MojoHelperTest {
 		try {
 			List<File> poms = helper.getPoms(BASEDIR, POM, IGNORE);
 			List<DefaultMutableTreeNode> nodes = helper.getNodes(poms);
-			logger.info("poms.size()=" + poms.size());
-			Map<String, DefaultMutableTreeNode> map = helper.getMap(nodes);
-			logger.info("map.size()=" + map.size());
 			DefaultMutableTreeNode tree = helper.getTree(BASEDIR, nodes, POM);
 			String s = helper.getDisplayString(tree, BASEDIR, POM);
 			logger.info("Maven Structure:\n" + s);
