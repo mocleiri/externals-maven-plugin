@@ -46,23 +46,6 @@ public class XMLUtils {
 		}
 	}
 
-	public String getVersion(String xml) {
-		try {
-			Reader reader = new StringReader(xml);
-			InputSource src = new InputSource(reader);
-			DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-			DocumentBuilder builder = factory.newDocumentBuilder();
-			Document document = builder.parse(src);
-			NodeList children = document.getChildNodes();
-			String s = getDisplayString(children, -1);
-			logger.info("XML Structure: \n" + s);
-			getParentGav(document);
-			return null;
-		} catch (Exception e) {
-			throw new IllegalStateException(e);
-		}
-	}
-
 	public GAV getParentGAV(String xml) {
 		Document document = getDocument(xml);
 		return getParentGav(document);
@@ -139,6 +122,11 @@ public class XMLUtils {
 		Node parentNode = nodeList.item(0);
 		NodeList gavNodeList = parentNode.getChildNodes();
 		return getGAV(gavNodeList);
+	}
+
+	public void display(NodeList nodeList, int level) {
+		String content = getDisplayString(nodeList, level);
+		logger.info(content);
 	}
 
 	protected String getDisplayString(NodeList nodeList, int level) {
