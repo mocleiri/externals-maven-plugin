@@ -207,7 +207,8 @@ public class MojoHelper {
 				buildTag.setSkipped(true);
 			} else {
 				SVNCommitInfo info = svnUtils.copy(src, revision, dst, message);
-				logger.info("Created [" + dst + "] Revision " + info.getNewRevision());
+				logger.info("Created [" + dst + "]");
+				logger.debug("Revision " + info.getNewRevision());
 			}
 		}
 	}
