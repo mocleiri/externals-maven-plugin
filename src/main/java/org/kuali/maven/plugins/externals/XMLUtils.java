@@ -25,6 +25,11 @@ public class XMLUtils {
 	private static final String FORMAT_PRETTY_PRINT = "format-pretty-print";
 	private static final String XML_DECLARATION = "xml-declaration";
 	private static final String DOM_IMPLEMENTATION = "LS";
+	private static final String GROUP_ID = "groupId";
+	private static final String ARTIFACT_ID = "artifactId";
+	private static final String VERSION = "version";
+	private static final String PARENT = "parent";
+	private static final String PROJECT = "parent";
 
 	public String format(String xml) {
 		try {
@@ -61,7 +66,7 @@ public class XMLUtils {
 			throw new IllegalArgumentException("Invalid xml for a Maven pom.  Expected exactly 1 top level node:\n " + xml);
 		}
 		Node projectNode = nodeList.item(0);
-		if (!projectNode.getNodeName().equals("project")) {
+		if (!projectNode.getNodeName().equals(PROJECT)) {
 			throw new IllegalArgumentException("Invalid xml for a Maven pom.  Must start with a <project> tag:\n " + xml);
 		}
 		GAV gav = getGAV(projectNode.getChildNodes());
@@ -98,13 +103,13 @@ public class XMLUtils {
 		int childCount = nodeList.getLength();
 		for (int i = 0; i < childCount; i++) {
 			Node node = nodeList.item(i);
-			if (node.getNodeName().equals("groupId")) {
+			if (node.getNodeName().equals(GROUP_ID)) {
 				gav.setGroupId(nullSafeTrim(node.getTextContent()));
 			}
-			if (node.getNodeName().equals("artifactId")) {
+			if (node.getNodeName().equals(ARTIFACT_ID)) {
 				gav.setArtifactId(nullSafeTrim(node.getTextContent()));
 			}
-			if (node.getNodeName().equals("version")) {
+			if (node.getNodeName().equals(VERSION)) {
 				gav.setVersion(nullSafeTrim(node.getTextContent()));
 			}
 		}
@@ -112,12 +117,12 @@ public class XMLUtils {
 	}
 
 	public GAV getParentGav(Document document) {
-		NodeList nodeList = document.getElementsByTagName("parent");
+		NodeList nodeList = document.getElementsByTagName(PARENT);
 		if (nodeList == null || nodeList.getLength() == 0) {
 			return null;
 		}
 		if (nodeList.getLength() > 1) {
-			throw new IllegalStateException("There should only be one <parent> tag in a pom");
+			throw new IllegalStateException("There should only be one <" + PARENT + "> tag in a pom");
 		}
 		Node parentNode = nodeList.item(0);
 		NodeList gavNodeList = parentNode.getChildNodes();
