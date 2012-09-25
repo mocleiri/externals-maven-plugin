@@ -54,22 +54,34 @@ public class XMLUtils {
 			DocumentBuilder builder = factory.newDocumentBuilder();
 			Document document = builder.parse(src);
 			NodeList children = document.getChildNodes();
-			displayNodeList(children);
+			String s = getDisplayString(children, -1);
+			logger.info("XML Structure: \n" + s);
 			return null;
 		} catch (Exception e) {
 			throw new RuntimeException(e);
 		}
 	}
 
-	protected void displayNodeList(NodeList nodeList) {
+	protected String getDisplayString(NodeList nodeList, int level) {
+		StringBuilder sb = new StringBuilder();
 		int childCount = nodeList.getLength();
+		level++;
 		for (int i = 0; i < childCount; i++) {
 			Node node = nodeList.item(i);
 			String name = node.getNodeName();
 			int type = node.getNodeType();
 			String value = node.getNodeValue();
-			logger.info(StringUtils.leftPad(i + "", 3) + ": [" + name + "," + type + "," + value + "]");
+			sb.append(level + ":" + StringUtils.repeat(" ", level) + "[" + name + "," + type + "," + flatten(value) + "]\n");
+			sb.append(getDisplayString(node.getChildNodes(), level));
 		}
+		return sb.toString();
 	}
 
+	protected String flatten(String s) {
+		if (s == null) {
+			return null;
+		} else {
+			return s.replace("\n", "LF").replace("\r", "CR");
+		}
+	}
 }

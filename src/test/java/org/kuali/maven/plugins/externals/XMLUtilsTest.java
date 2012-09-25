@@ -5,11 +5,9 @@ import java.util.List;
 
 import org.apache.commons.io.FileUtils;
 import org.junit.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class XMLUtilsTest {
-	private static final Logger logger = LoggerFactory.getLogger(XMLUtilsTest.class);
+	// private static final Logger logger = LoggerFactory.getLogger(XMLUtilsTest.class);
 
 	MojoHelper helper = MojoHelper.getInstance();
 	XMLUtils xmlUtils = new XMLUtils();
@@ -24,7 +22,7 @@ public class XMLUtilsTest {
 			File pom = poms.get(0);
 			String oldXml = FileUtils.readFileToString(pom);
 			String newXml = xmlUtils.format(oldXml);
-			logger.info(newXml);
+			// logger.info(newXml);
 			xmlUtils.getVersion(newXml);
 		} catch (Exception e) {
 			e.printStackTrace();
