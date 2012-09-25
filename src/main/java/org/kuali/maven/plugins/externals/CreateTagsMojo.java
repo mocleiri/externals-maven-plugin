@@ -63,12 +63,15 @@ public class CreateTagsMojo extends AbstractMojo {
 		List<File> files = helper.getPoms(project.getBasedir(), pom, ignoreDirectories);
 		List<DefaultMutableTreeNode> nodes = helper.getNodes(files);
 		DefaultMutableTreeNode node = helper.getTree(project.getBasedir(), nodes, pom);
+
 		// Extract svn:externals info from the root of the checkout
 		List<SVNExternal> externals = svnUtils.getExternals(project.getBasedir());
 		// Make sure the modules listed in the pom match the svn:externals definitions and the mappings provided in the plugin config
 		helper.validate(project, externals, mappings);
 		// Calculate the build tag for the root
 		BuildTag rootTag = helper.getBuildTag(project, tagStyle);
+		Project rootProject = (Project) node.getUserObject();
+		rootProject.setBuildTag(rootTag);
 		// Calculate build tags for each module
 		List<BuildTag> moduleTags = helper.getBuildTags(project, externals, mappings, tagStyle);
 		// Create new svn:externals definitions based on the newly created tags
