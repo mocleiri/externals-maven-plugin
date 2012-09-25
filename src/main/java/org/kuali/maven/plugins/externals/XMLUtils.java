@@ -54,22 +54,22 @@ public class XMLUtils {
 			DocumentBuilder builder = factory.newDocumentBuilder();
 			Document document = builder.parse(src);
 			NodeList children = document.getChildNodes();
-			getParentNode(document);
 			String s = getDisplayString(children, -1);
 			logger.info("XML Structure: \n" + s);
+			getParentGav(document);
 			return null;
 		} catch (Exception e) {
 			throw new RuntimeException(e);
 		}
 	}
 
-	protected Node getParentNode(Document document) {
+	protected GAV getParentGav(Document document) {
 		NodeList nodeList = document.getElementsByTagName("parent");
 		int childCount = nodeList.getLength();
 		for (int i = 0; i < childCount; i++) {
 			Node node = nodeList.item(i);
+			logger.info(getDisplayString(node));
 		}
-		logger.info(nodeList + "");
 		return null;
 	}
 
@@ -83,6 +83,10 @@ public class XMLUtils {
 			sb.append(getDisplayString(node.getChildNodes(), level));
 		}
 		return sb.toString();
+	}
+
+	protected String getDisplayString(Node node) {
+		return getDisplayString(node, -1);
 	}
 
 	protected String getDisplayString(Node node, int level) {
@@ -100,7 +104,6 @@ public class XMLUtils {
 		sb.append(type);
 		sb.append(",");
 		sb.append(flatten(value));
-		sb.append(",");
 		sb.append("]");
 		return sb.toString();
 	}
