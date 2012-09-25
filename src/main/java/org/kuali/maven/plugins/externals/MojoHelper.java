@@ -208,7 +208,7 @@ public class MojoHelper {
 			} else {
 				SVNCommitInfo info = svnUtils.copy(src, revision, dst, message);
 				logger.info("Created [" + dst + "]");
-				logger.debug("Revision " + info.getNewRevision());
+				logger.debug("Comitted revision " + info.getNewRevision());
 			}
 		}
 	}
