@@ -29,7 +29,7 @@ public class XMLUtils {
 	private static final String ARTIFACT_ID = "artifactId";
 	private static final String VERSION = "version";
 	private static final String PARENT = "parent";
-	private static final String PROJECT = "parent";
+	private static final String PROJECT = "project";
 
 	public String format(String xml) {
 		try {

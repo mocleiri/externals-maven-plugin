@@ -52,6 +52,32 @@ public class MojoHelper {
 		return instance;
 	}
 
+	public String toString(GAV gav) {
+		StringBuilder sb = new StringBuilder();
+		sb.append(gav.getGroupId());
+		sb.append(":");
+		sb.append(gav.getArtifactId());
+		sb.append(":");
+		sb.append(gav.getVersion());
+		return sb.toString();
+	}
+
+	public String getDisplayString(DefaultMutableTreeNode node) {
+		Project project = (Project) node.getUserObject();
+		GAV gav = project.getGav();
+		int level = node.getLevel();
+		StringBuilder sb = new StringBuilder();
+		sb.append(StringUtils.repeat(" ", level));
+		sb.append(gav.getArtifactId());
+		sb.append("\n");
+		Enumeration<?> children = node.children();
+		while (children.hasMoreElements()) {
+			DefaultMutableTreeNode child = (DefaultMutableTreeNode) children.nextElement();
+			sb.append(getDisplayString(child));
+		}
+		return sb.toString();
+	}
+
 	public String getDisplayString(DefaultMutableTreeNode node, File basedir, String pomFile) {
 		Project project = (Project) node.getUserObject();
 		File pom = project.getPom();
@@ -63,8 +89,6 @@ public class MojoHelper {
 			int pos = displayPath.lastIndexOf(File.separator);
 			displayPath = displayPath.substring(pos);
 			displayPath = displayPath.replace("/", "");
-		} else {
-			displayPath = displayPath.replace("/", "/");
 		}
 		int level = node.getLevel();
 		StringBuilder sb = new StringBuilder();

@@ -18,6 +18,19 @@ public class MojoHelperTest {
 	private static final File BASEDIR = new File("/Users/jeffcaddel/ws/aggregate");
 
 	@Test
+	public void testGetTree() {
+		try {
+			List<File> poms = helper.getPoms(BASEDIR, POM, IGNORE);
+			List<DefaultMutableTreeNode> nodes = helper.getNodes(poms);
+			DefaultMutableTreeNode tree = helper.getTree(BASEDIR, nodes, POM);
+			String s = helper.getDisplayString(tree);
+			logger.info("Maven Structure:\n" + s);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+
+	// @Test
 	public void testGetFiles() {
 		try {
 			List<File> poms = helper.getPoms(BASEDIR, POM, IGNORE);
