@@ -65,9 +65,18 @@ public class XMLUtils {
 
 	protected GAV getParentGav(Document document) {
 		NodeList nodeList = document.getElementsByTagName("parent");
-		int childCount = nodeList.getLength();
+		if (nodeList == null || nodeList.getLength() == 0) {
+			return null;
+		}
+		if (nodeList.getLength() > 1) {
+			throw new IllegalStateException("There should only be one <parent> tag in a pom");
+		}
+		logger.info(getDisplayString(nodeList, -1));
+		Node parentNode = nodeList.item(0);
+		NodeList parentNodeList = parentNode.getChildNodes();
+		int childCount = parentNodeList.getLength();
 		for (int i = 0; i < childCount; i++) {
-			Node node = nodeList.item(i);
+			Node node = parentNodeList.item(i);
 			logger.info(getDisplayString(node));
 		}
 		return null;
