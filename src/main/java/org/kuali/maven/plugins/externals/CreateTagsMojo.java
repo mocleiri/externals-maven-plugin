@@ -34,7 +34,9 @@ public class CreateTagsMojo extends AbstractMojo {
 	private String tagMessage;
 
 	/**
-	 * @parameter expression="${svn.tagStyle}"
+	 * Either <code>BUILDNUMBER</code> or <code>REVISION</code>
+	 * 
+	 * @parameter expression="${svn.tagStyle}" default-value="REVISION"
 	 */
 	private TagStyle tagStyle;
 
