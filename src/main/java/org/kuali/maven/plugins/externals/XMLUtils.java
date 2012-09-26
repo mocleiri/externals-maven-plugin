@@ -132,7 +132,7 @@ public class XMLUtils {
 				return;
 			}
 		}
-		logger.warn("No <" + VERSION + "> tag was found");
+		throw new IllegalStateException("No <" + VERSION + "> tag was found");
 	}
 
 	public GAV getGAV(NodeList nodeList) {
