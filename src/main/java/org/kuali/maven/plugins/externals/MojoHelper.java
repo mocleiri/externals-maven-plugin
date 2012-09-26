@@ -215,6 +215,22 @@ public class MojoHelper {
 	}
 
 	public void setBuildTags(List<DefaultMutableTreeNode> nodes, List<BuildTag> moduleTags, List<Mapping> mappings) {
+		for (int i = 0; i < mappings.size(); i++) {
+			Mapping mapping = mappings.get(i);
+			BuildTag moduleTag = moduleTags.get(i);
+			Project project = findProject(nodes, mapping.getModule());
+			project.setBuildTag(moduleTag);
+		}
+	}
+
+	protected Project findProject(List<DefaultMutableTreeNode> nodes, String artifactId) {
+		for (DefaultMutableTreeNode node : nodes) {
+			Project project = (Project) node.getUserObject();
+			if (project.getGav().getArtifactId().equals(artifactId)) {
+				return project;
+			}
+		}
+		throw new IllegalStateException("Unable to locate " + artifactId);
 	}
 
 	public List<BuildTag> getBuildTags(MavenProject project, List<SVNExternal> externals, List<Mapping> mappings, TagStyle tagStyle, int buildNumber) {
