@@ -95,7 +95,7 @@ public class CreateTagsMojo extends AbstractMojo {
 		// Update svn:externals definitions on the root tag so they point to the new module tags
 		SVNCommitInfo info = svnUtils.setExternals(rootTag.getTagUrl(), newExternals, externalsMessage);
 		getLog().info("Set " + newExternals.size() + " externals @ " + rootTag.getTagUrl());
-		getLog().info("Committed revision " + info.getNewRevision());
+		getLog().info("Committed revision " + info.getNewRevision() + ".");
 	}
 
 	public List<Mapping> getMappings() {
