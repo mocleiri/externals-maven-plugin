@@ -214,12 +214,18 @@ public class MojoHelper {
 		}
 	}
 
-	public void setBuildTags(List<DefaultMutableTreeNode> nodes, List<BuildTag> moduleTags, List<Mapping> mappings) {
+	public void updateBuildInfo(List<DefaultMutableTreeNode> nodes, List<BuildTag> moduleTags, List<Mapping> mappings, TagStyle tagStyle, int buildNumber) {
 		for (int i = 0; i < mappings.size(); i++) {
 			Mapping mapping = mappings.get(i);
 			BuildTag moduleTag = moduleTags.get(i);
 			Project project = findProject(nodes, mapping.getModule());
 			project.setBuildTag(moduleTag);
+			GAV oldGav = project.getGav();
+			String newVersion = getNewVersion(oldGav.getVersion(), buildNumber, moduleTag.getSourceRevision(), tagStyle);
+			GAV newGav = new GAV();
+			newGav.setGroupId(oldGav.getGroupId());
+			newGav.setArtifactId(oldGav.getArtifactId());
+			newGav.setVersion(newVersion);
 		}
 	}
 
