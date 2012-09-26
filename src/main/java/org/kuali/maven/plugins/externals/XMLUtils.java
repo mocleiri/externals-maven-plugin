@@ -98,6 +98,35 @@ public class XMLUtils {
 		}
 	}
 
+	public void updateParentVersion(Document document, String version) {
+		NodeList nodeList = document.getElementsByTagName(PARENT);
+		if (nodeList == null || nodeList.getLength() == 0) {
+			throw new IllegalStateException("There is no <" + PARENT + "> tag in this pom");
+		}
+		if (nodeList.getLength() > 1) {
+			throw new IllegalStateException("There should only be one <" + PARENT + "> tag in a pom");
+		}
+		Node parentNode = nodeList.item(0);
+		NodeList gavNodeList = parentNode.getChildNodes();
+		updateVersion(gavNodeList, version);
+	}
+
+	public void updateVersion(Document document, String version) {
+		NodeList nodeList = document.getChildNodes();
+		Node projectNode = nodeList.item(0);
+		updateVersion(projectNode.getChildNodes(), version);
+	}
+
+	protected void updateVersion(NodeList nodeList, String version) {
+		int childCount = nodeList.getLength();
+		for (int i = 0; i < childCount; i++) {
+			Node node = nodeList.item(i);
+			if (node.getNodeName().equals(VERSION)) {
+				node.setTextContent(version);
+			}
+		}
+	}
+
 	public GAV getGAV(NodeList nodeList) {
 		GAV gav = new GAV();
 		int childCount = nodeList.getLength();
