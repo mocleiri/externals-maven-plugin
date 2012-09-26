@@ -25,8 +25,7 @@ public class XMLUtilsTest {
 			String oldXml = FileUtils.readFileToString(pom);
 			String newXml = xmlUtils.format(oldXml);
 			String foo1Xml = xmlUtils.updateParentVersion(newXml, "foo1");
-			String foo2Xml = xmlUtils.updateVersion(newXml, "foo2");
-			logger.info(foo2Xml);
+			logger.info(foo1Xml);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

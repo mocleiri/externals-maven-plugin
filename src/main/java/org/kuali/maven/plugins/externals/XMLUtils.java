@@ -30,6 +30,10 @@ public class XMLUtils {
 	private static final String VERSION = "version";
 	private static final String PARENT = "parent";
 	private static final String PROJECT = "project";
+	private static final String SCM = "scm";
+	private static final String DEVELOPER_CONNECTION = "developerConnection";
+	private static final String CONNECTION = "connection";
+	private static final String URL = "url";
 
 	public String format(String xml) {
 		try {
@@ -104,6 +108,25 @@ public class XMLUtils {
 		} catch (Exception e) {
 			throw new IllegalStateException(e);
 		}
+	}
+
+	public String updateScm(String xml, String prefix, String url) {
+		Document document = getDocument(xml);
+		NodeList nodeList = document.getElementsByTagName(SCM);
+		Node scmNode = nodeList.item(0);
+		NodeList scmNodeList = scmNode.getChildNodes();
+		int childCount = scmNodeList.getLength();
+		for (int i = 0; i < childCount; i++) {
+			Node node = nodeList.item(i);
+			if (node.getNodeName().equals(DEVELOPER_CONNECTION)) {
+				node.setTextContent(prefix + url);
+			} else if (node.getNodeName().equals(CONNECTION)) {
+				node.setTextContent(prefix + url);
+			} else if (node.getNodeName().equals(URL)) {
+				node.setTextContent(url);
+			}
+		}
+		return getFormattedXml(document);
 	}
 
 	public String updateParentVersion(String xml, String version) {
