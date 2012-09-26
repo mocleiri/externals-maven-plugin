@@ -119,8 +119,10 @@ public class XMLUtils {
 			Node node = nodeList.item(i);
 			if (node.getNodeName().equals(VERSION)) {
 				node.setTextContent(version);
+				return;
 			}
 		}
+		logger.warn("No <" + VERSION + "> tag was found");
 	}
 
 	public GAV getGAV(NodeList nodeList) {
