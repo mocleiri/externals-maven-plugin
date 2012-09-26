@@ -1,6 +1,7 @@
 package org.kuali.maven.plugins.externals;
 
 public class GAV {
+
 	String groupId;
 	String artifactId;
 	String version;
