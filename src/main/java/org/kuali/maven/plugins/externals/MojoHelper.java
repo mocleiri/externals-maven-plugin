@@ -214,6 +214,9 @@ public class MojoHelper {
 		}
 	}
 
+	public void setBuildTags(List<DefaultMutableTreeNode> nodes, List<BuildTag> moduleTags, List<Mapping> mappings) {
+	}
+
 	public List<BuildTag> getBuildTags(MavenProject project, List<SVNExternal> externals, List<Mapping> mappings, TagStyle tagStyle, int buildNumber) {
 		Collections.sort(externals);
 		Collections.sort(mappings);

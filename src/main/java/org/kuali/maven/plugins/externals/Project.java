@@ -6,6 +6,7 @@ public class Project {
 
 	GAV parent;
 	GAV gav;
+	GAV newGav;
 	File pom;
 	String pomContents;
 	BuildTag buildTag;
@@ -48,5 +49,13 @@ public class Project {
 
 	public void setBuildTag(BuildTag buildTag) {
 		this.buildTag = buildTag;
+	}
+
+	public GAV getNewGav() {
+		return newGav;
+	}
+
+	public void setNewGav(GAV newGav) {
+		this.newGav = newGav;
 	}
 }

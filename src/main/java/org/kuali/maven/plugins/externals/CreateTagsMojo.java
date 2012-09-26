@@ -80,6 +80,8 @@ public class CreateTagsMojo extends AbstractMojo {
 		helper.validate(project, externals, mappings);
 		// Calculate the build tag for the root
 		BuildTag rootTag = helper.getBuildTag(project, tagStyle, buildNumber);
+		Project rootProject = (Project) node.getUserObject();
+		rootProject.setBuildTag(rootTag);
 		// Calculate build tags for each module
 		List<BuildTag> moduleTags = helper.getBuildTags(project, externals, mappings, tagStyle, buildNumber);
 		// Create new svn:externals definitions based on the newly created tags
