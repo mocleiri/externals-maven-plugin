@@ -1,15 +1,30 @@
 package org.kuali.maven.plugins.externals;
 
+import static org.apache.commons.io.filefilter.FileFilterUtils.and;
+import static org.apache.commons.io.filefilter.FileFilterUtils.directoryFileFilter;
+import static org.apache.commons.io.filefilter.FileFilterUtils.nameFileFilter;
+import static org.apache.commons.io.filefilter.FileFilterUtils.notFileFilter;
+
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 
+import javax.swing.tree.DefaultMutableTreeNode;
+
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.filefilter.FileFilterUtils;
+import org.apache.commons.io.filefilter.IOFileFilter;
 import org.apache.commons.lang.StringUtils;
 import org.apache.maven.project.MavenProject;
 import org.kuali.maven.common.Extractor;
+import org.kuali.maven.common.PropertiesUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.io.DefaultResourceLoader;
@@ -18,11 +33,12 @@ import org.springframework.core.io.ResourceLoader;
 import org.tmatesoft.svn.core.SVNCommitInfo;
 
 public class MojoHelper {
-	private static final Logger LOG = LoggerFactory.getLogger(MojoHelper.class);
+	private static final Logger logger = LoggerFactory.getLogger(MojoHelper.class);
 	private static final String MAVEN_SNAPSHOT_TOKEN = "SNAPSHOT";
-
 	SVNUtils svnUtils = SVNUtils.getInstance();
+	XMLUtils xmlUtils = new XMLUtils();
 	Extractor extractor = new Extractor();
+	PropertiesUtils propertiesUtils = new PropertiesUtils();
 
 	protected static MojoHelper instance;
 
@@ -35,6 +51,127 @@ public class MojoHelper {
 			instance = new MojoHelper();
 		}
 		return instance;
+	}
+
+	public String toString(GAV gav) {
+		StringBuilder sb = new StringBuilder();
+		sb.append(gav.getGroupId());
+		sb.append(":");
+		sb.append(gav.getArtifactId());
+		sb.append(":");
+		sb.append(gav.getVersion());
+		return sb.toString();
+	}
+
+	public String getDisplayString(DefaultMutableTreeNode node) {
+		Project project = (Project) node.getUserObject();
+		GAV gav = project.getGav();
+		int level = node.getLevel();
+		StringBuilder sb = new StringBuilder();
+		sb.append(StringUtils.repeat(" ", level));
+		sb.append(gav.getArtifactId());
+		sb.append("\n");
+		Enumeration<?> children = node.children();
+		while (children.hasMoreElements()) {
+			DefaultMutableTreeNode child = (DefaultMutableTreeNode) children.nextElement();
+			sb.append(getDisplayString(child));
+		}
+		return sb.toString();
+	}
+
+	public String getDisplayString(DefaultMutableTreeNode node, File basedir, String pomFile) {
+		Project project = (Project) node.getUserObject();
+		File pom = project.getPom();
+		String pomPath = pom.getAbsolutePath();
+		String displayPath = pomPath.replace(basedir.getAbsolutePath(), "");
+		displayPath = displayPath.replace(pomFile, "");
+		if (!node.isRoot()) {
+			displayPath = displayPath.substring(0, displayPath.length() - 1);
+			int pos = displayPath.lastIndexOf(File.separator);
+			displayPath = displayPath.substring(pos);
+			displayPath = displayPath.replace("/", "");
+		}
+		int level = node.getLevel();
+		StringBuilder sb = new StringBuilder();
+		sb.append(StringUtils.repeat(" ", level));
+		sb.append(displayPath);
+		sb.append("\n");
+		Enumeration<?> children = node.children();
+		while (children.hasMoreElements()) {
+			DefaultMutableTreeNode child = (DefaultMutableTreeNode) children.nextElement();
+			sb.append(getDisplayString(child, basedir, pomFile));
+		}
+		return sb.toString();
+	}
+
+	protected List<DefaultMutableTreeNode> getNodes(List<File> files) {
+		List<DefaultMutableTreeNode> nodes = new ArrayList<DefaultMutableTreeNode>();
+		for (File file : files) {
+			String pomContents = read(file);
+			GAV parent = xmlUtils.getParentGAV(pomContents);
+			GAV gav = xmlUtils.getGAV(pomContents, parent);
+			Project project = new Project();
+			project.setPom(file);
+			project.setPomContents(pomContents);
+			project.setGav(gav);
+			project.setParent(parent);
+			DefaultMutableTreeNode node = new DefaultMutableTreeNode(project);
+			nodes.add(node);
+		}
+		return nodes;
+	}
+
+	public Map<String, DefaultMutableTreeNode> getMap(List<DefaultMutableTreeNode> nodes) {
+		Map<String, DefaultMutableTreeNode> map = new HashMap<String, DefaultMutableTreeNode>();
+		for (DefaultMutableTreeNode node : nodes) {
+			Project project = (Project) node.getUserObject();
+			File file = project.getPom();
+			map.put(file.getAbsolutePath(), node);
+		}
+		return map;
+	}
+
+	public DefaultMutableTreeNode getTree(File basedir, List<DefaultMutableTreeNode> nodes, String pomFile) {
+		Map<String, DefaultMutableTreeNode> map = getMap(nodes);
+		for (DefaultMutableTreeNode child : nodes) {
+			Project project = (Project) child.getUserObject();
+			File pom = project.getPom();
+			File pomDir = pom.getParentFile();
+			File parentPom = new File(pomDir.getParentFile(), pomFile);
+			String parentPomPath = parentPom.getAbsolutePath();
+			DefaultMutableTreeNode parent = map.get(parentPomPath);
+			if (parent != null) {
+				parent.add(child);
+			}
+		}
+		String rootPom = basedir + File.separator + pomFile;
+		DefaultMutableTreeNode root = map.get(rootPom);
+		return root;
+	}
+
+	protected IOFileFilter getIgnoreDirectoryFilter(String dir) {
+		return notFileFilter(and(directoryFileFilter(), nameFileFilter(dir)));
+	}
+
+	protected IOFileFilter getIgnoreDirectoriesFilter(String csv) {
+		return getIgnoreDirectoriesFilter(csv.split(","));
+	}
+
+	protected IOFileFilter getIgnoreDirectoriesFilter(String... directories) {
+		IOFileFilter[] filters = new IOFileFilter[directories.length];
+		for (int i = 0; i < filters.length; i++) {
+			String dir = directories[i].trim();
+			filters[i] = getIgnoreDirectoryFilter(dir);
+		}
+		return FileFilterUtils.and(filters);
+	}
+
+	public List<File> getPoms(File basedir, String pomFile, String ignoreDirectoriesCSV) {
+		IOFileFilter fileFilter = nameFileFilter(pomFile);
+		IOFileFilter dirFilter = getIgnoreDirectoriesFilter(ignoreDirectoriesCSV);
+		List<File> files = new ArrayList<File>(FileUtils.listFiles(basedir, fileFilter, dirFilter));
+		Collections.sort(files);
+		return files;
 	}
 
 	public List<SVNExternal> getExternals(List<BuildTag> moduleTags, List<Mapping> mappings) {
@@ -67,34 +204,61 @@ public class MojoHelper {
 			String dst = buildTag.getTagUrl();
 			boolean exists = exists(dst);
 			if (exists) {
-				LOG.info("Skip existing tag [" + dst + "]");
+				logger.info("Skip existing tag [" + dst + "]");
 				buildTag.setSkipped(true);
 			} else {
 				SVNCommitInfo info = svnUtils.copy(src, revision, dst, message);
-				LOG.info("Created [" + dst + "] Revision " + info.getNewRevision());
+				logger.info("Created [" + dst + "]");
+				logger.debug("Comitted revision " + info.getNewRevision());
 			}
 		}
 	}
 
-	public List<BuildTag> getBuildTags(MavenProject project, List<SVNExternal> externals, List<Mapping> mappings) {
+	public void updateBuildInfo(List<DefaultMutableTreeNode> nodes, List<BuildTag> moduleTags, List<Mapping> mappings, TagStyle tagStyle, int buildNumber) {
+		for (int i = 0; i < mappings.size(); i++) {
+			Mapping mapping = mappings.get(i);
+			BuildTag moduleTag = moduleTags.get(i);
+			Project project = findProject(nodes, mapping.getModule());
+			project.setBuildTag(moduleTag);
+			GAV oldGav = project.getGav();
+			String newVersion = getNewVersion(oldGav.getVersion(), buildNumber, moduleTag.getSourceRevision(), tagStyle);
+			GAV newGav = new GAV();
+			newGav.setGroupId(oldGav.getGroupId());
+			newGav.setArtifactId(oldGav.getArtifactId());
+			newGav.setVersion(newVersion);
+		}
+	}
+
+	protected Project findProject(List<DefaultMutableTreeNode> nodes, String artifactId) {
+		for (DefaultMutableTreeNode node : nodes) {
+			Project project = (Project) node.getUserObject();
+			if (project.getGav().getArtifactId().equals(artifactId)) {
+				return project;
+			}
+		}
+		throw new IllegalStateException("Unable to locate " + artifactId);
+	}
+
+	public List<BuildTag> getBuildTags(MavenProject project, List<SVNExternal> externals, List<Mapping> mappings, TagStyle tagStyle, int buildNumber) {
 		Collections.sort(externals);
 		Collections.sort(mappings);
 		List<BuildTag> buildTags = new ArrayList<BuildTag>();
 		for (int i = 0; i < externals.size(); i++) {
 			SVNExternal external = externals.get(i);
 			Mapping mapping = mappings.get(i);
-			BuildTag buildTag = getBuildTag(project, external, mapping);
+			BuildTag buildTag = getBuildTag(project, external, mapping, tagStyle, buildNumber);
 			buildTags.add(buildTag);
 		}
 		return buildTags;
 	}
 
-	public BuildTag getBuildTag(MavenProject project) {
+	public BuildTag getBuildTag(MavenProject project, TagStyle tagStyle, int buildNumber) {
 		File workingCopy = project.getBasedir();
 		String sourceUrl = svnUtils.getUrl(workingCopy);
 		long sourceRevision = svnUtils.getLastRevision(workingCopy);
 		String version = project.getVersion();
-		String tag = getTag(sourceUrl, version, project.getArtifactId(), sourceRevision);
+
+		String tag = getTag(sourceUrl, version, project.getArtifactId(), buildNumber, sourceRevision, tagStyle);
 
 		BuildTag buildTag = new BuildTag();
 		buildTag.setSourceUrl(sourceUrl);
@@ -103,12 +267,12 @@ public class MojoHelper {
 		return buildTag;
 	}
 
-	public BuildTag getBuildTag(MavenProject project, SVNExternal external, Mapping mapping) {
+	public BuildTag getBuildTag(MavenProject project, SVNExternal external, Mapping mapping, TagStyle tagStyle, int buildNumber) {
 		File workingCopy = external.getWorkingCopyPath();
 		String sourceUrl = svnUtils.getUrl(workingCopy);
 		long sourceRevision = svnUtils.getLastRevision(workingCopy);
 		String version = project.getProperties().getProperty(mapping.getVersionProperty());
-		String tag = getTag(sourceUrl, version, mapping.getModule(), sourceRevision);
+		String tag = getTag(sourceUrl, version, mapping.getModule(), buildNumber, sourceRevision, tagStyle);
 
 		BuildTag buildTag = new BuildTag();
 		buildTag.setSourceUrl(sourceUrl);
@@ -117,16 +281,57 @@ public class MojoHelper {
 		return buildTag;
 	}
 
-	protected String getVersion(String version, long revision) {
+	public String getNewVersion(String version, int buildNumber, long revision, TagStyle tagStyle) {
 		String trimmed = trimSnapshot(version);
+		switch (tagStyle) {
+		case REVISION:
+			return trimmed + "-r" + revision;
+		case BUILDNUMBER:
+			return trimmed + "-build-" + buildNumber;
+		default:
+			throw new IllegalArgumentException(tagStyle + " is unknown");
+		}
+	}
+
+	public String getTag(String url, String version, String artifactId, int buildNumber, long revision, TagStyle tagStyle) {
+		switch (tagStyle) {
+		case REVISION:
+			return getRevisionTag(url, version, artifactId, revision);
+		case BUILDNUMBER:
+			return getBuildNumberTag(url, version, artifactId, buildNumber);
+		default:
+			throw new IllegalArgumentException(tagStyle + " is unknown");
+		}
+	}
+
+	public int getBuildNumber(MavenProject project, String buildNumberProperty) {
+		Properties properties = propertiesUtils.getMavenProperties(project);
+		String buildNumber = properties.getProperty(buildNumberProperty);
+		if (StringUtils.isBlank(buildNumber)) {
+			logger.warn(buildNumberProperty + " is blank");
+			return 0;
+		} else {
+			return new Integer(buildNumber);
+		}
+	}
+
+	public String getBuildNumberTag(String url, String version, String artifactId, int buildNumber) {
 		StringBuilder sb = new StringBuilder();
-		sb.append(trimmed);
-		sb.append("-");
+		sb.append(getBaseTag(url, version, artifactId));
+		sb.append("/");
+		sb.append("build-" + buildNumber);
+		return sb.toString();
+	}
+
+	public String getRevisionTag(String url, String version, String artifactId, long revision) {
+		StringBuilder sb = new StringBuilder();
+		sb.append(getBaseTag(url, version, artifactId));
+		sb.append("/");
 		sb.append("r" + revision);
 		return sb.toString();
 	}
 
-	protected String getTag(String url, String version, String artifactId, long revision) {
+	protected String getBaseTag(String url, String version, String artifactId) {
 		String tagBase = extractor.getTagBase(url);
 		if (StringUtils.isBlank(tagBase)) {
 			throw new IllegalArgumentException("Unable to calculate tag base from [" + url + "]");
@@ -147,8 +352,6 @@ public class MojoHelper {
 		sb.append(v.getMinor());
 		sb.append("/");
 		sb.append(trimmed);
-		sb.append("/");
-		sb.append("r" + revision);
 		return sb.toString();
 	}
 
@@ -293,5 +496,13 @@ public class MojoHelper {
 			sb.append(tokens[i]);
 		}
 		return sb.toString();
+	}
+
+	protected String read(File file) {
+		try {
+			return FileUtils.readFileToString(file);
+		} catch (IOException e) {
+			throw new IllegalStateException(e);
+		}
 	}
 }
