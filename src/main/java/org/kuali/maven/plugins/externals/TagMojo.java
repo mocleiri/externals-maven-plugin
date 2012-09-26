@@ -19,12 +19,12 @@ public class TagMojo extends AbstractMojo {
 	MojoHelper helper = MojoHelper.getInstance();
 
 	/**
-	 * @parameter expression="${svn.pom}" default-value="pom.xml"
+	 * @parameter expression="${externals.pom}" default-value="pom.xml"
 	 */
 	private String pom;
 
 	/**
-	 * @parameter expression="${svn.ignoreDirectories}" default-value="src,target,.svn,.git"
+	 * @parameter expression="${externals.ignoreDirectories}" default-value="src,target,.svn,.git"
 	 */
 	private String ignoreDirectories;
 
@@ -42,24 +42,24 @@ public class TagMojo extends AbstractMojo {
 	private List<Mapping> mappings;
 
 	/**
-	 * @parameter expression="${svn.tagMessage}"
+	 * @parameter expression="${externals.tagMessage}"
 	 */
 	private String tagMessage;
 
 	/**
-	 * @parameter expression="${svn.externalsMessage}"
+	 * @parameter expression="${externals.externalsMessage}"
 	 */
 	private String externalsMessage;
 
 	/**
-	 * @parameter expression="${svn.buildNumberProperty}" default-value="env.BUILD_NUMBER"
+	 * @parameter expression="${externals.buildNumberProperty}" default-value="env.BUILD_NUMBER"
 	 */
 	private String buildNumberProperty;
 
 	/**
 	 * Either <code>BUILDNUMBER</code> or <code>REVISION</code>
 	 * 
-	 * @parameter expression="${svn.tagStyle}" default-value="REVISION"
+	 * @parameter expression="${externals.tagStyle}" default-value="REVISION"
 	 */
 	private TagStyle tagStyle;
 
