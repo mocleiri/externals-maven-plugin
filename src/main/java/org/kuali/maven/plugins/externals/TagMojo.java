@@ -11,9 +11,9 @@ import org.apache.maven.project.MavenProject;
 import org.tmatesoft.svn.core.SVNCommitInfo;
 
 /**
- * @goal createtags
+ * @goal tag
  */
-public class CreateTagsMojo extends AbstractMojo {
+public class TagMojo extends AbstractMojo {
 
 	SVNUtils svnUtils = SVNUtils.getInstance();
 	MojoHelper helper = MojoHelper.getInstance();
