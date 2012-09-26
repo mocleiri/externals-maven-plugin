@@ -52,6 +52,11 @@ public class CreateTagsMojo extends AbstractMojo {
 	private String externalsMessage;
 
 	/**
+	 * @parameter expression="${svn.buildNumberProperty}" default-value="env.BUILD_NUMBER"
+	 */
+	private String buildNumberProperty;
+
+	/**
 	 * Either <code>BUILDNUMBER</code> or <code>REVISION</code>
 	 * 
 	 * @parameter expression="${svn.tagStyle}" default-value="REVISION"
@@ -60,6 +65,11 @@ public class CreateTagsMojo extends AbstractMojo {
 
 	@Override
 	public void execute() throws MojoExecutionException {
+		int buildNumber = -1;
+		if (tagStyle.equals(TagStyle.BUILDNUMBER)) {
+			buildNumber = helper.getBuildNumber(project, buildNumberProperty);
+		}
+
 		List<File> files = helper.getPoms(project.getBasedir(), pom, ignoreDirectories);
 		List<DefaultMutableTreeNode> nodes = helper.getNodes(files);
 		DefaultMutableTreeNode node = helper.getTree(project.getBasedir(), nodes, pom);
@@ -69,9 +79,9 @@ public class CreateTagsMojo extends AbstractMojo {
 		// Make sure the modules listed in the pom match the svn:externals definitions and the mappings provided in the plugin config
 		helper.validate(project, externals, mappings);
 		// Calculate the build tag for the root
-		BuildTag rootTag = helper.getBuildTag(project, tagStyle);
+		BuildTag rootTag = helper.getBuildTag(project, tagStyle, buildNumber);
 		// Calculate build tags for each module
-		List<BuildTag> moduleTags = helper.getBuildTags(project, externals, mappings, tagStyle);
+		List<BuildTag> moduleTags = helper.getBuildTags(project, externals, mappings, tagStyle, buildNumber);
 		// Create new svn:externals definitions based on the newly created tags
 		List<SVNExternal> newExternals = helper.getExternals(moduleTags, mappings);
 		// Create the module tags

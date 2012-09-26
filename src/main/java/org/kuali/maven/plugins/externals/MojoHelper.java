@@ -24,6 +24,7 @@ import org.apache.commons.io.filefilter.IOFileFilter;
 import org.apache.commons.lang.StringUtils;
 import org.apache.maven.project.MavenProject;
 import org.kuali.maven.common.Extractor;
+import org.kuali.maven.common.PropertiesUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.io.DefaultResourceLoader;
@@ -34,11 +35,10 @@ import org.tmatesoft.svn.core.SVNCommitInfo;
 public class MojoHelper {
 	private static final Logger logger = LoggerFactory.getLogger(MojoHelper.class);
 	private static final String MAVEN_SNAPSHOT_TOKEN = "SNAPSHOT";
-	private static final String BUILD_NUMBER_ENVIRONMENT_VARIABLE = "BUILD_NUMBER";
-
 	SVNUtils svnUtils = SVNUtils.getInstance();
 	XMLUtils xmlUtils = new XMLUtils();
 	Extractor extractor = new Extractor();
+	PropertiesUtils propertiesUtils = new PropertiesUtils();
 
 	protected static MojoHelper instance;
 
@@ -214,26 +214,26 @@ public class MojoHelper {
 		}
 	}
 
-	public List<BuildTag> getBuildTags(MavenProject project, List<SVNExternal> externals, List<Mapping> mappings, TagStyle tagStyle) {
+	public List<BuildTag> getBuildTags(MavenProject project, List<SVNExternal> externals, List<Mapping> mappings, TagStyle tagStyle, int buildNumber) {
 		Collections.sort(externals);
 		Collections.sort(mappings);
 		List<BuildTag> buildTags = new ArrayList<BuildTag>();
 		for (int i = 0; i < externals.size(); i++) {
 			SVNExternal external = externals.get(i);
 			Mapping mapping = mappings.get(i);
-			BuildTag buildTag = getBuildTag(project, external, mapping, tagStyle);
+			BuildTag buildTag = getBuildTag(project, external, mapping, tagStyle, buildNumber);
 			buildTags.add(buildTag);
 		}
 		return buildTags;
 	}
 
-	public BuildTag getBuildTag(MavenProject project, TagStyle tagStyle) {
+	public BuildTag getBuildTag(MavenProject project, TagStyle tagStyle, int buildNumber) {
 		File workingCopy = project.getBasedir();
 		String sourceUrl = svnUtils.getUrl(workingCopy);
 		long sourceRevision = svnUtils.getLastRevision(workingCopy);
 		String version = project.getVersion();
 
-		String tag = getTag(sourceUrl, version, project.getArtifactId(), sourceRevision, tagStyle);
+		String tag = getTag(sourceUrl, version, project.getArtifactId(), buildNumber, sourceRevision, tagStyle);
 
 		BuildTag buildTag = new BuildTag();
 		buildTag.setSourceUrl(sourceUrl);
@@ -242,12 +242,12 @@ public class MojoHelper {
 		return buildTag;
 	}
 
-	public BuildTag getBuildTag(MavenProject project, SVNExternal external, Mapping mapping, TagStyle tagStyle) {
+	public BuildTag getBuildTag(MavenProject project, SVNExternal external, Mapping mapping, TagStyle tagStyle, int buildNumber) {
 		File workingCopy = external.getWorkingCopyPath();
 		String sourceUrl = svnUtils.getUrl(workingCopy);
 		long sourceRevision = svnUtils.getLastRevision(workingCopy);
 		String version = project.getProperties().getProperty(mapping.getVersionProperty());
-		String tag = getTag(sourceUrl, version, mapping.getModule(), sourceRevision, tagStyle);
+		String tag = getTag(sourceUrl, version, mapping.getModule(), buildNumber, sourceRevision, tagStyle);
 
 		BuildTag buildTag = new BuildTag();
 		buildTag.setSourceUrl(sourceUrl);
@@ -268,23 +268,22 @@ public class MojoHelper {
 		}
 	}
 
-	public String getTag(String url, String version, String artifactId, long revision, TagStyle tagStyle) {
+	public String getTag(String url, String version, String artifactId, int buildNumber, long revision, TagStyle tagStyle) {
 		switch (tagStyle) {
 		case REVISION:
 			return getRevisionTag(url, version, artifactId, revision);
 		case BUILDNUMBER:
-			int buildNumber = getBuildNumber();
 			return getBuildNumberTag(url, version, artifactId, buildNumber);
 		default:
 			throw new IllegalArgumentException(tagStyle + " is unknown");
 		}
 	}
 
-	protected int getBuildNumber() {
-		Map<String, String> env = System.getenv();
-		String buildNumber = env.get(BUILD_NUMBER_ENVIRONMENT_VARIABLE);
+	public int getBuildNumber(MavenProject project, String buildNumberProperty) {
+		Properties properties = propertiesUtils.getMavenProperties(project);
+		String buildNumber = properties.getProperty(buildNumberProperty);
 		if (StringUtils.isBlank(buildNumber)) {
-			logger.warn("env." + BUILD_NUMBER_ENVIRONMENT_VARIABLE + " is blank");
+			logger.warn(buildNumberProperty + " is blank");
 			return 0;
 		} else {
 			return new Integer(buildNumber);
