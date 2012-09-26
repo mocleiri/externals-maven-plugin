@@ -226,7 +226,7 @@ public class MojoHelper {
 			newGav.setGroupId(oldGav.getGroupId());
 			newGav.setArtifactId(oldGav.getArtifactId());
 			newGav.setVersion(newVersion);
-			logger.info("old: " + toString(oldGav) + "->" + toString(newGav));
+			logger.info("GAV Update - [" + toString(oldGav) + "->" + newVersion + "]");
 		}
 	}
 
