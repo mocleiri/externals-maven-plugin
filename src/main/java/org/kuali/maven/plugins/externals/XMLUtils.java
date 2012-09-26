@@ -101,12 +101,6 @@ public class XMLUtils {
 	public void updateParentVersion(String xml, String version) {
 		Document document = getDocument(xml);
 		NodeList nodeList = document.getElementsByTagName(PARENT);
-		if (nodeList == null || nodeList.getLength() == 0) {
-			throw new IllegalStateException("There is no <" + PARENT + "> tag in this pom");
-		}
-		if (nodeList.getLength() > 1) {
-			throw new IllegalStateException("There should only be one <" + PARENT + "> tag in a pom");
-		}
 		Node parentNode = nodeList.item(0);
 		NodeList gavNodeList = parentNode.getChildNodes();
 		updateVersion(gavNodeList, version);
