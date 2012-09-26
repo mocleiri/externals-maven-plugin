@@ -98,7 +98,8 @@ public class XMLUtils {
 		}
 	}
 
-	public void updateParentVersion(Document document, String version) {
+	public void updateParentVersion(String xml, String version) {
+		Document document = getDocument(xml);
 		NodeList nodeList = document.getElementsByTagName(PARENT);
 		if (nodeList == null || nodeList.getLength() == 0) {
 			throw new IllegalStateException("There is no <" + PARENT + "> tag in this pom");
@@ -111,7 +112,8 @@ public class XMLUtils {
 		updateVersion(gavNodeList, version);
 	}
 
-	public void updateVersion(Document document, String version) {
+	public void updateVersion(String xml, String version) {
+		Document document = getDocument(xml);
 		NodeList nodeList = document.getChildNodes();
 		Node projectNode = nodeList.item(0);
 		updateVersion(projectNode.getChildNodes(), version);
