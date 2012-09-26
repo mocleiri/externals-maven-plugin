@@ -24,12 +24,9 @@ public class XMLUtilsTest {
 			File pom = poms.get(0);
 			String oldXml = FileUtils.readFileToString(pom);
 			String newXml = xmlUtils.format(oldXml);
-			logger.info(newXml);
-			GAV parent = xmlUtils.getParentGAV(newXml);
-			GAV gav = xmlUtils.getGAV(newXml, parent);
-			xmlUtils.updateParentVersion(newXml, "foo");
-			logger.info(parent.getGroupId() + ":" + parent.getArtifactId() + ":" + parent.getVersion());
-			logger.info(gav.getGroupId() + ":" + gav.getArtifactId() + ":" + gav.getVersion());
+			String foo1Xml = xmlUtils.updateParentVersion(newXml, "foo1");
+			String foo2Xml = xmlUtils.updateVersion(newXml, "foo2");
+			logger.info(foo2Xml);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
