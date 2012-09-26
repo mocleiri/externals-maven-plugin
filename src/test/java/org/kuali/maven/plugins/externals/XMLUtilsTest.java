@@ -18,6 +18,24 @@ public class XMLUtilsTest {
 	private static final File BASEDIR = new File("/Users/jeffcaddel/ws/aggregate");
 
 	@Test
+	public void testUpdateVersion() {
+		try {
+			List<File> poms = helper.getPoms(BASEDIR, POM, IGNORE);
+			File pom = poms.get(0);
+			String oldXml = FileUtils.readFileToString(pom);
+			String newXml = xmlUtils.format(oldXml);
+			logger.info(newXml);
+			GAV parent = xmlUtils.getParentGAV(newXml);
+			GAV gav = xmlUtils.getGAV(newXml, parent);
+			xmlUtils.updateParentVersion(newXml, "foo");
+			logger.info(parent.getGroupId() + ":" + parent.getArtifactId() + ":" + parent.getVersion());
+			logger.info(gav.getGroupId() + ":" + gav.getArtifactId() + ":" + gav.getVersion());
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+
+	// @Test
 	public void testGetFiles() {
 		try {
 			List<File> poms = helper.getPoms(BASEDIR, POM, IGNORE);

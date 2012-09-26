@@ -38,6 +38,14 @@ public class XMLUtils {
 			DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
 			DocumentBuilder builder = factory.newDocumentBuilder();
 			Document document = builder.parse(src);
+			return getFormattedXml(document);
+		} catch (Exception e) {
+			throw new IllegalStateException(e);
+		}
+	}
+
+	public String getFormattedXml(Document document) {
+		try {
 			Element element = document.getDocumentElement();
 			DOMImplementationRegistry registry = DOMImplementationRegistry.newInstance();
 			DOMImplementationLS impl = (DOMImplementationLS) registry.getDOMImplementation(DOM_IMPLEMENTATION);
@@ -98,19 +106,21 @@ public class XMLUtils {
 		}
 	}
 
-	public void updateParentVersion(String xml, String version) {
+	public String updateParentVersion(String xml, String version) {
 		Document document = getDocument(xml);
 		NodeList nodeList = document.getElementsByTagName(PARENT);
 		Node parentNode = nodeList.item(0);
 		NodeList gavNodeList = parentNode.getChildNodes();
 		updateVersion(gavNodeList, version);
+		return getFormattedXml(document);
 	}
 
-	public void updateVersion(String xml, String version) {
+	public String updateVersion(String xml, String version) {
 		Document document = getDocument(xml);
 		NodeList nodeList = document.getChildNodes();
 		Node projectNode = nodeList.item(0);
 		updateVersion(projectNode.getChildNodes(), version);
+		return getFormattedXml(document);
 	}
 
 	protected void updateVersion(NodeList nodeList, String version) {
