@@ -256,13 +256,16 @@ public class MojoHelper {
 		return buildTag;
 	}
 
-	protected String getVersion(String version, long revision) {
+	public String getNewVersion(String version, int buildNumber, long revision, TagStyle tagStyle) {
 		String trimmed = trimSnapshot(version);
-		StringBuilder sb = new StringBuilder();
-		sb.append(trimmed);
-		sb.append("-");
-		sb.append("r" + revision);
-		return sb.toString();
+		switch (tagStyle) {
+		case REVISION:
+			return trimmed + "-r" + revision;
+		case BUILDNUMBER:
+			return trimmed + "-build-" + buildNumber;
+		default:
+			throw new IllegalArgumentException(tagStyle + " is unknown");
+		}
 	}
 
 	public String getTag(String url, String version, String artifactId, long revision, TagStyle tagStyle) {
