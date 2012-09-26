@@ -117,7 +117,7 @@ public class XMLUtils {
 		NodeList scmNodeList = scmNode.getChildNodes();
 		int childCount = scmNodeList.getLength();
 		for (int i = 0; i < childCount; i++) {
-			Node node = nodeList.item(i);
+			Node node = scmNodeList.item(i);
 			if (node.getNodeName().equals(DEVELOPER_CONNECTION)) {
 				node.setTextContent(prefix + url);
 			} else if (node.getNodeName().equals(CONNECTION)) {

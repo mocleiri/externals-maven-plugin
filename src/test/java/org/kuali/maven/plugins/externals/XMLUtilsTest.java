@@ -18,6 +18,28 @@ public class XMLUtilsTest {
 	private static final File BASEDIR = new File("/Users/jeffcaddel/ws/aggregate");
 
 	@Test
+	public void testUpdateScm() {
+		try {
+			List<File> poms = helper.getPoms(BASEDIR, POM, IGNORE);
+			String rootXml = null;
+			for (File pom : poms) {
+				String xml = FileUtils.readFileToString(pom);
+				int pos = xml.indexOf("<artifactId>kuali-common</artifactId>");
+				if (pos == -1) {
+					continue;
+				} else {
+					rootXml = xml;
+					break;
+				}
+			}
+			String newXml = xmlUtils.updateScm(rootXml, "scm:svn:", "foo");
+			logger.info(newXml);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+
+	// @Test
 	public void testUpdateVersion() {
 		try {
 			List<File> poms = helper.getPoms(BASEDIR, POM, IGNORE);
