@@ -25,7 +25,7 @@ public class XMLUtilsTest {
 			List<File> poms = helper.getPoms(BASEDIR, POM, IGNORE);
 			List<DefaultMutableTreeNode> nodes = helper.getNodes(poms);
 			DefaultMutableTreeNode node = helper.getTree(BASEDIR, nodes, POM);
-			helper.updateVersions(node);
+			helper.updateGavs(node);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

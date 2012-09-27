@@ -71,13 +71,29 @@ public class MojoHelper {
 		return sb.toString();
 	}
 
+	public String getVersion(DefaultMutableTreeNode node) {
+		Object[] projectObjects = node.getUserObjectPath();
+		List<Project> projects = new ArrayList<Project>();
+		for (Object projectObject : projectObjects) {
+			projects.add((Project) projectObject);
+		}
+		Collections.reverse(projects);
+		for (Project project : projects) {
+			GAV gav = project.getGav();
+			if (!StringUtils.isBlank(gav.getVersion())) {
+				return gav.getVersion();
+			}
+		}
+		throw new IllegalStateException("Unable to determine a version");
+	}
+
 	public String getDisplayString(DefaultMutableTreeNode node) {
 		Project project = (Project) node.getUserObject();
 		GAV gav = project.getGav();
 		int level = node.getLevel();
 		StringBuilder sb = new StringBuilder();
 		sb.append(StringUtils.repeat(" ", level));
-		sb.append(gav.getArtifactId());
+		sb.append(gav.getArtifactId() + ":" + getVersion(node));
 		sb.append("\n");
 		Enumeration<?> children = node.children();
 		while (children.hasMoreElements()) {
@@ -270,28 +286,55 @@ public class MojoHelper {
 		}
 	}
 
-	public void updateVersions(DefaultMutableTreeNode node) {
+	public void updateGavs(DefaultMutableTreeNode node) {
 		Project project = (Project) node.getUserObject();
 		if (project.getNewGav() != null) {
-			String oldXml = project.getPomContents();
-			String newVersion = project.getNewGav().getVersion();
-			String newXml = xmlUtils.updateVersion(oldXml, newVersion);
-			project.setPomContents(newXml);
+			project.setGav(project.getNewGav());
+			// String oldXml = project.getPomContents();
+			// String newVersion = project.getNewGav().getVersion();
+			// String newXml = xmlUtils.updateVersion(oldXml, newVersion);
+			// project.setPomContents(newXml);
 		}
 		Enumeration<?> children = node.children();
 		while (children.hasMoreElements()) {
 			DefaultMutableTreeNode child = (DefaultMutableTreeNode) children.nextElement();
-			int level = child.getLevel();
 			Project childProject = (Project) child.getUserObject();
-			String oldXml = childProject.getPomContents();
-			String newXml = xmlUtils.updateParentVersion(oldXml, project.getVersion());
-			GAV gav = project.getGav();
-			String gid = gav.getGroupId();
-			String aid = gav.getArtifactId();
-			String v = project.getVersion();
-			logger.info(StringUtils.repeat(" ", level) + "parent=" + gid + ":" + aid + ":" + v);
-			childProject.setPomContents(newXml);
-			updateVersions(child);
+			childProject.setParent(project.getGav());
+			// int level = child.getLevel();
+			// Project childProject = (Project) child.getUserObject();
+			// String oldXml = childProject.getPomContents();
+			// String newXml = xmlUtils.updateParentVersion(oldXml, project.getVersion());
+			// GAV gav = project.getGav();
+			// String gid = gav.getGroupId();
+			// String aid = gav.getArtifactId();
+			// String v = project.getVersion();
+			// logger.info(StringUtils.repeat(" ", level) + "parent=" + gid + ":" + aid + ":" + v);
+			// childProject.setPomContents(newXml);
+			updateGavs(child);
+		}
+	}
+
+	public void updateXml(DefaultMutableTreeNode node) {
+		Project project = (Project) node.getUserObject();
+		String oldXml = project.getPomContents();
+		String newVersion = project.getNewGav().getVersion();
+		String newXml = xmlUtils.updateVersion(oldXml, newVersion);
+		project.setPomContents(newXml);
+		Enumeration<?> children = node.children();
+		while (children.hasMoreElements()) {
+			DefaultMutableTreeNode child = (DefaultMutableTreeNode) children.nextElement();
+			Project childProject = (Project) child.getUserObject();
+			// int level = child.getLevel();
+			// Project childProject = (Project) child.getUserObject();
+			// String oldXml = childProject.getPomContents();
+			// String newXml = xmlUtils.updateParentVersion(oldXml, project.getVersion());
+			// GAV gav = project.getGav();
+			// String gid = gav.getGroupId();
+			// String aid = gav.getArtifactId();
+			// String v = project.getVersion();
+			// logger.info(StringUtils.repeat(" ", level) + "parent=" + gid + ":" + aid + ":" + v);
+			// childProject.setPomContents(newXml);
+			updateGavs(child);
 		}
 	}
 
