@@ -255,6 +255,8 @@ public class MojoHelper {
 	}
 
 	public void writePoms(DefaultMutableTreeNode node, File baseDir, File checkoutDir) {
+		logger.info("Updating Maven POM's");
+		int count = 0;
 		Enumeration<?> e = node.depthFirstEnumeration();
 		while (e.hasMoreElements()) {
 			DefaultMutableTreeNode element = (DefaultMutableTreeNode) e.nextElement();
@@ -265,10 +267,12 @@ public class MojoHelper {
 			String oldContents = read(pom);
 			String newContents = project.getPomContents();
 			if (!oldContents.equals(newContents)) {
-				logger.info("Updating " + newPom.getAbsolutePath());
+				logger.debug("Updating " + newPom.getAbsolutePath());
 				write(newPom, newContents);
+				count++;
 			}
 		}
+		logger.info("Updated " + count + " pom's");
 	}
 
 	protected String getRelativePath(File dir, File file) {
