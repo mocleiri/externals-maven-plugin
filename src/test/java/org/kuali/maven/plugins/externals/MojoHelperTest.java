@@ -47,6 +47,7 @@ public class MojoHelperTest {
 		List<BuildTag> moduleTags = helper.getBuildTags(properties, externals, mappings, TagStyle.REVISION, buildNumber);
 		helper.updateBuildInfo(nodes, moduleTags, mappings, TagStyle.REVISION, buildNumber);
 		helper.updateGavs(node);
+		helper.updateProperties(node, properties, mappings);
 		logger.info("\n" + helper.getDisplayString(node));
 	}
 

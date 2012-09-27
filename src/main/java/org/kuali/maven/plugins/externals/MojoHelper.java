@@ -310,20 +310,39 @@ public class MojoHelper {
 
 	public void updateProperties(DefaultMutableTreeNode node, Properties properties, List<Mapping> mappings) {
 		Project project = (Project) node.getUserObject();
-		Properties versionProperties = getVersionProperties(properties, mappings);
+		Properties versionProperties = getVersionProperties(properties, mappings, node);
 		String oldXml = project.getPomContents();
 		String newXml = pomUtils.updateProperties(oldXml, versionProperties);
 		project.setPomContents(newXml);
 	}
 
-	public Properties getVersionProperties(Properties properties, List<Mapping> mappings) {
+	public Properties getVersionProperties(Properties properties, List<Mapping> mappings, DefaultMutableTreeNode node) {
 		Properties newProperties = new Properties();
 		for (Mapping mapping : mappings) {
+			String artifactId = mapping.getModule();
 			String key = mapping.getVersionProperty();
-			String value = properties.getProperty(key);
-			newProperties.setProperty(key, value);
+			String oldValue = properties.getProperty(key);
+			if (StringUtils.isBlank(oldValue)) {
+				throw new IllegalStateException("No existing value for '" + key + "'");
+			}
+			DefaultMutableTreeNode moduleNode = findNode(node, artifactId);
+			String newValue = getVersion(moduleNode);
+			newProperties.setProperty(key, newValue);
 		}
 		return newProperties;
+	}
+
+	protected DefaultMutableTreeNode findNode(DefaultMutableTreeNode node, String artifactId) {
+		Enumeration<?> e = node.breadthFirstEnumeration();
+		while (e.hasMoreElements()) {
+			DefaultMutableTreeNode element = (DefaultMutableTreeNode) e.nextElement();
+			Project project = (Project) element.getUserObject();
+			GAV gav = project.getGav();
+			if (gav.getArtifactId().equals(artifactId)) {
+				return element;
+			}
+		}
+		throw new IllegalStateException("Unable to locate " + artifactId);
 	}
 
 	public void updateXml(DefaultMutableTreeNode node) {

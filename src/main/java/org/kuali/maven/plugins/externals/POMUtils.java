@@ -140,11 +140,13 @@ public class POMUtils {
 	public String updateProperties(String xml, Properties properties) {
 		Document document = getDocument(xml);
 		NodeList nodeList = document.getElementsByTagName(PROPERTIES);
+		Node propertiesNode = nodeList.item(0);
+		NodeList propertiesNodeList = propertiesNode.getChildNodes();
 		List<String> keys = new ArrayList<String>(properties.stringPropertyNames());
 		Collections.sort(keys);
 		for (String key : keys) {
 			String value = properties.getProperty(key);
-			Node node = findNode(nodeList, key);
+			Node node = findNode(propertiesNodeList, key);
 			node.setTextContent(value);
 		}
 		return getFormattedXml(document);
@@ -154,7 +156,8 @@ public class POMUtils {
 		int childCount = nodeList.getLength();
 		for (int i = 0; i < childCount; i++) {
 			Node node = nodeList.item(i);
-			if (node.getNodeName().equals(key)) {
+			String name = node.getNodeName();
+			if (name.equals(key)) {
 				return node;
 			}
 		}
