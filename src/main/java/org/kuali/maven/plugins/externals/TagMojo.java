@@ -65,10 +65,7 @@ public class TagMojo extends AbstractMojo {
 
 	@Override
 	public void execute() throws MojoExecutionException {
-		int buildNumber = -1;
-		if (tagStyle.equals(TagStyle.BUILDNUMBER)) {
-			buildNumber = helper.getBuildNumber(project, buildNumberProperty);
-		}
+		int buildNumber = helper.getBuildNumber(project, buildNumberProperty);
 
 		List<File> files = helper.getPoms(project.getBasedir(), pom, ignoreDirectories);
 		List<DefaultMutableTreeNode> nodes = helper.getNodes(files);
