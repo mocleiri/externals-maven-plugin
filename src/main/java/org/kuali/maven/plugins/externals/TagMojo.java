@@ -89,8 +89,10 @@ public class TagMojo extends AbstractMojo {
 		List<BuildTag> moduleTags = helper.getBuildTags(project.getProperties(), externals, mappings, tagStyle, buildNumber);
 		// Update build information for nodes that represent an svn:external
 		helper.updateBuildInfo(nodes, moduleTags, mappings, tagStyle, buildNumber);
-		// Recursively modify the <version> tag in any poms that have a newGav
+		// Recursively update the project gav's and parent gav's
 		helper.updateGavs(node);
+		// Recursively update the project gav's and parent gav's
+		helper.updateXml(node);
 		// Update the <scm> info in the root pom
 		helper.updateScm(node, scmUrlPrefix);
 		// Persist the modified poms to the file system
