@@ -2,6 +2,10 @@ package org.kuali.maven.plugins.externals;
 
 import java.io.Reader;
 import java.io.StringReader;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Properties;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -33,6 +37,7 @@ public class XMLUtils {
 	private static final String SCM = "scm";
 	private static final String DEVELOPER_CONNECTION = "developerConnection";
 	private static final String CONNECTION = "connection";
+	private static final String PROPERTIES = "properties";
 	private static final String URL = "url";
 
 	public String format(String xml) {
@@ -131,6 +136,30 @@ public class XMLUtils {
 		Node projectNode = nodeList.item(0);
 		updateVersion(projectNode.getChildNodes(), version);
 		return getFormattedXml(document);
+	}
+
+	public String updateProperties(String xml, Properties properties) {
+		Document document = getDocument(xml);
+		NodeList nodeList = document.getElementsByTagName(PROPERTIES);
+		List<String> keys = new ArrayList<String>(properties.stringPropertyNames());
+		Collections.sort(keys);
+		for (String key : keys) {
+			String value = properties.getProperty(key);
+			Node node = findNode(nodeList, key);
+			node.setTextContent(value);
+		}
+		return getFormattedXml(document);
+	}
+
+	protected Node findNode(NodeList nodeList, String key) {
+		int childCount = nodeList.getLength();
+		for (int i = 0; i < childCount; i++) {
+			Node node = nodeList.item(i);
+			if (node.getNodeName().equals(key)) {
+				return node;
+			}
+		}
+		throw new IllegalArgumentException("Unable to locate property '" + key + "'");
 	}
 
 	protected void updateVersion(NodeList nodeList, String version) {
