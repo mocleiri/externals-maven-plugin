@@ -211,6 +211,7 @@ public class SVNUtils {
 		try {
 			SVNClientManager manager = SVNClientManager.newInstance(null, username, password);
 			SVNCommitClient client = manager.getCommitClient();
+			client.setIgnoreExternals(false);
 			return client.doCommit(new File[] { workingCopyPath }, true, message, null, null, true, true, SVNDepth.INFINITY);
 		} catch (SVNException e) {
 			throw new IllegalStateException(e);
