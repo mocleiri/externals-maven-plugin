@@ -246,9 +246,32 @@ public class MojoHelper {
 		project.setPomContents(newXml);
 	}
 
+	protected String getGroupId(Project project) {
+		GAV gav = project.getGav();
+		GAV parent = project.getParent();
+		String groupId = gav.getGroupId();
+		String parentGroupId = parent.getGroupId();
+		if (!StringUtils.isBlank(groupId)) {
+			return groupId;
+		} else {
+			return parentGroupId;
+		}
+	}
+
+	protected String getVersion(Project project) {
+		GAV gav = project.getGav();
+		GAV parent = project.getParent();
+		String version = gav.getVersion();
+		String parentVersion = parent.getVersion();
+		if (!StringUtils.isBlank(version)) {
+			return version;
+		} else {
+			return parentVersion;
+		}
+	}
+
 	public void updateVersions(DefaultMutableTreeNode node) {
 		Project project = (Project) node.getUserObject();
-		project.setVersion(project.getGav().getVersion());
 		if (project.getNewGav() != null) {
 			int level = node.getLevel();
 			String oldXml = project.getPomContents();
@@ -307,14 +330,14 @@ public class MojoHelper {
 		throw new IllegalStateException("Unable to locate " + artifactId);
 	}
 
-	public List<BuildTag> getBuildTags(MavenProject project, List<SVNExternal> externals, List<Mapping> mappings, TagStyle tagStyle, int buildNumber) {
+	public List<BuildTag> getBuildTags(Properties properties, List<SVNExternal> externals, List<Mapping> mappings, TagStyle tagStyle, int buildNumber) {
 		Collections.sort(externals);
 		Collections.sort(mappings);
 		List<BuildTag> buildTags = new ArrayList<BuildTag>();
 		for (int i = 0; i < externals.size(); i++) {
 			SVNExternal external = externals.get(i);
 			Mapping mapping = mappings.get(i);
-			BuildTag buildTag = getBuildTag(project, external, mapping, tagStyle, buildNumber);
+			BuildTag buildTag = getBuildTag(properties, external, mapping, tagStyle, buildNumber);
 			buildTags.add(buildTag);
 		}
 		return buildTags;
@@ -334,11 +357,11 @@ public class MojoHelper {
 		return buildTag;
 	}
 
-	public BuildTag getBuildTag(MavenProject project, SVNExternal external, Mapping mapping, TagStyle tagStyle, int buildNumber) {
+	public BuildTag getBuildTag(Properties properties, SVNExternal external, Mapping mapping, TagStyle tagStyle, int buildNumber) {
 		File workingCopy = external.getWorkingCopyPath();
 		String sourceUrl = svnUtils.getUrl(workingCopy);
 		long sourceRevision = svnUtils.getLastRevision(workingCopy);
-		String version = project.getProperties().getProperty(mapping.getVersionProperty());
+		String version = properties.getProperty(mapping.getVersionProperty());
 		String tag = getTag(sourceUrl, version, mapping.getModule(), buildNumber, sourceRevision, tagStyle);
 
 		BuildTag buildTag = new BuildTag();

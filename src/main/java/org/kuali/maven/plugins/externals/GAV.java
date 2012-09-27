@@ -6,6 +6,17 @@ public class GAV {
 	String artifactId;
 	String version;
 
+	public GAV() {
+		this(null, null, null);
+	}
+
+	public GAV(String groupId, String artifactId, String version) {
+		super();
+		this.groupId = groupId;
+		this.artifactId = artifactId;
+		this.version = version;
+	}
+
 	public String getGroupId() {
 		return groupId;
 	}
