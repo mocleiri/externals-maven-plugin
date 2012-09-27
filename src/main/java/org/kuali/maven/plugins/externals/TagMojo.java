@@ -81,6 +81,7 @@ public class TagMojo extends AbstractMojo {
 		helper.updateBuildInfo(node, rootTag, TagStyle.BUILDNUMBER, buildNumber);
 		// Calculate build tags for each module
 		List<BuildTag> moduleTags = helper.getBuildTags(project, externals, mappings, tagStyle, buildNumber);
+
 		// Update build information as necessary
 		helper.updateBuildInfo(nodes, moduleTags, mappings, tagStyle, buildNumber);
 		helper.modifyPoms(node);
