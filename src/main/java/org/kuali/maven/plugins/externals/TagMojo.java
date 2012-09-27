@@ -103,7 +103,7 @@ public class TagMojo extends AbstractMojo {
 		// Update the <scm> info in the root pom
 		helper.updateScm(node, scmUrlPrefix);
 		// Persist the modified poms to the file system
-		helper.writePoms(node);
+		// helper.writePoms(node);
 		// Create new svn:externals definitions based on the newly created tags
 		List<SVNExternal> newExternals = helper.getExternals(moduleTags, mappings);
 		// Create the module tags
@@ -114,7 +114,6 @@ public class TagMojo extends AbstractMojo {
 		SVNCommitInfo info = svnUtils.setExternals(rootTag.getTagUrl(), newExternals, externalsMessage);
 		getLog().info("Set " + newExternals.size() + " externals @ " + rootTag.getTagUrl());
 		getLog().info("Committed revision " + info.getNewRevision() + ".");
-		helper.touch(checkoutDir);
 		getLog().info("Checking out " + rootTag.getTagUrl() + " to " + checkoutDir.getAbsolutePath());
 		svnUtils.checkout(rootTag.getTagUrl(), checkoutDir, null, null);
 	}
