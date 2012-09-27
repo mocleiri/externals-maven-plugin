@@ -308,6 +308,24 @@ public class MojoHelper {
 		}
 	}
 
+	public void updateProperties(DefaultMutableTreeNode node, Properties properties, List<Mapping> mappings) {
+		Project project = (Project) node.getUserObject();
+		Properties versionProperties = getVersionProperties(properties, mappings);
+		String oldXml = project.getPomContents();
+		String newXml = pomUtils.updateProperties(oldXml, versionProperties);
+		project.setPomContents(newXml);
+	}
+
+	public Properties getVersionProperties(Properties properties, List<Mapping> mappings) {
+		Properties newProperties = new Properties();
+		for (Mapping mapping : mappings) {
+			String key = mapping.getVersionProperty();
+			String value = properties.getProperty(key);
+			newProperties.setProperty(key, value);
+		}
+		return newProperties;
+	}
+
 	public void updateXml(DefaultMutableTreeNode node) {
 		Project project = (Project) node.getUserObject();
 		String version = project.getGav().getVersion();

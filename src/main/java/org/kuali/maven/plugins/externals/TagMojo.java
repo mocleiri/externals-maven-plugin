@@ -93,6 +93,8 @@ public class TagMojo extends AbstractMojo {
 		helper.updateGavs(node);
 		// Recursively update the project gav's and parent gav's
 		helper.updateXml(node);
+		// Update the properties in the root pom that hold version info for the modules
+		helper.updateProperties(node, project.getProperties(), mappings);
 		// Update the <scm> info in the root pom
 		helper.updateScm(node, scmUrlPrefix);
 		// Persist the modified poms to the file system
