@@ -260,13 +260,21 @@ public class MojoHelper {
 			DefaultMutableTreeNode element = (DefaultMutableTreeNode) e.nextElement();
 			Project project = (Project) element.getUserObject();
 			File pom = project.getPom();
+			String relativePath = getRelativePath(baseDir, pom);
+			File newPom = new File(checkoutDir.getAbsolutePath() + File.separator + relativePath);
 			String oldContents = read(pom);
 			String newContents = project.getPomContents();
 			if (!oldContents.equals(newContents)) {
-				logger.info("Updating " + pom.getAbsolutePath());
-				write(pom, newContents);
+				logger.info("Updating " + newPom.getAbsolutePath());
+				write(newPom, newContents);
 			}
 		}
+	}
+
+	protected String getRelativePath(File dir, File file) {
+		String dirPath = dir.getAbsolutePath();
+		String filePath = file.getAbsolutePath();
+		return filePath.replace(dirPath, "");
 	}
 
 	public void updateScm(DefaultMutableTreeNode root, String scmUrlPrefix) {

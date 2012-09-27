@@ -116,8 +116,9 @@ public class TagMojo extends AbstractMojo {
 		getLog().info("Checking out " + rootTag.getTagUrl() + " to " + checkoutDir.getAbsolutePath());
 		long revision = svnUtils.checkout(rootTag.getTagUrl(), checkoutDir, null, null);
 		getLog().info("Checked out out revision " + revision + ".");
-
 		helper.writePoms(node, project.getBasedir(), checkoutDir);
+		SVNCommitInfo info2 = svnUtils.commit(checkoutDir, "Automated pom version updates", null, null);
+		getLog().info("Committed revision " + info2.getNewRevision() + ".");
 	}
 
 	public List<Mapping> getMappings() {

@@ -207,11 +207,11 @@ public class SVNUtils {
 		}
 	}
 
-	public void commit(File workingCopyPath, String message, String username, String password) {
+	public SVNCommitInfo commit(File workingCopyPath, String message, String username, String password) {
 		try {
 			SVNClientManager manager = SVNClientManager.newInstance(null, username, password);
 			SVNCommitClient client = manager.getCommitClient();
-			client.doCommit(new File[] { workingCopyPath }, true, message, null, null, true, true, SVNDepth.INFINITY);
+			return client.doCommit(new File[] { workingCopyPath }, true, message, null, null, true, true, SVNDepth.INFINITY);
 		} catch (SVNException e) {
 			throw new IllegalStateException(e);
 		}
