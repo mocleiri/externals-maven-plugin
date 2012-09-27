@@ -269,16 +269,16 @@ public class MojoHelper {
 		}
 	}
 
-	public void updateBuildInfo(DefaultMutableTreeNode root, BuildTag rootTag, TagStyle tagStyle, int buildNumber) {
-		Project rootProject = (Project) root.getUserObject();
-		rootProject.setBuildTag(rootTag);
-		GAV oldGav = rootProject.getGav();
-		String newVersion = getNewVersion(oldGav.getVersion(), buildNumber, rootTag.getSourceRevision(), tagStyle);
+	public void updateBuildInfo(DefaultMutableTreeNode node, BuildTag buildTag, TagStyle tagStyle, int buildNumber) {
+		Project project = (Project) node.getUserObject();
+		project.setBuildTag(buildTag);
+		GAV oldGav = project.getGav();
+		String newVersion = getNewVersion(oldGav.getVersion(), buildNumber, buildTag.getSourceRevision(), tagStyle);
 		GAV newGav = new GAV();
 		newGav.setGroupId(oldGav.getGroupId());
 		newGav.setArtifactId(oldGav.getArtifactId());
 		newGav.setVersion(newVersion);
-		rootProject.setNewGav(newGav);
+		project.setNewGav(newGav);
 		logger.info("GAV Update - [" + toString(oldGav) + "->" + newVersion + "]");
 	}
 
@@ -286,24 +286,16 @@ public class MojoHelper {
 		for (int i = 0; i < mappings.size(); i++) {
 			Mapping mapping = mappings.get(i);
 			BuildTag moduleTag = moduleTags.get(i);
-			Project project = findProject(nodes, mapping.getModule());
-			project.setBuildTag(moduleTag);
-			GAV oldGav = project.getGav();
-			String newVersion = getNewVersion(oldGav.getVersion(), buildNumber, moduleTag.getSourceRevision(), tagStyle);
-			GAV newGav = new GAV();
-			newGav.setGroupId(oldGav.getGroupId());
-			newGav.setArtifactId(oldGav.getArtifactId());
-			newGav.setVersion(newVersion);
-			project.setNewGav(newGav);
-			logger.info("GAV Update - [" + toString(oldGav) + "->" + newVersion + "]");
+			DefaultMutableTreeNode node = findNode(nodes, mapping.getModule());
+			updateBuildInfo(node, moduleTag, tagStyle, buildNumber);
 		}
 	}
 
-	protected Project findProject(List<DefaultMutableTreeNode> nodes, String artifactId) {
+	protected DefaultMutableTreeNode findNode(List<DefaultMutableTreeNode> nodes, String artifactId) {
 		for (DefaultMutableTreeNode node : nodes) {
 			Project project = (Project) node.getUserObject();
 			if (project.getGav().getArtifactId().equals(artifactId)) {
-				return project;
+				return node;
 			}
 		}
 		throw new IllegalStateException("Unable to locate " + artifactId);
