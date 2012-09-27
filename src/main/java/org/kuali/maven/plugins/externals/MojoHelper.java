@@ -220,13 +220,36 @@ public class MojoHelper {
 		if (buildTag != null) {
 			int level = node.getLevel();
 			logger.info(StringUtils.repeat(" ", level) + toString(project.getGav()));
+			String xml = project.getPomContents();
+			String version = project.getNewGav().getVersion();
+			if (node.isRoot()) {
+				String url = buildTag.getTagUrl();
+				xmlUtils.updateVersion(xml, version);
+				xmlUtils.updateScm(xml, "scm:svn", url);
+			}
 			Enumeration<?> children = node.children();
 			while (children.hasMoreElements()) {
 				DefaultMutableTreeNode child = (DefaultMutableTreeNode) children.nextElement();
+				Project childProject = (Project) child.getUserObject();
+				String childXml = childProject.getPomContents();
+				xmlUtils.updateParentVersion(childXml, version);
 				modifyPoms(child);
 			}
 		}
 
+	}
+
+	public void updateBuildInfo(DefaultMutableTreeNode root, BuildTag rootTag, TagStyle tagStyle, int buildNumber) {
+		Project rootProject = (Project) root.getUserObject();
+		rootProject.setBuildTag(rootTag);
+		GAV oldGav = rootProject.getGav();
+		String newVersion = getNewVersion(oldGav.getVersion(), buildNumber, rootTag.getSourceRevision(), tagStyle);
+		GAV newGav = new GAV();
+		newGav.setGroupId(oldGav.getGroupId());
+		newGav.setArtifactId(oldGav.getArtifactId());
+		newGav.setVersion(newVersion);
+		rootProject.setNewGav(newGav);
+		logger.info("GAV Update - [" + toString(oldGav) + "->" + newVersion + "]");
 	}
 
 	public void updateBuildInfo(List<DefaultMutableTreeNode> nodes, List<BuildTag> moduleTags, List<Mapping> mappings, TagStyle tagStyle, int buildNumber) {
@@ -241,6 +264,7 @@ public class MojoHelper {
 			newGav.setGroupId(oldGav.getGroupId());
 			newGav.setArtifactId(oldGav.getArtifactId());
 			newGav.setVersion(newVersion);
+			project.setNewGav(newGav);
 			logger.info("GAV Update - [" + toString(oldGav) + "->" + newVersion + "]");
 		}
 	}
