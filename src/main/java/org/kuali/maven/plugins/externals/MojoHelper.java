@@ -273,13 +273,10 @@ public class MojoHelper {
 	public void updateVersions(DefaultMutableTreeNode node) {
 		Project project = (Project) node.getUserObject();
 		if (project.getNewGav() != null) {
-			int level = node.getLevel();
 			String oldXml = project.getPomContents();
 			String newVersion = project.getNewGav().getVersion();
 			String newXml = xmlUtils.updateVersion(oldXml, newVersion);
 			project.setPomContents(newXml);
-			project.setVersion(newVersion);
-			logger.info(StringUtils.repeat(" ", level) + toString(project.getGav()) + "->" + newVersion);
 		}
 		Enumeration<?> children = node.children();
 		while (children.hasMoreElements()) {
@@ -296,6 +293,11 @@ public class MojoHelper {
 			childProject.setPomContents(newXml);
 			updateVersions(child);
 		}
+	}
+
+	protected void log(DefaultMutableTreeNode node) {
+		StringBuilder sb = new StringBuilder();
+		logger.info(sb.toString());
 	}
 
 	public void updateBuildInfo(DefaultMutableTreeNode node, BuildTag buildTag, TagStyle tagStyle, int buildNumber) {
