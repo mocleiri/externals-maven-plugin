@@ -80,7 +80,7 @@ public class TagMojo extends AbstractMojo {
 		helper.validate(project, externals, mappings);
 		// Calculate the build tag for the root
 		BuildTag rootTag = helper.getBuildTag(project, tagStyle, buildNumber);
-		// Update build info for the root project
+		// Update build info for the root node
 		helper.updateBuildInfo(node, rootTag, tagStyle, buildNumber);
 		// Calculate build tags for each module
 		List<BuildTag> moduleTags = helper.getBuildTags(project, externals, mappings, tagStyle, buildNumber);
