@@ -222,9 +222,9 @@ public class MojoHelper {
 			logger.info(StringUtils.repeat(" ", level) + toString(project.getGav()));
 			String xml = project.getPomContents();
 			String version = project.getNewGav().getVersion();
+			xmlUtils.updateVersion(xml, version);
 			if (node.isRoot()) {
 				String url = buildTag.getTagUrl();
-				xmlUtils.updateVersion(xml, version);
 				xmlUtils.updateScm(xml, "scm:svn", url);
 			}
 			Enumeration<?> children = node.children();
