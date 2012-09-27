@@ -79,7 +79,7 @@ public class TagMojo extends AbstractMojo {
 		// Make sure the modules listed in the pom match the svn:externals definitions and the mappings provided in the plugin config
 		helper.validate(project, externals, mappings);
 		// Calculate the build tag for the root
-		BuildTag rootTag = helper.getBuildTag(project, tagStyle, buildNumber);
+		BuildTag rootTag = helper.getBuildTag(project, TagStyle.BUILDNUMBER, buildNumber);
 		// Update build info for the root node
 		helper.updateBuildInfo(node, rootTag, TagStyle.BUILDNUMBER, buildNumber);
 		// Calculate build tags for each module
