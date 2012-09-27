@@ -16,6 +16,7 @@ import org.tmatesoft.svn.core.SVNCommitInfo;
 public class TagMojo extends AbstractMojo {
 
 	SVNUtils svnUtils = SVNUtils.getInstance();
+	XMLUtils xmlUtils = new XMLUtils();
 	MojoHelper helper = MojoHelper.getInstance();
 
 	/**
@@ -86,11 +87,12 @@ public class TagMojo extends AbstractMojo {
 		helper.updateBuildInfo(node, rootTag, TagStyle.BUILDNUMBER, buildNumber);
 		// Calculate build tags for each module
 		List<BuildTag> moduleTags = helper.getBuildTags(project, externals, mappings, tagStyle, buildNumber);
-
 		// Update build information as necessary
 		helper.updateBuildInfo(nodes, moduleTags, mappings, tagStyle, buildNumber);
-		// Modify the the version <tags> and <scm> info in the poms
-		helper.modifyPoms(node, scmUrlPrefix);
+		// Recursively modify the <version> tag in any poms that have a newGav
+		helper.updateVersions(node);
+		// Update the <scm> info in the root pom
+		helper.updateScm(node, scmUrlPrefix);
 		// Persist the modified poms to the file system
 		helper.writePoms(node);
 		// Create new svn:externals definitions based on the newly created tags

@@ -10,6 +10,7 @@ public class Project {
 	File pom;
 	String pomContents;
 	BuildTag buildTag;
+	String version;
 
 	public GAV getParent() {
 		return parent;
@@ -57,5 +58,13 @@ public class Project {
 
 	public void setNewGav(GAV newGav) {
 		this.newGav = newGav;
+	}
+
+	public String getVersion() {
+		return version;
+	}
+
+	public void setVersion(String version) {
+		this.version = version;
 	}
 }

@@ -229,27 +229,35 @@ public class MojoHelper {
 		}
 	}
 
-	public void modifyPoms(DefaultMutableTreeNode node, String scmUrlPrefix) {
-		Project project = (Project) node.getUserObject();
+	public void updateScm(DefaultMutableTreeNode root, String scmUrlPrefix) {
+		Project project = (Project) root.getUserObject();
 		BuildTag buildTag = project.getBuildTag();
-		if (buildTag != null) {
+		String url = buildTag.getTagUrl();
+		String oldXml = project.getPomContents();
+		String newXml = xmlUtils.updateScm(oldXml, scmUrlPrefix, url);
+		project.setPomContents(newXml);
+	}
+
+	public void updateVersions(DefaultMutableTreeNode node) {
+		Project project = (Project) node.getUserObject();
+		project.setVersion(project.getGav().getVersion());
+		if (project.getNewGav() != null) {
 			int level = node.getLevel();
+			String oldXml = project.getPomContents();
+			String newVersion = project.getNewGav().getVersion();
+			String newXml = xmlUtils.updateVersion(oldXml, newVersion);
+			project.setPomContents(newXml);
+			project.setVersion(newVersion);
 			logger.info(StringUtils.repeat(" ", level) + toString(project.getGav()));
-			String xml = project.getPomContents();
-			String version = project.getNewGav().getVersion();
-			String newXml = xmlUtils.updateVersion(xml, version);
-			if (node.isRoot()) {
-				String url = buildTag.getTagUrl();
-				newXml = xmlUtils.updateScm(newXml, scmUrlPrefix, url);
-			}
-			if (!newXml.equals(xml)) {
-				project.setPomContents(newXml);
-			}
-			Enumeration<?> children = node.children();
-			while (children.hasMoreElements()) {
-				DefaultMutableTreeNode child = (DefaultMutableTreeNode) children.nextElement();
-				modifyPoms(child, scmUrlPrefix);
-			}
+		}
+		Enumeration<?> children = node.children();
+		while (children.hasMoreElements()) {
+			DefaultMutableTreeNode child = (DefaultMutableTreeNode) children.nextElement();
+			Project childProject = (Project) child.getUserObject();
+			String oldXml = childProject.getPomContents();
+			String newXml = xmlUtils.updateParentVersion(oldXml, project.getVersion());
+			childProject.setPomContents(newXml);
+			updateVersions(child);
 		}
 	}
 
