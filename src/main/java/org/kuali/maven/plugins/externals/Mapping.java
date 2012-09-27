@@ -1,6 +1,7 @@
 package org.kuali.maven.plugins.externals;
 
 public class Mapping implements Comparable<Mapping> {
+
 	String module;
 	String versionProperty;
 
