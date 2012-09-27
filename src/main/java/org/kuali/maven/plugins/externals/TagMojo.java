@@ -16,7 +16,6 @@ import org.tmatesoft.svn.core.SVNCommitInfo;
 public class TagMojo extends AbstractMojo {
 
 	SVNUtils svnUtils = SVNUtils.getInstance();
-	XMLUtils xmlUtils = new XMLUtils();
 	MojoHelper helper = MojoHelper.getInstance();
 
 	/**
