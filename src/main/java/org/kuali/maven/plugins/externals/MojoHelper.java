@@ -36,7 +36,7 @@ public class MojoHelper {
 	private static final Logger logger = LoggerFactory.getLogger(MojoHelper.class);
 	private static final String MAVEN_SNAPSHOT_TOKEN = "SNAPSHOT";
 	SVNUtils svnUtils = SVNUtils.getInstance();
-	POMUtils xmlUtils = new POMUtils();
+	POMUtils pomUtils = new POMUtils();
 	Extractor extractor = new Extractor();
 	PropertiesUtils propertiesUtils = new PropertiesUtils();
 
@@ -140,8 +140,8 @@ public class MojoHelper {
 		List<DefaultMutableTreeNode> nodes = new ArrayList<DefaultMutableTreeNode>();
 		for (File file : files) {
 			String pomContents = read(file);
-			GAV parent = xmlUtils.getParentGAV(pomContents);
-			GAV gav = xmlUtils.getGAV(pomContents);
+			GAV parent = pomUtils.getParentGAV(pomContents);
+			GAV gav = pomUtils.getGAV(pomContents);
 			Project project = new Project();
 			project.setPom(file);
 			project.setPomContents(pomContents);
@@ -266,7 +266,7 @@ public class MojoHelper {
 		BuildTag buildTag = project.getBuildTag();
 		String url = buildTag.getTagUrl();
 		String oldXml = project.getPomContents();
-		String newXml = xmlUtils.updateScm(oldXml, scmUrlPrefix, url);
+		String newXml = pomUtils.updateScm(oldXml, scmUrlPrefix, url);
 		project.setPomContents(newXml);
 	}
 
@@ -313,12 +313,12 @@ public class MojoHelper {
 		String version = project.getGav().getVersion();
 		if (!StringUtils.isBlank(version)) {
 			String oldXml = project.getPomContents();
-			String newXml = xmlUtils.updateVersion(oldXml, version);
+			String newXml = pomUtils.updateVersion(oldXml, version);
 			project.setPomContents(newXml);
 		}
 		String parentVersion = project.getParent().getVersion();
 		String oldXml = project.getPomContents();
-		String newXml = xmlUtils.updateParentVersion(oldXml, parentVersion);
+		String newXml = pomUtils.updateParentVersion(oldXml, parentVersion);
 		project.setPomContents(newXml);
 		Enumeration<?> children = node.children();
 		while (children.hasMoreElements()) {
