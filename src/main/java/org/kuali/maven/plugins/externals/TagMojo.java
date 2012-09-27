@@ -19,6 +19,11 @@ public class TagMojo extends AbstractMojo {
 	MojoHelper helper = MojoHelper.getInstance();
 
 	/**
+	 * @parameter expression="${externals.scmUrlPrefix}" default-value="scm:svn:"
+	 */
+	private String scmUrlPrefix;
+
+	/**
 	 * @parameter expression="${externals.pom}" default-value="pom.xml"
 	 */
 	private String pom;
@@ -84,7 +89,10 @@ public class TagMojo extends AbstractMojo {
 
 		// Update build information as necessary
 		helper.updateBuildInfo(nodes, moduleTags, mappings, tagStyle, buildNumber);
-		helper.modifyPoms(node);
+		// Modify the the version <tags> and <scm> info in the poms
+		helper.modifyPoms(node, scmUrlPrefix);
+		// Persist the modified poms to the file system
+		helper.writePoms(node);
 		// Create new svn:externals definitions based on the newly created tags
 		List<SVNExternal> newExternals = helper.getExternals(moduleTags, mappings);
 		// Create the module tags
@@ -131,6 +139,38 @@ public class TagMojo extends AbstractMojo {
 
 	public void setTagStyle(TagStyle tagStyle) {
 		this.tagStyle = tagStyle;
+	}
+
+	public String getScmUrlPrefix() {
+		return scmUrlPrefix;
+	}
+
+	public void setScmUrlPrefix(String scmUrlPrefix) {
+		this.scmUrlPrefix = scmUrlPrefix;
+	}
+
+	public String getPom() {
+		return pom;
+	}
+
+	public void setPom(String pom) {
+		this.pom = pom;
+	}
+
+	public String getIgnoreDirectories() {
+		return ignoreDirectories;
+	}
+
+	public void setIgnoreDirectories(String ignoreDirectories) {
+		this.ignoreDirectories = ignoreDirectories;
+	}
+
+	public String getBuildNumberProperty() {
+		return buildNumberProperty;
+	}
+
+	public void setBuildNumberProperty(String buildNumberProperty) {
+		this.buildNumberProperty = buildNumberProperty;
 	}
 
 }

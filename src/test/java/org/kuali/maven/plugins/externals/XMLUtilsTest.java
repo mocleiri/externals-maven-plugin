@@ -18,6 +18,7 @@ public class XMLUtilsTest {
 	private static final String POM = "pom.xml";
 	private static final String IGNORE = "src,target,.svn,.git";
 	private static final File BASEDIR = new File("/Users/jeffcaddel/ws/aggregate");
+	private static final String SCM_URL_PREFIX = "scm:svn:";
 
 	@Test
 	public void testModifyPoms() {
@@ -25,7 +26,7 @@ public class XMLUtilsTest {
 			List<File> poms = helper.getPoms(BASEDIR, POM, IGNORE);
 			List<DefaultMutableTreeNode> nodes = helper.getNodes(poms);
 			DefaultMutableTreeNode node = helper.getTree(BASEDIR, nodes, POM);
-			helper.modifyPoms(node);
+			helper.modifyPoms(node, SCM_URL_PREFIX);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

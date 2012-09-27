@@ -214,7 +214,22 @@ public class MojoHelper {
 		}
 	}
 
-	public void modifyPoms(DefaultMutableTreeNode node) {
+	public void writePoms(DefaultMutableTreeNode node) {
+		Enumeration<?> e = node.depthFirstEnumeration();
+		while (e.hasMoreElements()) {
+			DefaultMutableTreeNode element = (DefaultMutableTreeNode) e.nextElement();
+			Project project = (Project) element.getUserObject();
+			File pom = project.getPom();
+			String oldContents = read(pom);
+			String newContents = project.getPomContents();
+			if (!oldContents.equals(newContents)) {
+				logger.info("Updating " + pom.getAbsolutePath());
+				write(pom, newContents);
+			}
+		}
+	}
+
+	public void modifyPoms(DefaultMutableTreeNode node, String scmUrlPrefix) {
 		Project project = (Project) node.getUserObject();
 		BuildTag buildTag = project.getBuildTag();
 		if (buildTag != null) {
@@ -222,21 +237,20 @@ public class MojoHelper {
 			logger.info(StringUtils.repeat(" ", level) + toString(project.getGav()));
 			String xml = project.getPomContents();
 			String version = project.getNewGav().getVersion();
-			xmlUtils.updateVersion(xml, version);
+			String newXml = xmlUtils.updateVersion(xml, version);
 			if (node.isRoot()) {
 				String url = buildTag.getTagUrl();
-				xmlUtils.updateScm(xml, "scm:svn", url);
+				newXml = xmlUtils.updateScm(newXml, scmUrlPrefix, url);
+			}
+			if (!newXml.equals(xml)) {
+				project.setPomContents(newXml);
 			}
 			Enumeration<?> children = node.children();
 			while (children.hasMoreElements()) {
 				DefaultMutableTreeNode child = (DefaultMutableTreeNode) children.nextElement();
-				Project childProject = (Project) child.getUserObject();
-				String childXml = childProject.getPomContents();
-				xmlUtils.updateParentVersion(childXml, version);
-				modifyPoms(child);
+				modifyPoms(child, scmUrlPrefix);
 			}
 		}
-
 	}
 
 	public void updateBuildInfo(DefaultMutableTreeNode root, BuildTag rootTag, TagStyle tagStyle, int buildNumber) {
@@ -536,6 +550,14 @@ public class MojoHelper {
 			sb.append(tokens[i]);
 		}
 		return sb.toString();
+	}
+
+	protected void write(File file, String data) {
+		try {
+			FileUtils.write(file, data);
+		} catch (IOException e) {
+			throw new IllegalStateException(e);
+		}
 	}
 
 	protected String read(File file) {
