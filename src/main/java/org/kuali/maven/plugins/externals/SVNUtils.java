@@ -8,6 +8,7 @@ import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.tmatesoft.svn.core.SVNCommitInfo;
+import org.tmatesoft.svn.core.SVNDepth;
 import org.tmatesoft.svn.core.SVNDirEntry;
 import org.tmatesoft.svn.core.SVNException;
 import org.tmatesoft.svn.core.SVNPropertyValue;
@@ -19,11 +20,13 @@ import org.tmatesoft.svn.core.internal.io.svn.SVNRepositoryFactoryImpl;
 import org.tmatesoft.svn.core.io.SVNRepository;
 import org.tmatesoft.svn.core.io.SVNRepositoryFactory;
 import org.tmatesoft.svn.core.wc.SVNClientManager;
+import org.tmatesoft.svn.core.wc.SVNCommitClient;
 import org.tmatesoft.svn.core.wc.SVNCopyClient;
 import org.tmatesoft.svn.core.wc.SVNCopySource;
 import org.tmatesoft.svn.core.wc.SVNInfo;
 import org.tmatesoft.svn.core.wc.SVNPropertyData;
 import org.tmatesoft.svn.core.wc.SVNRevision;
+import org.tmatesoft.svn.core.wc.SVNUpdateClient;
 import org.tmatesoft.svn.core.wc.SVNWCClient;
 import org.tmatesoft.svn.core.wc.SVNWCUtil;
 
@@ -187,6 +190,28 @@ public class SVNUtils {
 			SVNURL svnUrl = getSvnUrl(url);
 			SVNPropertyData data = client.doGetProperty(svnUrl, EXTERNALS_PROPERTY_NAME, SVNRevision.HEAD, SVNRevision.HEAD);
 			return getExternals(data, null);
+		} catch (SVNException e) {
+			throw new IllegalStateException(e);
+		}
+	}
+
+	public void checkout(String url, File dstPath, String username, String password) {
+		try {
+			SVNClientManager manager = SVNClientManager.newInstance(null, username, password);
+			SVNUpdateClient client = manager.getUpdateClient();
+			client.setIgnoreExternals(false);
+			SVNURL svnUrl = getSvnUrl(url);
+			client.doCheckout(svnUrl, dstPath, SVNRevision.HEAD, SVNRevision.HEAD, SVNDepth.INFINITY, false);
+		} catch (SVNException e) {
+			throw new IllegalStateException(e);
+		}
+	}
+
+	public void commit(File workingCopyPath, String message, String username, String password) {
+		try {
+			SVNClientManager manager = SVNClientManager.newInstance(null, username, password);
+			SVNCommitClient client = manager.getCommitClient();
+			client.doCommit(new File[] { workingCopyPath }, true, message, null, null, true, true, SVNDepth.INFINITY);
 		} catch (SVNException e) {
 			throw new IllegalStateException(e);
 		}
