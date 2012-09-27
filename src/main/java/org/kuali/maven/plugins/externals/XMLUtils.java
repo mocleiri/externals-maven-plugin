@@ -86,8 +86,7 @@ public class XMLUtils {
 		if (!projectNode.getNodeName().equals(PROJECT)) {
 			throw new IllegalArgumentException("Invalid xml for a Maven pom.  Must start with a <project> tag:\n " + xml);
 		}
-		GAV gav = getGAV(projectNode.getChildNodes());
-		return gav;
+		return getGAV(projectNode.getChildNodes());
 	}
 
 	public Document getDocument(String xml) {
