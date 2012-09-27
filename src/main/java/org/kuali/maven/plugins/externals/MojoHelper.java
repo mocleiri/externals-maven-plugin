@@ -256,14 +256,20 @@ public class MojoHelper {
 			String newXml = xmlUtils.updateVersion(oldXml, newVersion);
 			project.setPomContents(newXml);
 			project.setVersion(newVersion);
-			logger.info(StringUtils.repeat(" ", level) + toString(project.getGav()));
+			logger.info(StringUtils.repeat(" ", level) + toString(project.getGav()) + "->" + newVersion);
 		}
 		Enumeration<?> children = node.children();
 		while (children.hasMoreElements()) {
 			DefaultMutableTreeNode child = (DefaultMutableTreeNode) children.nextElement();
+			int level = child.getLevel();
 			Project childProject = (Project) child.getUserObject();
 			String oldXml = childProject.getPomContents();
 			String newXml = xmlUtils.updateParentVersion(oldXml, project.getVersion());
+			GAV gav = project.getGav();
+			String gid = gav.getGroupId();
+			String aid = gav.getArtifactId();
+			String v = project.getVersion();
+			logger.info(StringUtils.repeat(" ", level) + "parent=" + gid + ":" + aid + ":" + v);
 			childProject.setPomContents(newXml);
 			updateVersions(child);
 		}
