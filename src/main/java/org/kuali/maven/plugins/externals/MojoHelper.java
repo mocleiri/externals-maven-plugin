@@ -53,6 +53,14 @@ public class MojoHelper {
 		return instance;
 	}
 
+	public void touch(File file) {
+		try {
+			FileUtils.touch(file);
+		} catch (IOException e) {
+			throw new IllegalStateException(e);
+		}
+	}
+
 	public GAV getGav(MavenProject project) {
 		GAV gav = new GAV();
 		gav.setGroupId(project.getGroupId());

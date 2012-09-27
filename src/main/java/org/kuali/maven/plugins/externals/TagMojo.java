@@ -24,6 +24,11 @@ public class TagMojo extends AbstractMojo {
 	private String scmUrlPrefix;
 
 	/**
+	 * @parameter expression="${externals.checkoutDir}" default-value="${project.build.directory}/checkout"
+	 */
+	private File checkoutDir;
+
+	/**
 	 * @parameter expression="${externals.pom}" default-value="pom.xml"
 	 */
 	private String pom;
@@ -109,6 +114,9 @@ public class TagMojo extends AbstractMojo {
 		SVNCommitInfo info = svnUtils.setExternals(rootTag.getTagUrl(), newExternals, externalsMessage);
 		getLog().info("Set " + newExternals.size() + " externals @ " + rootTag.getTagUrl());
 		getLog().info("Committed revision " + info.getNewRevision() + ".");
+		helper.touch(checkoutDir);
+		getLog().info("Checking out " + rootTag.getTagUrl() + " to " + checkoutDir.getAbsolutePath());
+		svnUtils.checkout(rootTag.getTagUrl(), checkoutDir, null, null);
 	}
 
 	public List<Mapping> getMappings() {
@@ -177,6 +185,14 @@ public class TagMojo extends AbstractMojo {
 
 	public void setBuildNumberProperty(String buildNumberProperty) {
 		this.buildNumberProperty = buildNumberProperty;
+	}
+
+	public File getCheckoutDir() {
+		return checkoutDir;
+	}
+
+	public void setCheckoutDir(File checkoutDir) {
+		this.checkoutDir = checkoutDir;
 	}
 
 }
