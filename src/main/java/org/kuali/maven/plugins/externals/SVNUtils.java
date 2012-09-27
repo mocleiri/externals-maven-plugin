@@ -195,13 +195,13 @@ public class SVNUtils {
 		}
 	}
 
-	public void checkout(String url, File dstPath, String username, String password) {
+	public long checkout(String url, File dstPath, String username, String password) {
 		try {
 			SVNClientManager manager = SVNClientManager.newInstance(null, username, password);
 			SVNUpdateClient client = manager.getUpdateClient();
 			client.setIgnoreExternals(false);
 			SVNURL svnUrl = getSvnUrl(url);
-			client.doCheckout(svnUrl, dstPath, SVNRevision.HEAD, SVNRevision.HEAD, SVNDepth.INFINITY, false);
+			return client.doCheckout(svnUrl, dstPath, SVNRevision.HEAD, SVNRevision.HEAD, SVNDepth.INFINITY, false);
 		} catch (SVNException e) {
 			throw new IllegalStateException(e);
 		}

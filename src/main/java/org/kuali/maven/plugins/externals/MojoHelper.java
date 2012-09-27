@@ -254,7 +254,7 @@ public class MojoHelper {
 		}
 	}
 
-	public void writePoms(DefaultMutableTreeNode node) {
+	public void writePoms(DefaultMutableTreeNode node, File baseDir, File checkoutDir) {
 		Enumeration<?> e = node.depthFirstEnumeration();
 		while (e.hasMoreElements()) {
 			DefaultMutableTreeNode element = (DefaultMutableTreeNode) e.nextElement();
