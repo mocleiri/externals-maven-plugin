@@ -1,6 +1,7 @@
 package org.kuali.maven.plugins.externals;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.swing.tree.DefaultMutableTreeNode;
@@ -117,7 +118,14 @@ public class TagMojo extends AbstractMojo {
 		long revision = svnUtils.checkout(rootTag.getTagUrl(), checkoutDir, null, null);
 		getLog().info("Checked out out revision " + revision + ".");
 		helper.writePoms(node, project.getBasedir(), checkoutDir);
-		SVNCommitInfo info2 = svnUtils.commit(checkoutDir, tagMessage, null, null);
+		List<File> workingCopyPaths = new ArrayList<File>();
+		workingCopyPaths.add(checkoutDir);
+		for (SVNExternal external : externals) {
+			String path = checkoutDir.getAbsolutePath() + File.separator + external.getPath();
+			workingCopyPaths.add(new File(path));
+		}
+		File[] commitDirs = workingCopyPaths.toArray(new File[workingCopyPaths.size()]);
+		SVNCommitInfo info2 = svnUtils.commit(commitDirs, tagMessage, null, null);
 		getLog().info("Committed revision " + info2.getNewRevision() + ".");
 	}
 
