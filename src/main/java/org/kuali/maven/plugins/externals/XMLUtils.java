@@ -68,7 +68,7 @@ public class XMLUtils {
 		return getParentGav(document);
 	}
 
-	public GAV getGAV(String xml, GAV parent) {
+	public GAV getGAV(String xml) {
 		Document document = getDocument(xml);
 		NodeList nodeList = document.getChildNodes();
 		if (nodeList == null || nodeList.getLength() == 0) {
@@ -82,20 +82,7 @@ public class XMLUtils {
 			throw new IllegalArgumentException("Invalid xml for a Maven pom.  Must start with a <project> tag:\n " + xml);
 		}
 		GAV gav = getGAV(projectNode.getChildNodes());
-		update(gav, parent);
 		return gav;
-	}
-
-	protected void update(GAV gav, GAV parent) {
-		if (parent == null) {
-			return;
-		}
-		if (gav.getGroupId() == null) {
-			gav.setGroupId(parent.getGroupId());
-		}
-		if (gav.getVersion() == null) {
-			gav.setVersion(parent.getVersion());
-		}
 	}
 
 	public Document getDocument(String xml) {

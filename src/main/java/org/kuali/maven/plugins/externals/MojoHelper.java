@@ -117,7 +117,7 @@ public class MojoHelper {
 		for (File file : files) {
 			String pomContents = read(file);
 			GAV parent = xmlUtils.getParentGAV(pomContents);
-			GAV gav = xmlUtils.getGAV(pomContents, parent);
+			GAV gav = xmlUtils.getGAV(pomContents);
 			Project project = new Project();
 			project.setPom(file);
 			project.setPomContents(pomContents);

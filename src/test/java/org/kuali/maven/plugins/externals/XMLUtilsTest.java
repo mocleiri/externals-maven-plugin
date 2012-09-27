@@ -76,7 +76,7 @@ public class XMLUtilsTest {
 			String newXml = xmlUtils.format(oldXml);
 			logger.info(newXml);
 			GAV parent = xmlUtils.getParentGAV(newXml);
-			GAV gav = xmlUtils.getGAV(newXml, parent);
+			GAV gav = xmlUtils.getGAV(newXml);
 			logger.info(parent.getGroupId() + ":" + parent.getArtifactId() + ":" + parent.getVersion());
 			logger.info(gav.getGroupId() + ":" + gav.getArtifactId() + ":" + gav.getVersion());
 		} catch (Exception e) {
