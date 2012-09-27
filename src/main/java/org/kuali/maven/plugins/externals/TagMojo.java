@@ -88,7 +88,7 @@ public class TagMojo extends AbstractMojo {
 		helper.updateBuildInfo(node, rootTag, TagStyle.BUILDNUMBER, buildNumber);
 		// Calculate build tags for each module
 		List<BuildTag> moduleTags = helper.getBuildTags(project, externals, mappings, tagStyle, buildNumber);
-		// Update build information as necessary
+		// Update build information for nodes that represent an svn:external
 		helper.updateBuildInfo(nodes, moduleTags, mappings, tagStyle, buildNumber);
 		// Recursively modify the <version> tag in any poms that have a newGav
 		helper.updateVersions(node);
