@@ -86,6 +86,7 @@ public class TagMojo extends AbstractMojo {
 		List<BuildTag> moduleTags = helper.getBuildTags(project, externals, mappings, tagStyle, buildNumber);
 		// Update build information as necessary
 		helper.updateBuildInfo(nodes, moduleTags, mappings, tagStyle, buildNumber);
+		helper.modifyPoms(node);
 		// Create new svn:externals definitions based on the newly created tags
 		List<SVNExternal> newExternals = helper.getExternals(moduleTags, mappings);
 		// Create the module tags

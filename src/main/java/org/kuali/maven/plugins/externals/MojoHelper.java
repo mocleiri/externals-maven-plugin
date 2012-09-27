@@ -214,6 +214,21 @@ public class MojoHelper {
 		}
 	}
 
+	public void modifyPoms(DefaultMutableTreeNode node) {
+		Project project = (Project) node.getUserObject();
+		BuildTag buildTag = project.getBuildTag();
+		if (buildTag != null) {
+			int level = node.getLevel();
+			logger.info(StringUtils.repeat(" ", level) + toString(project.getGav()));
+			Enumeration<?> children = node.children();
+			while (children.hasMoreElements()) {
+				DefaultMutableTreeNode child = (DefaultMutableTreeNode) children.nextElement();
+				modifyPoms(child);
+			}
+		}
+
+	}
+
 	public void updateBuildInfo(List<DefaultMutableTreeNode> nodes, List<BuildTag> moduleTags, List<Mapping> mappings, TagStyle tagStyle, int buildNumber) {
 		for (int i = 0; i < mappings.size(); i++) {
 			Mapping mapping = mappings.get(i);

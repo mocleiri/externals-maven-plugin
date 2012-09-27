@@ -3,6 +3,8 @@ package org.kuali.maven.plugins.externals;
 import java.io.File;
 import java.util.List;
 
+import javax.swing.tree.DefaultMutableTreeNode;
+
 import org.apache.commons.io.FileUtils;
 import org.junit.Test;
 import org.slf4j.Logger;
@@ -18,6 +20,18 @@ public class XMLUtilsTest {
 	private static final File BASEDIR = new File("/Users/jeffcaddel/ws/aggregate");
 
 	@Test
+	public void testModifyPoms() {
+		try {
+			List<File> poms = helper.getPoms(BASEDIR, POM, IGNORE);
+			List<DefaultMutableTreeNode> nodes = helper.getNodes(poms);
+			DefaultMutableTreeNode node = helper.getTree(BASEDIR, nodes, POM);
+			helper.modifyPoms(node);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+
+	// @Test
 	public void testUpdateScm() {
 		try {
 			List<File> poms = helper.getPoms(BASEDIR, POM, IGNORE);
