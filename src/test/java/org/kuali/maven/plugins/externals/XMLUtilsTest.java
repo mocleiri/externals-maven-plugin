@@ -14,7 +14,7 @@ public class XMLUtilsTest {
 	private static final Logger logger = LoggerFactory.getLogger(XMLUtilsTest.class);
 
 	MojoHelper helper = MojoHelper.getInstance();
-	XMLUtils xmlUtils = new XMLUtils();
+	POMUtils xmlUtils = new POMUtils();
 	private static final String POM = "pom.xml";
 	private static final String IGNORE = "src,target,.svn,.git";
 	private static final File BASEDIR = new File("/Users/jeffcaddel/ws/aggregate");

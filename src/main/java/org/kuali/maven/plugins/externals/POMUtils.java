@@ -23,8 +23,8 @@ import org.w3c.dom.ls.DOMImplementationLS;
 import org.w3c.dom.ls.LSSerializer;
 import org.xml.sax.InputSource;
 
-public class XMLUtils {
-	private static final Logger logger = LoggerFactory.getLogger(XMLUtils.class);
+public class POMUtils {
+	private static final Logger logger = LoggerFactory.getLogger(POMUtils.class);
 
 	private static final String FORMAT_PRETTY_PRINT = "format-pretty-print";
 	private static final String XML_DECLARATION = "xml-declaration";

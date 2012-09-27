@@ -36,7 +36,7 @@ public class MojoHelper {
 	private static final Logger logger = LoggerFactory.getLogger(MojoHelper.class);
 	private static final String MAVEN_SNAPSHOT_TOKEN = "SNAPSHOT";
 	SVNUtils svnUtils = SVNUtils.getInstance();
-	XMLUtils xmlUtils = new XMLUtils();
+	POMUtils xmlUtils = new POMUtils();
 	Extractor extractor = new Extractor();
 	PropertiesUtils propertiesUtils = new PropertiesUtils();
 
