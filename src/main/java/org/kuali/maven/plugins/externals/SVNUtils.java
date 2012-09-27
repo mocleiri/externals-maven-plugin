@@ -207,15 +207,19 @@ public class SVNUtils {
 		}
 	}
 
-	public SVNCommitInfo commit(File workingCopyPath, String message, String username, String password) {
+	public SVNCommitInfo commit(File[] workingCopyPaths, String message, String username, String password) {
 		try {
 			SVNClientManager manager = SVNClientManager.newInstance(null, username, password);
 			SVNCommitClient client = manager.getCommitClient();
 			client.setIgnoreExternals(false);
-			return client.doCommit(new File[] { workingCopyPath }, true, message, null, null, true, false, SVNDepth.INFINITY);
+			return client.doCommit(workingCopyPaths, true, message, null, null, true, false, SVNDepth.INFINITY);
 		} catch (SVNException e) {
 			throw new IllegalStateException(e);
 		}
+	}
+
+	public SVNCommitInfo commit(File workingCopyPath, String message, String username, String password) {
+		return commit(new File[] { workingCopyPath }, message, username, password);
 	}
 
 	/**
