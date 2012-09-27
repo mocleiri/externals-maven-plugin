@@ -72,6 +72,7 @@ public class TagMojo extends AbstractMojo {
 	@Override
 	public void execute() throws MojoExecutionException {
 		int buildNumber = helper.getBuildNumber(project, buildNumberProperty);
+		GAV gav = helper.getGav(project);
 
 		List<File> files = helper.getPoms(project.getBasedir(), pom, ignoreDirectories);
 		List<DefaultMutableTreeNode> nodes = helper.getNodes(files);
@@ -82,7 +83,7 @@ public class TagMojo extends AbstractMojo {
 		// Make sure the modules listed in the pom match the svn:externals definitions and the mappings provided in the plugin config
 		helper.validate(project, externals, mappings);
 		// Calculate the build tag for the root
-		BuildTag rootTag = helper.getBuildTag(project, TagStyle.BUILDNUMBER, buildNumber);
+		BuildTag rootTag = helper.getBuildTag(project.getBasedir(), gav, TagStyle.BUILDNUMBER, buildNumber);
 		// Update build info for the root node
 		helper.updateBuildInfo(node, rootTag, TagStyle.BUILDNUMBER, buildNumber);
 		// Calculate build tags for each module

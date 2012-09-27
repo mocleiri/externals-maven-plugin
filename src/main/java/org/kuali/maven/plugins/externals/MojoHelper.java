@@ -53,6 +53,14 @@ public class MojoHelper {
 		return instance;
 	}
 
+	public GAV getGav(MavenProject project) {
+		GAV gav = new GAV();
+		gav.setGroupId(project.getGroupId());
+		gav.setArtifactId(project.getArtifactId());
+		gav.setVersion(project.getVersion());
+		return gav;
+	}
+
 	public String toString(GAV gav) {
 		StringBuilder sb = new StringBuilder();
 		sb.append(gav.getGroupId());
@@ -314,13 +322,12 @@ public class MojoHelper {
 		return buildTags;
 	}
 
-	public BuildTag getBuildTag(MavenProject project, TagStyle tagStyle, int buildNumber) {
-		File workingCopy = project.getBasedir();
+	public BuildTag getBuildTag(File workingCopy, GAV gav, TagStyle tagStyle, int buildNumber) {
 		String sourceUrl = svnUtils.getUrl(workingCopy);
 		long sourceRevision = svnUtils.getLastRevision(workingCopy);
-		String version = project.getVersion();
+		String version = gav.getVersion();
 
-		String tag = getTag(sourceUrl, version, project.getArtifactId(), buildNumber, sourceRevision, tagStyle);
+		String tag = getTag(sourceUrl, version, gav.getArtifactId(), buildNumber, sourceRevision, tagStyle);
 
 		BuildTag buildTag = new BuildTag();
 		buildTag.setSourceUrl(sourceUrl);
