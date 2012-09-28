@@ -7,7 +7,6 @@ import java.util.Properties;
 
 import javax.swing.tree.DefaultMutableTreeNode;
 
-import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -20,7 +19,7 @@ public class MojoHelperTest {
 	private static final String IGNORE = "src,target,.svn,.git";
 	private static final File BASEDIR = new File("/Users/jeffcaddel/ws/aggregate");
 
-	@Test
+	// @Test
 	public void testUpdateVersions() {
 		int buildNumber = 100;
 		GAV gav = new GAV("org.kuali.student", "student", "2.0.0-SNAPSHOT");

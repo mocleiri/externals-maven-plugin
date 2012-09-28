@@ -6,7 +6,6 @@ import java.util.List;
 import javax.swing.tree.DefaultMutableTreeNode;
 
 import org.apache.commons.io.FileUtils;
-import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -19,7 +18,7 @@ public class XMLUtilsTest {
 	private static final String IGNORE = "src,target,.svn,.git";
 	private static final File BASEDIR = new File("/Users/jeffcaddel/ws/aggregate");
 
-	@Test
+	// @Test
 	public void testModifyPoms() {
 		try {
 			List<File> poms = helper.getPoms(BASEDIR, POM, IGNORE);
