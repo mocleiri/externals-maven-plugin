@@ -24,7 +24,7 @@ public class TagMojo extends AbstractMojo {
 	private String scmUrlPrefix;
 
 	/**
-	 * @parameter expression="${externals.file}" default-value="${project.basedir}/svn.externals"
+	 * @parameter expression="${externals.file}" default-value="${project.build.directory}/checkout/svn.externals"
 	 */
 	private File file;
 
