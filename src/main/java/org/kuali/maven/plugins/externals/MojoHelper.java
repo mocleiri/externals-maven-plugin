@@ -46,8 +46,8 @@ public class MojoHelper {
 
 	protected MojoHelper() {
 		super();
-		nf.setMaximumFractionDigits(2);
-		nf.setMinimumFractionDigits(2);
+		nf.setMaximumFractionDigits(3);
+		nf.setMinimumFractionDigits(3);
 		nf.setGroupingUsed(false);
 	}
 
