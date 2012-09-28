@@ -713,7 +713,7 @@ public class MojoHelper {
 		return sb.toString();
 	}
 
-	protected void write(File file, String data) {
+	public void write(File file, String data) {
 		try {
 			FileUtils.write(file, data);
 		} catch (IOException e) {
@@ -721,7 +721,7 @@ public class MojoHelper {
 		}
 	}
 
-	protected String read(File file) {
+	public String read(File file) {
 		try {
 			return FileUtils.readFileToString(file);
 		} catch (IOException e) {
