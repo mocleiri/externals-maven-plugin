@@ -7,6 +7,7 @@ import java.util.List;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.project.MavenProject;
+import org.tmatesoft.svn.core.SVNCommitInfo;
 
 /**
  * @goal commit
@@ -41,10 +42,14 @@ public class CommitMojo extends AbstractMojo {
 		dirs.add(project.getBasedir());
 		for (Mapping mapping : mappings) {
 			File dir = new File(project.getBasedir().getAbsolutePath() + File.separator + mapping.getModule());
-			dirs.add(dir);
+			if (!dir.exists()) {
+				getLog().warn(dir.getAbsolutePath() + " does not exist");
+			} else {
+				dirs.add(dir);
+			}
 		}
-		svnUtils.commit(dirs, commitMessage, null, null);
-
+		SVNCommitInfo info = svnUtils.commit(dirs, commitMessage, null, null);
+		getLog().info("Committed revision " + info.getNewRevision() + ".");
 	}
 
 	public MojoHelper getHelper() {
