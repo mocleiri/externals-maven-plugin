@@ -11,6 +11,10 @@ import org.apache.maven.project.MavenProject;
 import org.tmatesoft.svn.core.SVNCommitInfo;
 
 /**
+ * Connect svn:externals definitions with a multi-module Maven build in an intelligent manner. This mojo creates a tag from a Subversion checkout that contain svn:externals
+ * definitions corresponding to Maven modules. The version numbers in the respective poms are modified to reflect the current build. This allows the tag to be used to create
+ * reproducible builds. The binaries Maven produces off the tag, correspond exactly to the version numbers in the Maven pom's.
+ * 
  * @goal tag
  */
 public class TagMojo extends AbstractMojo {
@@ -19,26 +23,36 @@ public class TagMojo extends AbstractMojo {
 	MojoHelper helper = MojoHelper.getInstance();
 
 	/**
+	 * The prefix Maven needs in front of the real SCM url
+	 * 
 	 * @parameter expression="${externals.scmUrlPrefix}" default-value="scm:svn:"
 	 */
 	private String scmUrlPrefix;
 
 	/**
+	 * The location of a text file that contains the svn:externals definitions
+	 * 
 	 * @parameter expression="${externals.file}" default-value="${project.build.directory}/checkout/svn.externals"
 	 */
 	private File file;
 
 	/**
+	 * The directory where the new tag is checked out to
+	 * 
 	 * @parameter expression="${externals.checkoutDir}" default-value="${project.build.directory}/checkout"
 	 */
 	private File checkoutDir;
 
 	/**
+	 * Filename pattern used to discover Maven pom's
+	 * 
 	 * @parameter expression="${externals.pom}" default-value="pom.xml"
 	 */
 	private String pom;
 
 	/**
+	 * Directores to ignore when examining the file system for Maven pom's
+	 * 
 	 * @parameter expression="${externals.ignoreDirectories}" default-value="src,target,.svn,.git"
 	 */
 	private String ignoreDirectories;
@@ -52,26 +66,36 @@ public class TagMojo extends AbstractMojo {
 	private MavenProject project;
 
 	/**
+	 * These mappings connect the svn:externals definitions with a property inside the root pom that controls what version each external is set to
+	 * 
 	 * @parameter
 	 */
 	private List<Mapping> mappings;
 
 	/**
+	 * The commit message for when the new tag is first created
+	 * 
 	 * @parameter expression="${externals.createTagMessage}" default-value="[externals-maven-plugin] Create tag"
 	 */
 	private String createTagMessage;
 
 	/**
+	 * The commit message for when the updated pom's and svn.external file is committed to the tag
+	 * 
 	 * @parameter expression="${externals.updateTagMessage}" default-value="[externals-maven-plugin] Tag maintenance"
 	 */
 	private String updateTagMessage;
 
 	/**
+	 * The commit message for when the <code>svn propset</code> command is used to set externals on the tag
+	 * 
 	 * @parameter expression="${externals.externalsMessage}" default-value="[externals-maven-plugin] Set svn:externals"
 	 */
 	private String externalsMessage;
 
 	/**
+	 * The property where the current build number is stored. Jenkins automatically sets an environment variable called <code>BUILD_NUMBER</code> each time a job is run
+	 * 
 	 * @parameter expression="${externals.buildNumberProperty}" default-value="env.BUILD_NUMBER"
 	 */
 	private String buildNumberProperty;
