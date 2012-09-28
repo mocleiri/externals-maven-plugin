@@ -260,6 +260,7 @@ public class MojoHelper {
 			sb.append("\n");
 		}
 		write(externalsFile, sb.toString());
+		logger.info("Updated svn:externals control file @ " + externalsFile.getAbsolutePath());
 	}
 
 	public void commitTagChanges(File tagDir, List<SVNExternal> externals, String msg) {
@@ -289,7 +290,6 @@ public class MojoHelper {
 	}
 
 	public void writePoms(DefaultMutableTreeNode node, File baseDir, File checkoutDir) {
-		logger.info("Updating Maven POM's");
 		int count = 0;
 		Enumeration<?> e = node.depthFirstEnumeration();
 		while (e.hasMoreElements()) {
@@ -306,7 +306,7 @@ public class MojoHelper {
 				count++;
 			}
 		}
-		logger.info("Updated " + count + " pom's");
+		logger.info("Updated " + count + " Maven pom's");
 	}
 
 	protected String getRelativePath(File dir, File file) {
