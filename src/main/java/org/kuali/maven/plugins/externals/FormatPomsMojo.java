@@ -22,11 +22,6 @@ public class FormatPomsMojo extends AbstractMojo {
 	private String pom;
 
 	/**
-	 * @parameter expression="${externals.commitMessage}" default-value="[externals-maven-plugin] Format poms"
-	 */
-	private String commitMessage;
-
-	/**
 	 * @parameter expression="${externals.ignoreDirectories}" default-value="src,target,.svn,.git"
 	 */
 	private String ignoreDirectories;
@@ -74,14 +69,6 @@ public class FormatPomsMojo extends AbstractMojo {
 
 	public void setPom(String pom) {
 		this.pom = pom;
-	}
-
-	public String getCommitMessage() {
-		return commitMessage;
-	}
-
-	public void setCommitMessage(String commitMessage) {
-		this.commitMessage = commitMessage;
 	}
 
 	public String getIgnoreDirectories() {
