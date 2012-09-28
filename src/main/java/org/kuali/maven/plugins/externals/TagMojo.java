@@ -79,7 +79,7 @@ public class TagMojo extends AbstractMojo {
 	/**
 	 * Either <code>BUILDNUMBER</code> or <code>REVISION</code>
 	 * 
-	 * @parameter expression="${externals.tagStyle}" default-value="REVISION"
+	 * @parameter expression="${externals.tagStyle}" default-value="BUILDNUMBER"
 	 */
 	private TagStyle tagStyle;
 
