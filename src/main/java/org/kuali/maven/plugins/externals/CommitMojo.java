@@ -30,11 +30,15 @@ public class CommitMojo extends AbstractMojo {
 	 */
 	private MavenProject project;
 
+	/**
+	 * @parameter expression="${externals.workingCopy}" default-value="${project.basedir}"
+	 */
+	private File workingCopy;
+
 	@Override
 	public void execute() throws MojoExecutionException {
-		File workingCopy = project.getBasedir();
 		List<File> dirs = new ArrayList<File>();
-		dirs.add(project.getBasedir());
+		dirs.add(workingCopy);
 		List<SVNExternal> externals = svnUtils.getExternals(workingCopy);
 		for (SVNExternal external : externals) {
 			File dir = new File(workingCopy.getAbsolutePath() + File.separator + external.getPath());
@@ -67,5 +71,13 @@ public class CommitMojo extends AbstractMojo {
 
 	public MavenProject getProject() {
 		return project;
+	}
+
+	public File getWorkingCopy() {
+		return workingCopy;
+	}
+
+	public void setWorkingCopy(File workingCopy) {
+		this.workingCopy = workingCopy;
 	}
 }
