@@ -7,6 +7,7 @@ import static org.apache.commons.io.filefilter.FileFilterUtils.notFileFilter;
 
 import java.io.File;
 import java.io.IOException;
+import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -39,11 +40,15 @@ public class MojoHelper {
 	POMUtils pomUtils = new POMUtils();
 	Extractor extractor = new Extractor();
 	PropertiesUtils propertiesUtils = new PropertiesUtils();
+	NumberFormat nf = NumberFormat.getInstance();
 
 	protected static MojoHelper instance;
 
 	protected MojoHelper() {
 		super();
+		nf.setMaximumFractionDigits(2);
+		nf.setMinimumFractionDigits(2);
+		nf.setGroupingUsed(false);
 	}
 
 	public synchronized static MojoHelper getInstance() {
@@ -51,14 +56,6 @@ public class MojoHelper {
 			instance = new MojoHelper();
 		}
 		return instance;
-	}
-
-	public void touch(File file) {
-		try {
-			FileUtils.touch(file);
-		} catch (IOException e) {
-			throw new IllegalStateException(e);
-		}
 	}
 
 	public GAV getGav(MavenProject project) {
@@ -275,6 +272,20 @@ public class MojoHelper {
 		File[] commitDirs = workingCopyPaths.toArray(new File[workingCopyPaths.size()]);
 		SVNCommitInfo info = svnUtils.commit(commitDirs, msg, null, null);
 		logger.info("Committed revision " + info.getNewRevision() + ".");
+	}
+
+	public void logTime(long elapsed) {
+		double millis = elapsed * 1.0D;
+		double millisPerSecond = 1000;
+		double millisPerMinute = 60 * millisPerSecond;
+		double millisPerHour = 60 * millisPerMinute;
+		if (millis > millisPerHour) {
+			logger.info("Total time: " + nf.format(millis / millisPerHour) + "h");
+		} else if (millis > millisPerMinute) {
+			logger.info("Total time: " + nf.format(millis / millisPerMinute) + "m");
+		} else {
+			logger.info("Total time: " + nf.format(millis / millisPerSecond) + "s");
+		}
 	}
 
 	public void writePoms(DefaultMutableTreeNode node, File baseDir, File checkoutDir) {
