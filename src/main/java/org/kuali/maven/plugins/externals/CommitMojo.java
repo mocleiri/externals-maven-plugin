@@ -15,19 +15,12 @@ import org.tmatesoft.svn.core.SVNCommitInfo;
  */
 public class CommitMojo extends AbstractMojo {
 
-	MojoHelper helper = MojoHelper.getInstance();
-	POMUtils pomUtils = new POMUtils();
 	SVNUtils svnUtils = SVNUtils.getInstance();
 
 	/**
 	 * @parameter expression="${externals.commitMessage}" default-value="[externals-maven-plugin] Commit changes"
 	 */
 	private String commitMessage;
-
-	/**
-	 * @parameter
-	 */
-	private List<Mapping> mappings;
 
 	/**
 	 * The Maven project object
@@ -39,10 +32,12 @@ public class CommitMojo extends AbstractMojo {
 
 	@Override
 	public void execute() throws MojoExecutionException {
+		File workingCopy = project.getBasedir();
 		List<File> dirs = new ArrayList<File>();
 		dirs.add(project.getBasedir());
-		for (Mapping mapping : mappings) {
-			File dir = new File(project.getBasedir().getAbsolutePath() + File.separator + mapping.getModule());
+		List<SVNExternal> externals = svnUtils.getExternals(workingCopy);
+		for (SVNExternal external : externals) {
+			File dir = new File(workingCopy.getAbsolutePath() + File.separator + external.getPath());
 			if (!dir.exists()) {
 				getLog().warn(dir.getAbsolutePath() + " does not exist");
 			} else {
@@ -52,18 +47,10 @@ public class CommitMojo extends AbstractMojo {
 		SVNCommitInfo info = svnUtils.commit(dirs, commitMessage, null, null);
 		long newRevision = info.getNewRevision();
 		if (newRevision == -1) {
-			getLog().info("No uncommitted changes detected.");
+			getLog().info("No changes.");
 		} else {
 			getLog().info("Committed revision " + info.getNewRevision() + ".");
 		}
-	}
-
-	public MojoHelper getHelper() {
-		return helper;
-	}
-
-	public void setHelper(MojoHelper helper) {
-		this.helper = helper;
 	}
 
 	public String getCommitMessage() {
@@ -72,14 +59,6 @@ public class CommitMojo extends AbstractMojo {
 
 	public void setCommitMessage(String commitMessage) {
 		this.commitMessage = commitMessage;
-	}
-
-	public List<Mapping> getMappings() {
-		return mappings;
-	}
-
-	public void setMappings(List<Mapping> mappings) {
-		this.mappings = mappings;
 	}
 
 	public MavenProject getProject() {
