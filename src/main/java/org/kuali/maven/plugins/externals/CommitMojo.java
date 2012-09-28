@@ -44,6 +44,10 @@ public class CommitMojo extends AbstractMojo {
 				dirs.add(dir);
 			}
 		}
+		getLog().info("Committing changes in:");
+		for (File dir : dirs) {
+			getLog().info(dir.getAbsolutePath());
+		}
 		SVNCommitInfo info = svnUtils.commit(dirs, commitMessage, null, null);
 		long newRevision = info.getNewRevision();
 		if (newRevision == -1) {
