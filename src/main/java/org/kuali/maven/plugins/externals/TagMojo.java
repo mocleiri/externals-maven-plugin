@@ -8,7 +8,6 @@ import javax.swing.tree.DefaultMutableTreeNode;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.project.MavenProject;
-import org.codehaus.plexus.util.FileUtils;
 import org.tmatesoft.svn.core.SVNCommitInfo;
 
 /**
