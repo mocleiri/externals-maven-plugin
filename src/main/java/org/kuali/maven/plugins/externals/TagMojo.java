@@ -1,7 +1,6 @@
 package org.kuali.maven.plugins.externals;
 
 import java.io.File;
-import java.util.ArrayList;
 import java.util.List;
 
 import javax.swing.tree.DefaultMutableTreeNode;
@@ -23,6 +22,11 @@ public class TagMojo extends AbstractMojo {
 	 * @parameter expression="${externals.scmUrlPrefix}" default-value="scm:svn:"
 	 */
 	private String scmUrlPrefix;
+
+	/**
+	 * @parameter expression="${externals.file}" default-value="${project.basedir}/svn.externals"
+	 */
+	private File file;
 
 	/**
 	 * @parameter expression="${externals.checkoutDir}" default-value="${project.build.directory}/checkout"
@@ -53,9 +57,14 @@ public class TagMojo extends AbstractMojo {
 	private List<Mapping> mappings;
 
 	/**
-	 * @parameter expression="${externals.tagMessage}"
+	 * @parameter expression="${externals.createTagMessage}"
 	 */
-	private String tagMessage;
+	private String createTagMessage;
+
+	/**
+	 * @parameter expression="${externals.updateTagMessage}"
+	 */
+	private String updateTagMessage;
 
 	/**
 	 * @parameter expression="${externals.externalsMessage}"
@@ -107,26 +116,20 @@ public class TagMojo extends AbstractMojo {
 		// Create new svn:externals definitions based on the newly created tags
 		List<SVNExternal> newExternals = helper.getExternals(moduleTags, mappings);
 		// Create the module tags
-		helper.createTags(moduleTags, tagMessage);
+		helper.createTags(moduleTags, createTagMessage);
 		// Create the root tag
-		helper.createTag(rootTag, tagMessage);
+		helper.createTag(rootTag, createTagMessage);
 		// Update svn:externals definitions on the root tag so they point to the new module tags
 		SVNCommitInfo info = svnUtils.setExternals(rootTag.getTagUrl(), newExternals, externalsMessage);
 		getLog().info("Set " + newExternals.size() + " externals @ " + rootTag.getTagUrl());
 		getLog().info("Committed revision " + info.getNewRevision() + ".");
-		getLog().info("Checking out " + rootTag.getTagUrl() + " to " + checkoutDir.getAbsolutePath());
+		getLog().info("Checking out - " + rootTag.getTagUrl());
+		getLog().info("Checkout dir - " + checkoutDir.getAbsolutePath());
 		long revision = svnUtils.checkout(rootTag.getTagUrl(), checkoutDir, null, null);
 		getLog().info("Checked out out revision " + revision + ".");
 		helper.writePoms(node, project.getBasedir(), checkoutDir);
-		List<File> workingCopyPaths = new ArrayList<File>();
-		workingCopyPaths.add(checkoutDir);
-		for (SVNExternal external : externals) {
-			String path = checkoutDir.getAbsolutePath() + File.separator + external.getPath();
-			workingCopyPaths.add(new File(path));
-		}
-		File[] commitDirs = workingCopyPaths.toArray(new File[workingCopyPaths.size()]);
-		SVNCommitInfo info2 = svnUtils.commit(commitDirs, tagMessage, null, null);
-		getLog().info("Committed revision " + info2.getNewRevision() + ".");
+		helper.updateExternalsFile(newExternals, file);
+		helper.commitTagChanges(checkoutDir, newExternals, updateTagMessage);
 	}
 
 	public List<Mapping> getMappings() {
@@ -141,12 +144,12 @@ public class TagMojo extends AbstractMojo {
 		return project;
 	}
 
-	public String getTagMessage() {
-		return tagMessage;
+	public String getCreateTagMessage() {
+		return createTagMessage;
 	}
 
-	public void setTagMessage(String message) {
-		this.tagMessage = message;
+	public void setCreateTagMessage(String message) {
+		this.createTagMessage = message;
 	}
 
 	public String getExternalsMessage() {
@@ -203,6 +206,22 @@ public class TagMojo extends AbstractMojo {
 
 	public void setCheckoutDir(File checkoutDir) {
 		this.checkoutDir = checkoutDir;
+	}
+
+	public File getFile() {
+		return file;
+	}
+
+	public void setFile(File file) {
+		this.file = file;
+	}
+
+	public String getUpdateTagMessage() {
+		return updateTagMessage;
+	}
+
+	public void setUpdateTagMessage(String updateTagMessage) {
+		this.updateTagMessage = updateTagMessage;
 	}
 
 }

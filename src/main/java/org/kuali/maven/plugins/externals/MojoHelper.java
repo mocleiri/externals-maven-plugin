@@ -254,6 +254,29 @@ public class MojoHelper {
 		}
 	}
 
+	public void updateExternalsFile(List<SVNExternal> externals, File externalsFile) {
+		StringBuilder sb = new StringBuilder();
+		for (SVNExternal external : externals) {
+			sb.append(external.getPath());
+			sb.append(" ");
+			sb.append(external.getUrl());
+			sb.append("\n");
+		}
+		write(externalsFile, sb.toString());
+	}
+
+	public void commitTagChanges(File tagDir, List<SVNExternal> externals, String msg) {
+		List<File> workingCopyPaths = new ArrayList<File>();
+		workingCopyPaths.add(tagDir);
+		for (SVNExternal external : externals) {
+			String path = tagDir.getAbsolutePath() + File.separator + external.getPath();
+			workingCopyPaths.add(new File(path));
+		}
+		File[] commitDirs = workingCopyPaths.toArray(new File[workingCopyPaths.size()]);
+		SVNCommitInfo info = svnUtils.commit(commitDirs, msg, null, null);
+		logger.info("Committed revision " + info.getNewRevision() + ".");
+	}
+
 	public void writePoms(DefaultMutableTreeNode node, File baseDir, File checkoutDir) {
 		logger.info("Updating Maven POM's");
 		int count = 0;
