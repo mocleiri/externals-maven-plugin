@@ -11,8 +11,8 @@ import org.apache.maven.project.MavenProject;
 import org.tmatesoft.svn.core.SVNCommitInfo;
 
 /**
- * Connect svn:externals definitions with a multi-module Maven build in an intelligent manner. This mojo creates a tag from a Subversion checkout that contain svn:externals
- * definitions corresponding to Maven modules. The version numbers in the respective poms are modified to reflect the current build. This allows the tag to be used to create
+ * Connect svn:externals definitions with a multi-module Maven build in an intelligent manner. This mojo creates a tag from a Subversion checkout containing svn:externals
+ * definitions that correspond to Maven modules. The version numbers in the respective poms are modified to reflect the current build. This allows the tag to be used to create
  * reproducible builds. The binaries Maven produces off the tag, correspond exactly to the version numbers in the Maven pom's.
  * 
  * @goal tag
