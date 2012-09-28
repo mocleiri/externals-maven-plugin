@@ -50,7 +50,12 @@ public class CommitMojo extends AbstractMojo {
 			}
 		}
 		SVNCommitInfo info = svnUtils.commit(dirs, commitMessage, null, null);
-		getLog().info("Committed revision " + info.getNewRevision() + ".");
+		long newRevision = info.getNewRevision();
+		if (newRevision == -1) {
+			getLog().info("No uncommitted changes detected.");
+		} else {
+			getLog().info("Committed revision " + info.getNewRevision() + ".");
+		}
 	}
 
 	public MojoHelper getHelper() {
