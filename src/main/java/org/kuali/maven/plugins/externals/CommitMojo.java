@@ -11,6 +11,7 @@ import org.tmatesoft.svn.core.SVNCommitInfo;
 
 /**
  * @goal commit
+ * @aggregator
  */
 public class CommitMojo extends AbstractMojo {
 

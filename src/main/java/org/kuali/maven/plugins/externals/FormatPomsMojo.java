@@ -9,6 +9,7 @@ import org.apache.maven.project.MavenProject;
 
 /**
  * @goal formatpoms
+ * @aggregator
  */
 public class FormatPomsMojo extends AbstractMojo {
 
