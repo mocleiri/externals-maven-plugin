@@ -44,7 +44,7 @@
     </developer>
   </developers>
   <properties>
-    <svnkit.version>1.3.5</svnkit.version>
+    <svnkit.version>1.7.5-v1</svnkit.version>
   </properties>
   <dependencies>
     <dependency>
