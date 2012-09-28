@@ -57,17 +57,17 @@ public class TagMojo extends AbstractMojo {
 	private List<Mapping> mappings;
 
 	/**
-	 * @parameter expression="${externals.createTagMessage}" default-value="[externals-maven-plugin] Automated tag creation ${kuali.build.timestamp}"
+	 * @parameter expression="${externals.createTagMessage}" default-value="[externals-maven-plugin] Create tag"
 	 */
 	private String createTagMessage;
 
 	/**
-	 * @parameter expression="${externals.updateTagMessage}"
+	 * @parameter expression="${externals.updateTagMessage}" default-value="[externals-maven-plugin] Tag maintenance"
 	 */
 	private String updateTagMessage;
 
 	/**
-	 * @parameter expression="${externals.externalsMessage}"
+	 * @parameter expression="${externals.externalsMessage}" default-value="[externals-maven-plugin] Set svn:externals"
 	 */
 	private String externalsMessage;
 
