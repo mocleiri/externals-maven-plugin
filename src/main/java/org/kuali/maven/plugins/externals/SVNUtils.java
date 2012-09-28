@@ -335,6 +335,7 @@ public class SVNUtils {
 		}
 	}
 
+	@SuppressWarnings("deprecation")
 	protected SVNURL getSvnUrl(String url) {
 		try {
 			return SVNURL.parseURIDecoded(url);
