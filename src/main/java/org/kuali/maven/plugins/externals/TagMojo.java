@@ -106,13 +106,12 @@ public class TagMojo extends AbstractMojo {
 		helper.updateBuildInfo(nodes, moduleTags, mappings, tagStyle, buildNumber);
 		// Recursively update the project gav's and parent gav's
 		helper.updateGavs(node);
-		// Recursively update the project gav's and parent gav's
+		// Recursively update the corresponding Maven pom's
 		helper.updateXml(node);
 		// Update the properties in the root pom that hold version info for the modules
 		helper.updateProperties(node, project.getProperties(), mappings);
 		// Update the <scm> info in the root pom
 		helper.updateScm(node, scmUrlPrefix);
-		// Persist the modified poms to the file system
 		// Create new svn:externals definitions based on the newly created tags
 		List<SVNExternal> newExternals = helper.getExternals(moduleTags, mappings);
 		// Create the module tags
@@ -127,8 +126,11 @@ public class TagMojo extends AbstractMojo {
 		getLog().info("Checkout dir - " + checkoutDir.getAbsolutePath());
 		long revision = svnUtils.checkout(rootTag.getTagUrl(), checkoutDir, null, null);
 		getLog().info("Checked out out revision " + revision + ".");
+		// Update the poms in the directory where the tag has been checked out
 		helper.writePoms(node, project.getBasedir(), checkoutDir);
+		// Update the svn.externals file
 		helper.updateExternalsFile(newExternals, file);
+		// Commit the changes to the tag
 		helper.commitTagChanges(checkoutDir, newExternals, updateTagMessage);
 	}
 
