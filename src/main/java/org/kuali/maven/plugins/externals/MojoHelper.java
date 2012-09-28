@@ -260,7 +260,7 @@ public class MojoHelper {
 			sb.append("\n");
 		}
 		write(externalsFile, sb.toString());
-		logger.info("Updated svn:externals control file @ " + externalsFile.getAbsolutePath());
+		logger.info("Updated svn:externals control file - " + externalsFile.getAbsolutePath());
 	}
 
 	public void commitTagChanges(File tagDir, List<SVNExternal> externals, String msg) {
