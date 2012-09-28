@@ -126,11 +126,11 @@ public class TagMojo extends AbstractMojo {
 		getLog().info("Checkout dir - " + checkoutDir.getAbsolutePath());
 		long start = System.currentTimeMillis();
 		long revision = svnUtils.checkout(rootTag.getTagUrl(), checkoutDir, null, null);
-		helper.logTime(System.currentTimeMillis() - start);
+		helper.logTime("Total checkout time: ", System.currentTimeMillis() - start);
 		getLog().info("Checked out revision " + revision + ".");
 		// Update the poms in the directory where the tag has been checked out
 		helper.writePoms(node, project.getBasedir(), checkoutDir);
-		// Update the svn.externals file
+		// Update the svn.externals file in the tag
 		helper.updateExternalsFile(newExternals, file);
 		// Commit the changes to the tag
 		helper.commitTagChanges(checkoutDir, newExternals, updateTagMessage);

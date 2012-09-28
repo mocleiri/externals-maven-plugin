@@ -274,17 +274,17 @@ public class MojoHelper {
 		logger.info("Committed revision " + info.getNewRevision() + ".");
 	}
 
-	public void logTime(long elapsed) {
+	public void logTime(String msg, long elapsed) {
 		double millis = elapsed * 1.0D;
 		double millisPerSecond = 1000;
 		double millisPerMinute = 60 * millisPerSecond;
 		double millisPerHour = 60 * millisPerMinute;
 		if (millis > millisPerHour) {
-			logger.info("Total time: " + nf.format(millis / millisPerHour) + "h");
+			logger.info(msg + nf.format(millis / millisPerHour) + "h");
 		} else if (millis > millisPerMinute) {
-			logger.info("Total time: " + nf.format(millis / millisPerMinute) + "m");
+			logger.info(msg + nf.format(millis / millisPerMinute) + "m");
 		} else {
-			logger.info("Total time: " + nf.format(millis / millisPerSecond) + "s");
+			logger.info(msg + nf.format(millis / millisPerSecond) + "s");
 		}
 	}
 
