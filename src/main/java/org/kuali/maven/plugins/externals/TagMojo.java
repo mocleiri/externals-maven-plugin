@@ -8,6 +8,7 @@ import javax.swing.tree.DefaultMutableTreeNode;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.project.MavenProject;
+import org.codehaus.plexus.util.FileUtils;
 import org.tmatesoft.svn.core.SVNCommitInfo;
 
 /**
@@ -124,6 +125,10 @@ public class TagMojo extends AbstractMojo {
 		getLog().info("Committed revision " + info.getNewRevision() + ".");
 		getLog().info("Checking out - " + rootTag.getTagUrl());
 		getLog().info("Checkout dir - " + checkoutDir.getAbsolutePath());
+		if (checkoutDir.exists()) {
+			getLog().info("Deleting " + checkoutDir.getAbsolutePath());
+			helper.deleteDirectory(checkoutDir);
+		}
 		long start = System.currentTimeMillis();
 		long revision = svnUtils.checkout(rootTag.getTagUrl(), checkoutDir, null, null);
 		helper.logTime("Total checkout time: ", System.currentTimeMillis() - start);

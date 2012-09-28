@@ -721,6 +721,14 @@ public class MojoHelper {
 		}
 	}
 
+	public void deleteDirectory(File dir) {
+		try {
+			FileUtils.deleteDirectory(dir);
+		} catch (IOException e) {
+			throw new IllegalStateException(e);
+		}
+	}
+
 	public String read(File file) {
 		try {
 			return FileUtils.readFileToString(file);
