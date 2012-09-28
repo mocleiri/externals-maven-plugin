@@ -15,7 +15,6 @@ public class FormatPomsMojo extends AbstractMojo {
 
 	MojoHelper helper = MojoHelper.getInstance();
 	POMUtils pomUtils = new POMUtils();
-	SVNUtils svnUtils = SVNUtils.getInstance();
 
 	/**
 	 * @parameter expression="${externals.pom}" default-value="pom.xml"
@@ -26,11 +25,6 @@ public class FormatPomsMojo extends AbstractMojo {
 	 * @parameter expression="${externals.ignoreDirectories}" default-value="src,target,.svn,.git"
 	 */
 	private String ignoreDirectories;
-
-	/**
-	 * @parameter
-	 */
-	private List<Mapping> mappings;
 
 	/**
 	 * The Maven project object
@@ -78,14 +72,6 @@ public class FormatPomsMojo extends AbstractMojo {
 
 	public void setIgnoreDirectories(String ignoreDirectories) {
 		this.ignoreDirectories = ignoreDirectories;
-	}
-
-	public List<Mapping> getMappings() {
-		return mappings;
-	}
-
-	public void setMappings(List<Mapping> mappings) {
-		this.mappings = mappings;
 	}
 
 	public MavenProject getProject() {
