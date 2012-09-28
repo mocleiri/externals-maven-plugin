@@ -10,6 +10,8 @@ import org.apache.maven.project.MavenProject;
 import org.tmatesoft.svn.core.SVNCommitInfo;
 
 /**
+ * Examine the local working copy of a project for any svn:externals definitions. Commit any local changes including any changes under the svn:externals directories.
+ * 
  * @goal commit
  * @aggregator
  */
@@ -18,6 +20,8 @@ public class CommitMojo extends AbstractMojo {
 	SVNUtils svnUtils = SVNUtils.getInstance();
 
 	/**
+	 * The message to associate with the commit
+	 * 
 	 * @parameter expression="${externals.commitMessage}" default-value="[externals-maven-plugin] Commit changes"
 	 */
 	private String commitMessage;
@@ -31,6 +35,8 @@ public class CommitMojo extends AbstractMojo {
 	private MavenProject project;
 
 	/**
+	 * The directory where a local working copy of the project is checked out
+	 * 
 	 * @parameter expression="${externals.workingCopy}" default-value="${project.basedir}"
 	 */
 	private File workingCopy;
