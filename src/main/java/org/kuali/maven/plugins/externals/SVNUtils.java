@@ -207,6 +207,11 @@ public class SVNUtils {
 		}
 	}
 
+	public SVNCommitInfo commit(List<File> workingCopyPaths, String message, String username, String password) {
+		File[] fileArray = workingCopyPaths.toArray(new File[workingCopyPaths.size()]);
+		return commit(fileArray, message, username, password);
+	}
+
 	public SVNCommitInfo commit(File[] workingCopyPaths, String message, String username, String password) {
 		try {
 			SVNClientManager manager = SVNClientManager.newInstance(null, username, password);

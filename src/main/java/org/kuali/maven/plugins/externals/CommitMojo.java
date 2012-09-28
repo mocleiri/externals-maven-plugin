@@ -1,6 +1,7 @@
 package org.kuali.maven.plugins.externals;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.maven.plugin.AbstractMojo;
@@ -8,28 +9,18 @@ import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.project.MavenProject;
 
 /**
- * @goal formatpoms
+ * @goal commit
  */
-public class FormatPomsMojo extends AbstractMojo {
+public class CommitMojo extends AbstractMojo {
 
 	MojoHelper helper = MojoHelper.getInstance();
 	POMUtils pomUtils = new POMUtils();
 	SVNUtils svnUtils = SVNUtils.getInstance();
 
 	/**
-	 * @parameter expression="${externals.pom}" default-value="pom.xml"
-	 */
-	private String pom;
-
-	/**
-	 * @parameter expression="${externals.commitMessage}" default-value="[externals-maven-plugin] Format poms"
+	 * @parameter expression="${externals.commitMessage}" default-value="[externals-maven-plugin] Commit changes"
 	 */
 	private String commitMessage;
-
-	/**
-	 * @parameter expression="${externals.ignoreDirectories}" default-value="src,target,.svn,.git"
-	 */
-	private String ignoreDirectories;
 
 	/**
 	 * @parameter
@@ -46,18 +37,14 @@ public class FormatPomsMojo extends AbstractMojo {
 
 	@Override
 	public void execute() throws MojoExecutionException {
-		List<File> poms = helper.getPoms(project.getBasedir(), pom, ignoreDirectories);
-		int count = 0;
-		for (File pom : poms) {
-			String xml = helper.read(pom);
-			String formattedXML = pomUtils.format(xml);
-			if (!xml.equals(formattedXML)) {
-				count++;
-				helper.write(pom, formattedXML);
-				getLog().info("Formatting applied to " + pom.getAbsolutePath());
-			}
+		List<File> dirs = new ArrayList<File>();
+		dirs.add(project.getBasedir());
+		for (Mapping mapping : mappings) {
+			File dir = new File(project.getBasedir().getAbsolutePath() + File.separator + mapping.getModule());
+			dirs.add(dir);
 		}
-		getLog().info("Formatted " + count + " poms");
+		svnUtils.commit(dirs, commitMessage, null, null);
+
 	}
 
 	public MojoHelper getHelper() {
@@ -68,28 +55,12 @@ public class FormatPomsMojo extends AbstractMojo {
 		this.helper = helper;
 	}
 
-	public String getPom() {
-		return pom;
-	}
-
-	public void setPom(String pom) {
-		this.pom = pom;
-	}
-
 	public String getCommitMessage() {
 		return commitMessage;
 	}
 
 	public void setCommitMessage(String commitMessage) {
 		this.commitMessage = commitMessage;
-	}
-
-	public String getIgnoreDirectories() {
-		return ignoreDirectories;
-	}
-
-	public void setIgnoreDirectories(String ignoreDirectories) {
-		this.ignoreDirectories = ignoreDirectories;
 	}
 
 	public List<Mapping> getMappings() {
