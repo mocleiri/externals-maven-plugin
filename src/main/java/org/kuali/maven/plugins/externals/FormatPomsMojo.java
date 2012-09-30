@@ -48,7 +48,7 @@ public class FormatPomsMojo extends AbstractMojo {
 	private String ignoreDirectories;
 
 	/**
-	 * Directories to ignore when examining the file system
+	 * The base directory that is recursively scanned for Maven pom's
 	 * 
 	 * @parameter expression="${externals.basedir}" default-value="${project.basedir}"
 	 */
