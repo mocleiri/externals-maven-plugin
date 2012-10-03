@@ -45,13 +45,13 @@ public class ShowMojo extends AbstractMojo {
 	 * 
 	 * @parameter expression="${externals.directory}" default-value="${project.basedir}"
 	 */
-	private File file;
+	private File directory;
 
 	@Override
 	public void execute() throws MojoExecutionException {
-		getLog().info("Examining " + file.getAbsolutePath());
+		getLog().info("Examining " + directory.getAbsolutePath());
 		// Extract svn:externals info from the root of the checkout
-		List<SVNExternal> externals = svnUtils.getExternals(project.getBasedir());
+		List<SVNExternal> externals = svnUtils.getExternals(directory);
 		getLog().info("Located " + externals.size() + " svn:externals");
 		int count = 1;
 		for (SVNExternal external : externals) {
@@ -63,11 +63,11 @@ public class ShowMojo extends AbstractMojo {
 		return project;
 	}
 
-	public File getFile() {
-		return file;
+	public File getDirectory() {
+		return directory;
 	}
 
-	public void setFile(File file) {
-		this.file = file;
+	public void setDirectory(File file) {
+		this.directory = file;
 	}
 }
