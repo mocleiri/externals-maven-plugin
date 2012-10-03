@@ -48,9 +48,9 @@ public class ShowMojo extends AbstractMojo {
 
 	@Override
 	public void execute() throws MojoExecutionException {
+		getLog().info("Examining " + file.getAbsolutePath());
 		// Extract svn:externals info from the root of the checkout
 		List<SVNExternal> externals = svnUtils.getExternals(project.getBasedir());
-		getLog().info("Examining " + file.getAbsolutePath());
 		getLog().info("Located  " + externals.size() + " svn:externals");
 		for (SVNExternal external : externals) {
 			getLog().info(external.getPath() + " " + external.getUrl());
