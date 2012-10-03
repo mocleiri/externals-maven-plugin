@@ -29,9 +29,9 @@ import org.apache.maven.project.MavenProject;
  * Make sure the aggregate checkout is "self-contained". Make sure the parent versions of the svn:externals modules point back to the correct root pom. Make sure the properties
  * used to figure out which version of the child modules to use, actually match up with the versions declared in the child modules.
  * 
- * @goal validate
+ * @goal validatepoms
  */
-public class ValidateMojo extends AbstractMojo {
+public class ValidatePomsMojo extends AbstractMojo {
 
 	SVNUtils svnUtils = SVNUtils.getInstance();
 	MojoHelper helper = MojoHelper.getInstance();
