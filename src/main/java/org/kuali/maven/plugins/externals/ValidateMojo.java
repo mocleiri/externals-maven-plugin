@@ -22,8 +22,8 @@ import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.project.MavenProject;
 
 /**
- * Make sure the aggregate checkout is "self-contained". Make sure the parent versions of the svn:externals modules point back to the correct aggregated root and make sure the
- * properties used to set the properties for the child modules match up with the versions actually declared in the child modules.
+ * Make sure the aggregate checkout is "self-contained". Make sure the parent versions of the svn:externals modules point back to the correct root pom. Make sure the properties
+ * used to figure out which version of the child modules to use, actually match up with the versions declared in the child modules.
  * 
  * @goal validate
  */
