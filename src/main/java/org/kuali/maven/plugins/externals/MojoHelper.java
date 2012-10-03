@@ -91,6 +91,17 @@ public class MojoHelper {
 		return sb.toString();
 	}
 
+	public String getGroupId(DefaultMutableTreeNode node) {
+		List<Project> projects = getProjectPath(node);
+		for (Project project : projects) {
+			GAV gav = project.getGav();
+			if (!StringUtils.isBlank(gav.getGroupId())) {
+				return gav.getGroupId();
+			}
+		}
+		throw new IllegalStateException("Unable to determine a version");
+	}
+
 	public String getVersion(DefaultMutableTreeNode node) {
 		List<Project> projects = getProjectPath(node);
 		for (Project project : projects) {
@@ -183,6 +194,9 @@ public class MojoHelper {
 		return map;
 	}
 
+	/**
+	 * Assemble the list of nodes into a tree, based on the directory structure.
+	 */
 	public DefaultMutableTreeNode getTree(File basedir, List<DefaultMutableTreeNode> nodes, String pomFile) {
 		Map<String, DefaultMutableTreeNode> map = getMap(nodes);
 		for (DefaultMutableTreeNode child : nodes) {
@@ -438,6 +452,56 @@ public class MojoHelper {
 		logger.info(sb.toString());
 	}
 
+	public Map<String, DefaultMutableTreeNode> getGavMap(DefaultMutableTreeNode node) {
+		Enumeration<?> e = node.breadthFirstEnumeration();
+		Map<String, DefaultMutableTreeNode> map = new HashMap<String, DefaultMutableTreeNode>();
+		while (e.hasMoreElements()) {
+			DefaultMutableTreeNode element = (DefaultMutableTreeNode) e.nextElement();
+			Project project = (Project) element.getUserObject();
+			GAV gav = project.getGav();
+			String gavId = toString(gav);
+			map.put(gavId, element);
+		}
+		return map;
+	}
+
+	public void validateParents(DefaultMutableTreeNode node, Map<String, DefaultMutableTreeNode> map) {
+		Enumeration<?> e = node.breadthFirstEnumeration();
+		while (e.hasMoreElements()) {
+			DefaultMutableTreeNode element = (DefaultMutableTreeNode) e.nextElement();
+			if (element.isRoot()) {
+				continue;
+			}
+			Project project = (Project) element.getUserObject();
+			GAV parentGav = project.getParent();
+			String parentGavId = toString(parentGav);
+			DefaultMutableTreeNode parent = map.get(parentGavId);
+			if (parent == null) {
+				throw new IllegalStateException(parentGavId + " could not be located");
+			}
+		}
+	}
+
+	public void fillInGavs(DefaultMutableTreeNode node) {
+		Project project = (Project) node.getUserObject();
+		GAV gav = project.getGav();
+		String groupId = getGroupId(node);
+		String version = getVersion(node);
+		if (gav.getGroupId() == null) {
+			gav.setGroupId(groupId);
+			logger.info("Update " + gav.getArtifactId() + "->" + groupId);
+		}
+		if (gav.getVersion() == null) {
+			gav.setVersion(version);
+			logger.info("Update " + gav.getArtifactId() + "->" + version);
+		}
+		Enumeration<?> e = node.children();
+		while (e.hasMoreElements()) {
+			DefaultMutableTreeNode child = (DefaultMutableTreeNode) e.nextElement();
+			fillInGavs(child);
+		}
+	}
+
 	public void updateBuildInfo(DefaultMutableTreeNode node, BuildTag buildTag, TagStyle tagStyle, int buildNumber) {
 		Project project = (Project) node.getUserObject();
 		project.setBuildTag(buildTag);
@@ -663,18 +727,18 @@ public class MojoHelper {
 			return;
 		}
 		StringBuilder sb = new StringBuilder();
-		int count = 0;
+		int missingCount = 0;
 		for (Mapping mapping : mappings) {
 			String key = mapping.getVersionProperty();
 			String value = properties.getProperty(key);
 			if (StringUtils.isBlank(value)) {
-				if (count++ != 0) {
+				if (missingCount++ != 0) {
 					sb.append(", ");
 				}
 				sb.append(key);
 			}
 		}
-		if (sb.length() != 0) {
+		if (missingCount != 0) {
 			throw new IllegalArgumentException("Missing values for [" + sb.toString() + "]");
 		}
 	}

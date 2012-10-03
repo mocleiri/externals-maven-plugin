@@ -15,7 +15,11 @@
  */
 package org.kuali.maven.plugins.externals;
 
+import java.io.File;
 import java.util.List;
+import java.util.Map;
+
+import javax.swing.tree.DefaultMutableTreeNode;
 
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
@@ -40,7 +44,7 @@ public class ValidateMojo extends AbstractMojo {
 	private String pom;
 
 	/**
-	 * Directores to ignore when examining the file system for Maven pom's
+	 * Directories to ignore when examining the file system for Maven pom's
 	 * 
 	 * @parameter expression="${externals.ignoreDirectories}" default-value="src,target,.svn,.git"
 	 */
@@ -63,7 +67,17 @@ public class ValidateMojo extends AbstractMojo {
 
 	@Override
 	public void execute() throws MojoExecutionException {
-		// Add some slick validation logic here
+		List<File> files = helper.getPoms(project.getBasedir(), pom, ignoreDirectories);
+		List<DefaultMutableTreeNode> nodes = helper.getNodes(files);
+		// This tree is based on the file system directory structure
+		// It will always have everything correctly connected together
+		DefaultMutableTreeNode node = helper.getTree(project.getBasedir(), nodes, pom);
+		// Make sure each gav is fully populated
+		helper.fillInGavs(node);
+		// Populate a map keyed by the gav id
+		Map<String, DefaultMutableTreeNode> map = helper.getGavMap(node);
+		// Validate that all of the parents are contained in the map
+		helper.validateParents(node, map);
 	}
 
 	public String getPom() {

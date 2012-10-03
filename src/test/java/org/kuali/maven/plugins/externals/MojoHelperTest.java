@@ -36,6 +36,18 @@ public class MojoHelperTest {
 	private static final File BASEDIR = new File("/Users/jeffcaddel/ws/aggregate");
 
 	@Test
+	public void testValidate() {
+		try {
+			List<File> poms = helper.getPoms(BASEDIR, POM, IGNORE);
+			List<DefaultMutableTreeNode> nodes = helper.getNodes(poms);
+			DefaultMutableTreeNode tree = helper.getTree(BASEDIR, nodes, POM);
+			helper.fillInGavs(tree);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+
+	// @Test
 	public void testUpdateVersions() {
 		int buildNumber = 100;
 		GAV gav = new GAV("org.kuali.student", "student", "2.0.0-SNAPSHOT");
