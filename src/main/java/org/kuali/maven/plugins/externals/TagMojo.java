@@ -122,10 +122,17 @@ public class TagMojo extends AbstractMojo {
 	 */
 	private TagStyle tagStyle;
 
+	/**
+	 * If true, execution will fail when attempting to create a tag that already exists.
+	 * 
+	 * @parameter expression="${externals.failOnExistingTag}" default-value="true"
+	 */
+	private boolean failOnExistingTag;
+
 	@Override
 	public void execute() throws MojoExecutionException {
 		int buildNumber = helper.getBuildNumber(project, buildNumberProperty);
-		GAV gav = helper.getGav(project);
+		GAV rootGav = helper.getGav(project);
 
 		List<File> files = helper.getPoms(project.getBasedir(), pom, ignoreDirectories);
 		List<DefaultMutableTreeNode> nodes = helper.getNodes(files);
@@ -136,13 +143,13 @@ public class TagMojo extends AbstractMojo {
 		// Make sure the modules listed in the pom match the svn:externals definitions and the mappings provided in the plugin config
 		helper.validate(project, externals, mappings);
 		// Calculate the build tag for the root
-		BuildTag rootTag = helper.getBuildTag(project.getBasedir(), gav, TagStyle.BUILDNUMBER, buildNumber);
+		BuildTag rootTag = helper.getBuildTag(rootGav, project.getBasedir(), rootGav, TagStyle.BUILDNUMBER, buildNumber);
 		// Update build info for the root node
-		helper.updateBuildInfo(node, rootTag, TagStyle.BUILDNUMBER, buildNumber);
+		helper.updateBuildInfo(rootGav, node, rootTag, TagStyle.BUILDNUMBER, buildNumber);
 		// Calculate build tags for each module
-		List<BuildTag> moduleTags = helper.getBuildTags(project.getProperties(), externals, mappings, tagStyle, buildNumber);
+		List<BuildTag> moduleTags = helper.getBuildTags(rootGav, project.getProperties(), externals, mappings, tagStyle, buildNumber);
 		// Update build information for nodes that represent an svn:external
-		helper.updateBuildInfo(nodes, moduleTags, mappings, tagStyle, buildNumber);
+		helper.updateBuildInfo(rootGav, nodes, moduleTags, mappings, tagStyle, buildNumber);
 		// Recursively update the project gav's and parent gav's
 		helper.updateGavs(node);
 		// Recursively update the corresponding Maven pom's
@@ -154,9 +161,9 @@ public class TagMojo extends AbstractMojo {
 		// Create new svn:externals definitions based on the newly created tags
 		List<SVNExternal> newExternals = helper.getExternals(moduleTags, mappings);
 		// Create the module tags
-		helper.createTags(moduleTags, createTagMessage);
+		helper.createTags(moduleTags, createTagMessage, failOnExistingTag);
 		// Create the root tag
-		helper.createTag(rootTag, createTagMessage);
+		helper.createTag(rootTag, createTagMessage, failOnExistingTag);
 		// Update svn:externals definitions on the root tag so they point to the new module tags
 		SVNCommitInfo info = svnUtils.setExternals(rootTag.getTagUrl(), newExternals, externalsMessage);
 		getLog().info("Set " + newExternals.size() + " externals @ " + rootTag.getTagUrl());
@@ -269,6 +276,14 @@ public class TagMojo extends AbstractMojo {
 
 	public void setUpdateTagMessage(String updateTagMessage) {
 		this.updateTagMessage = updateTagMessage;
+	}
+
+	public boolean isFailOnExistingTag() {
+		return failOnExistingTag;
+	}
+
+	public void setFailOnExistingTag(boolean failOnExistingTag) {
+		this.failOnExistingTag = failOnExistingTag;
 	}
 
 }
