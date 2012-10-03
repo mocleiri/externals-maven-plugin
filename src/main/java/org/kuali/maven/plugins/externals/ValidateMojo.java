@@ -78,6 +78,9 @@ public class ValidateMojo extends AbstractMojo {
 		Map<String, DefaultMutableTreeNode> map = helper.getGavMap(node);
 		// Validate that all of the parents are contained in the map
 		helper.validateParents(node, map);
+		int depth = node.getDepth();
+		int size = nodes.size();
+		getLog().info("Validated " + size + " POM's.  Module depth=" + depth);
 	}
 
 	public String getPom() {
