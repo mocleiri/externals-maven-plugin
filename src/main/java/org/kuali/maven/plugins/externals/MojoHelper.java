@@ -489,11 +489,11 @@ public class MojoHelper {
 		String version = getVersion(node);
 		if (gav.getGroupId() == null) {
 			gav.setGroupId(groupId);
-			logger.info("Update " + gav.getArtifactId() + "->" + groupId);
+			logger.debug("Update " + gav.getArtifactId() + "->" + groupId);
 		}
 		if (gav.getVersion() == null) {
 			gav.setVersion(version);
-			logger.info("Update " + gav.getArtifactId() + "->" + version);
+			logger.debug("Update " + gav.getArtifactId() + "->" + version);
 		}
 		Enumeration<?> e = node.children();
 		while (e.hasMoreElements()) {
