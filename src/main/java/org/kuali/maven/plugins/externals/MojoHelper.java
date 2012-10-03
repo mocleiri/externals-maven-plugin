@@ -465,6 +465,24 @@ public class MojoHelper {
 		return map;
 	}
 
+	public void validateMappings(Properties properties, List<Mapping> mappings, DefaultMutableTreeNode node) {
+		for (Mapping mapping : mappings) {
+			boolean valid = isValid(properties, mapping, node);
+			if (!valid) {
+				throw new IllegalStateException("Version mismatch on " + mapping.getModule());
+			}
+		}
+	}
+
+	public boolean isValid(Properties properties, Mapping mapping, DefaultMutableTreeNode node) {
+		DefaultMutableTreeNode match = findNode(node, mapping.getModule());
+		Project project = (Project) match.getUserObject();
+		GAV gav = project.getGav();
+		String propertyVersion = properties.getProperty(mapping.getVersionProperty());
+		String gavVersion = gav.getVersion();
+		return propertyVersion.equals(gavVersion);
+	}
+
 	public void validateParents(DefaultMutableTreeNode node, Map<String, DefaultMutableTreeNode> map) {
 		Enumeration<?> e = node.breadthFirstEnumeration();
 		while (e.hasMoreElements()) {
