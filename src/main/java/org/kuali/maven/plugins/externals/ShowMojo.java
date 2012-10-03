@@ -26,6 +26,7 @@ import org.apache.maven.project.MavenProject;
  * Display svn:externals definitions
  * 
  * @goal show
+ * @aggregator
  */
 public class ShowMojo extends AbstractMojo {
 
@@ -51,9 +52,10 @@ public class ShowMojo extends AbstractMojo {
 		getLog().info("Examining " + file.getAbsolutePath());
 		// Extract svn:externals info from the root of the checkout
 		List<SVNExternal> externals = svnUtils.getExternals(project.getBasedir());
-		getLog().info("Located  " + externals.size() + " svn:externals");
+		getLog().info("Located " + externals.size() + " svn:externals");
+		int count = 1;
 		for (SVNExternal external : externals) {
-			getLog().info(external.getPath() + " " + external.getUrl());
+			getLog().info(" " + (count++) + "   " + external.getPath() + " " + external.getUrl());
 		}
 	}
 
