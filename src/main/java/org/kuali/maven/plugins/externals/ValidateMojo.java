@@ -69,8 +69,7 @@ public class ValidateMojo extends AbstractMojo {
 	public void execute() throws MojoExecutionException {
 		List<File> files = helper.getPoms(project.getBasedir(), pom, ignoreDirectories);
 		List<DefaultMutableTreeNode> nodes = helper.getNodes(files);
-		// This tree is based on the file system directory structure
-		// This will always be a perfect tree structure
+		// Since this tree is based on the file system directory structure, it should always be a perfect tree
 		DefaultMutableTreeNode node = helper.getTree(project.getBasedir(), nodes, pom);
 		// Make sure each gav is fully populated
 		helper.fillInGavs(node);
