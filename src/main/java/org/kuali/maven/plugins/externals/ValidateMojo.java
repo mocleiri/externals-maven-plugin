@@ -71,9 +71,9 @@ public class ValidateMojo extends AbstractMojo {
 		List<DefaultMutableTreeNode> nodes = helper.getNodes(files);
 		// Since this tree is based on the file system directory structure, it should always be a perfect tree
 		DefaultMutableTreeNode node = helper.getTree(project.getBasedir(), nodes, pom);
-		// Make sure each gav is fully populated
+		// Make sure each GAV is fully populated
 		helper.fillInGavs(node);
-		// Populate a map keyed by the gav id
+		// Populate a map keyed by the GAV id
 		Map<String, DefaultMutableTreeNode> map = helper.getGavMap(node);
 		// Validate that all of the parents are contained in the map
 		helper.validateParents(node, map);
