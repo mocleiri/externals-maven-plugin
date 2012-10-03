@@ -37,7 +37,7 @@ public class MojoHelperTest {
 	// @Test
 	public void testUpdateVersions() {
 		int buildNumber = 100;
-		GAV rootGav = new GAV("org.kuali.student", "student", "2.0.0-SNAPSHOT");
+		GAV rootGav = new GAV("org.kuali.student", "student", "2.0.0-services-SNAPSHOT");
 		List<Mapping> mappings = new ArrayList<Mapping>();
 		mappings.add(new Mapping("ks-api", "ks.api.version"));
 		mappings.add(new Mapping("ks-core", "ks.core.version"));
