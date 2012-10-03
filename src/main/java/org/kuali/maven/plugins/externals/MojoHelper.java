@@ -245,23 +245,19 @@ public class MojoHelper {
 		return resource.exists();
 	}
 
-	public void createTag(BuildTag buildTag, String message, boolean failIfExisting) {
-		createTags(Collections.singletonList(buildTag), message, failIfExisting);
+	public void createTag(BuildTag buildTag, String message) {
+		createTags(Collections.singletonList(buildTag), message);
 	}
 
-	public void createTags(List<BuildTag> buildTags, String message, boolean failIfExisting) {
+	public void createTags(List<BuildTag> buildTags, String message) {
 		for (BuildTag buildTag : buildTags) {
 			String src = buildTag.getSourceUrl();
 			long revision = buildTag.getSourceRevision();
 			String dst = buildTag.getTagUrl();
 			boolean exists = exists(dst);
 			if (exists) {
-				if (failIfExisting) {
-					throw new IllegalStateException("Tag already exists [" + dst + "]");
-				} else {
-					logger.info("Skip existing tag [" + dst + "]");
-					buildTag.setSkipped(true);
-				}
+				logger.info("Skip existing tag [" + dst + "]");
+				buildTag.setSkipped(true);
 			} else {
 				SVNCommitInfo info = svnUtils.copy(src, revision, dst, message);
 				logger.info("Created [" + dst + "]");
@@ -442,16 +438,11 @@ public class MojoHelper {
 		logger.info(sb.toString());
 	}
 
-	public void updateBuildInfo(GAV rootGav, DefaultMutableTreeNode node, BuildTag buildTag, TagStyle tagStyle, int buildNumber) {
+	public void updateBuildInfo(DefaultMutableTreeNode node, BuildTag buildTag, TagStyle tagStyle, int buildNumber) {
 		Project project = (Project) node.getUserObject();
 		project.setBuildTag(buildTag);
 		GAV oldGav = project.getGav();
-		String newVersion = null;
-		if (node.isRoot()) {
-			newVersion = getNewVersion(oldGav.getVersion(), buildNumber, buildTag.getSourceRevision(), tagStyle);
-		} else {
-			newVersion = getNewVersion(rootGav, oldGav.getVersion(), buildNumber, buildTag.getSourceRevision(), tagStyle);
-		}
+		String newVersion = getNewVersion(oldGav.getVersion(), buildNumber, buildTag.getSourceRevision(), tagStyle);
 		GAV newGav = new GAV();
 		newGav.setGroupId(oldGav.getGroupId());
 		newGav.setArtifactId(oldGav.getArtifactId());
@@ -460,12 +451,12 @@ public class MojoHelper {
 		logger.info("GAV Update - [" + toString(oldGav) + "->" + newVersion + "]");
 	}
 
-	public void updateBuildInfo(GAV rootGav, List<DefaultMutableTreeNode> nodes, List<BuildTag> moduleTags, List<Mapping> mappings, TagStyle tagStyle, int buildNumber) {
+	public void updateBuildInfo(List<DefaultMutableTreeNode> nodes, List<BuildTag> moduleTags, List<Mapping> mappings, TagStyle tagStyle, int buildNumber) {
 		for (int i = 0; i < mappings.size(); i++) {
 			Mapping mapping = mappings.get(i);
 			BuildTag moduleTag = moduleTags.get(i);
 			DefaultMutableTreeNode node = findNode(nodes, mapping.getModule());
-			updateBuildInfo(rootGav, node, moduleTag, tagStyle, buildNumber);
+			updateBuildInfo(node, moduleTag, tagStyle, buildNumber);
 		}
 	}
 
@@ -479,25 +470,25 @@ public class MojoHelper {
 		throw new IllegalStateException("Unable to locate " + artifactId);
 	}
 
-	public List<BuildTag> getBuildTags(GAV rootGav, Properties properties, List<SVNExternal> externals, List<Mapping> mappings, TagStyle tagStyle, int buildNumber) {
+	public List<BuildTag> getBuildTags(Properties properties, List<SVNExternal> externals, List<Mapping> mappings, TagStyle tagStyle, int buildNumber) {
 		Collections.sort(externals);
 		Collections.sort(mappings);
 		List<BuildTag> buildTags = new ArrayList<BuildTag>();
 		for (int i = 0; i < externals.size(); i++) {
 			SVNExternal external = externals.get(i);
 			Mapping mapping = mappings.get(i);
-			BuildTag buildTag = getBuildTag(rootGav, properties, external, mapping, tagStyle, buildNumber);
+			BuildTag buildTag = getBuildTag(properties, external, mapping, tagStyle, buildNumber);
 			buildTags.add(buildTag);
 		}
 		return buildTags;
 	}
 
-	public BuildTag getBuildTag(GAV rootGav, File workingCopy, GAV gav, TagStyle tagStyle, int buildNumber) {
+	public BuildTag getBuildTag(File workingCopy, GAV gav, TagStyle tagStyle, int buildNumber) {
 		String sourceUrl = svnUtils.getUrl(workingCopy);
 		long sourceRevision = svnUtils.getLastRevision(workingCopy);
 		String version = gav.getVersion();
 
-		String tag = getTag(rootGav, sourceUrl, version, gav.getArtifactId(), buildNumber, sourceRevision, tagStyle);
+		String tag = getTag(sourceUrl, version, gav.getArtifactId(), buildNumber, sourceRevision, tagStyle);
 
 		BuildTag buildTag = new BuildTag();
 		buildTag.setSourceUrl(sourceUrl);
@@ -506,12 +497,12 @@ public class MojoHelper {
 		return buildTag;
 	}
 
-	public BuildTag getBuildTag(GAV rootGav, Properties properties, SVNExternal external, Mapping mapping, TagStyle tagStyle, int buildNumber) {
+	public BuildTag getBuildTag(Properties properties, SVNExternal external, Mapping mapping, TagStyle tagStyle, int buildNumber) {
 		File workingCopy = external.getWorkingCopyPath();
 		String sourceUrl = svnUtils.getUrl(workingCopy);
 		long sourceRevision = svnUtils.getLastRevision(workingCopy);
 		String version = properties.getProperty(mapping.getVersionProperty());
-		String tag = getTag(rootGav, sourceUrl, version, mapping.getModule(), buildNumber, sourceRevision, tagStyle);
+		String tag = getTag(sourceUrl, version, mapping.getModule(), buildNumber, sourceRevision, tagStyle);
 
 		BuildTag buildTag = new BuildTag();
 		buildTag.setSourceUrl(sourceUrl);
@@ -532,29 +523,12 @@ public class MojoHelper {
 		}
 	}
 
-	public String getNewVersion(GAV rootGav, String version, int buildNumber, long revision, TagStyle tagStyle) {
-		Version v = parseVersion(rootGav.getVersion());
-		String rootQualifier = v.getQualifier();
-		String trimmed = trimSnapshot(version);
-		if (!StringUtils.isBlank(rootQualifier)) {
-			trimmed += "-" + rootQualifier;
-		}
+	public String getTag(String url, String version, String artifactId, int buildNumber, long revision, TagStyle tagStyle) {
 		switch (tagStyle) {
 		case REVISION:
-			return trimmed + "-r" + revision;
+			return getRevisionTag(url, version, artifactId, revision);
 		case BUILDNUMBER:
-			return trimmed + "-build-" + buildNumber;
-		default:
-			throw new IllegalArgumentException(tagStyle + " is unknown");
-		}
-	}
-
-	public String getTag(GAV rootGav, String url, String version, String artifactId, int buildNumber, long revision, TagStyle tagStyle) {
-		switch (tagStyle) {
-		case REVISION:
-			return getRevisionTag(rootGav, url, version, artifactId, revision);
-		case BUILDNUMBER:
-			return getBuildNumberTag(rootGav, url, version, artifactId, buildNumber);
+			return getBuildNumberTag(url, version, artifactId, buildNumber);
 		default:
 			throw new IllegalArgumentException(tagStyle + " is unknown");
 		}
@@ -571,29 +545,18 @@ public class MojoHelper {
 		}
 	}
 
-	public String getBuildNumberTag(GAV rootGav, String url, String version, String artifactId, int buildNumber) {
-		Version v = parseVersion(rootGav.getVersion());
-
+	public String getBuildNumberTag(String url, String version, String artifactId, int buildNumber) {
 		StringBuilder sb = new StringBuilder();
 		sb.append(getBaseTag(url, version, artifactId));
 		sb.append("/");
-		if (!StringUtils.isEmpty(v.getQualifier())) {
-			sb.append(v.getQualifier());
-			sb.append("-");
-		}
 		sb.append("build-" + buildNumber);
 		return sb.toString();
 	}
 
-	public String getRevisionTag(GAV rootGav, String url, String version, String artifactId, long revision) {
-		Version v = parseVersion(rootGav.getVersion());
+	public String getRevisionTag(String url, String version, String artifactId, long revision) {
 		StringBuilder sb = new StringBuilder();
 		sb.append(getBaseTag(url, version, artifactId));
 		sb.append("/");
-		if (!StringUtils.isEmpty(v.getQualifier())) {
-			sb.append(v.getQualifier());
-			sb.append("-");
-		}
 		sb.append("r" + revision);
 		return sb.toString();
 	}

@@ -22,6 +22,7 @@ import java.util.Properties;
 
 import javax.swing.tree.DefaultMutableTreeNode;
 
+import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -34,10 +35,10 @@ public class MojoHelperTest {
 	private static final String IGNORE = "src,target,.svn,.git";
 	private static final File BASEDIR = new File("/Users/jeffcaddel/ws/aggregate");
 
-	// @Test
+	@Test
 	public void testUpdateVersions() {
 		int buildNumber = 100;
-		GAV rootGav = new GAV("org.kuali.student", "student", "2.0.0-services-SNAPSHOT");
+		GAV gav = new GAV("org.kuali.student", "student", "2.0.0-SNAPSHOT");
 		List<Mapping> mappings = new ArrayList<Mapping>();
 		mappings.add(new Mapping("ks-api", "ks.api.version"));
 		mappings.add(new Mapping("ks-core", "ks.core.version"));
@@ -56,10 +57,10 @@ public class MojoHelperTest {
 		List<DefaultMutableTreeNode> nodes = helper.getNodes(files);
 		DefaultMutableTreeNode node = helper.getTree(BASEDIR, nodes, POM);
 		List<SVNExternal> externals = svnUtils.getExternals(BASEDIR);
-		BuildTag rootTag = helper.getBuildTag(rootGav, BASEDIR, rootGav, TagStyle.BUILDNUMBER, buildNumber);
-		helper.updateBuildInfo(rootGav, node, rootTag, TagStyle.BUILDNUMBER, buildNumber);
-		List<BuildTag> moduleTags = helper.getBuildTags(rootGav, properties, externals, mappings, TagStyle.REVISION, buildNumber);
-		helper.updateBuildInfo(rootGav, nodes, moduleTags, mappings, TagStyle.REVISION, buildNumber);
+		BuildTag rootTag = helper.getBuildTag(BASEDIR, gav, TagStyle.BUILDNUMBER, buildNumber);
+		helper.updateBuildInfo(node, rootTag, TagStyle.BUILDNUMBER, buildNumber);
+		List<BuildTag> moduleTags = helper.getBuildTags(properties, externals, mappings, TagStyle.REVISION, buildNumber);
+		helper.updateBuildInfo(nodes, moduleTags, mappings, TagStyle.REVISION, buildNumber);
 		helper.updateGavs(node);
 		helper.updateProperties(node, properties, mappings);
 		logger.info("\n" + helper.getDisplayString(node));
