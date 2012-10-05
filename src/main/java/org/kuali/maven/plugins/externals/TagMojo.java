@@ -67,7 +67,7 @@ public class TagMojo extends AbstractMojo {
 	private String pom;
 
 	/**
-	 * Directores to ignore when examining the file system for Maven pom's
+	 * Directories to ignore when examining the file system for Maven pom's
 	 * 
 	 * @parameter expression="${externals.ignoreDirectories}" default-value="src,target,.svn,.git"
 	 */
