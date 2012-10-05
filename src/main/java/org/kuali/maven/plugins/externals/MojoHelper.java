@@ -600,6 +600,8 @@ public class MojoHelper {
 			return trimmed + "-r" + revision;
 		case BUILDNUMBER:
 			return trimmed + "-build-" + buildNumber;
+		case RELEASE:
+			return trimmed;
 		default:
 			throw new IllegalArgumentException(tagStyle + " is unknown");
 		}
@@ -611,6 +613,8 @@ public class MojoHelper {
 			return getRevisionTag(url, version, artifactId, revision);
 		case BUILDNUMBER:
 			return getBuildNumberTag(url, version, artifactId, buildNumber);
+		case RELEASE:
+			return getReleaseTag(url, version, artifactId);
 		default:
 			throw new IllegalArgumentException(tagStyle + " is unknown");
 		}
@@ -625,6 +629,23 @@ public class MojoHelper {
 		} else {
 			return new Integer(buildNumber);
 		}
+	}
+
+	public String getReleaseTag(String url, String version, String artifactId) {
+		String tagBase = extractor.getTagBase(url);
+		if (StringUtils.isBlank(tagBase)) {
+			throw new IllegalArgumentException("Unable to calculate tag base from [" + url + "]");
+		}
+
+		String trimmed = trimSnapshot(version);
+
+		StringBuilder sb = new StringBuilder();
+		sb.append(tagBase);
+		sb.append("/");
+		sb.append(artifactId);
+		sb.append("-");
+		sb.append(trimmed);
+		return sb.toString();
 	}
 
 	public String getBuildNumberTag(String url, String version, String artifactId, int buildNumber) {
