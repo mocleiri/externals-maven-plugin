@@ -26,9 +26,10 @@ import org.apache.maven.project.MavenProject;
 import org.tmatesoft.svn.core.SVNCommitInfo;
 
 /**
- * Connect svn:externals definitions with a multi-module Maven build in an intelligent manner. This mojo creates a tag from a Subversion checkout containing svn:externals
- * definitions that correspond to Maven modules. The version numbers in the respective poms are modified to reflect the current build. This allows the tag to be used to create
- * reproducible builds. The binaries Maven produces off the tag, correspond exactly to the version numbers in the Maven pom's.
+ * Connect svn:externals definitions with a multi-module Maven build in an intelligent manner. This mojo creates a tag from a Subversion
+ * checkout containing svn:externals definitions that correspond to Maven modules. The version numbers in the respective poms are modified
+ * to reflect the current build. This allows the tag to be used to create reproducible builds. The binaries Maven produces off the tag,
+ * correspond exactly to the version numbers in the Maven pom's.
  * 
  * @goal tag
  */
@@ -81,7 +82,8 @@ public class TagMojo extends AbstractMojo {
 	private MavenProject project;
 
 	/**
-	 * These mappings connect the svn:externals definitions with a property inside the root pom that controls what version each external is set to
+	 * These mappings connect the svn:externals definitions with a property inside the root pom that controls what version each external is
+	 * set to
 	 * 
 	 * @parameter
 	 */
@@ -109,14 +111,15 @@ public class TagMojo extends AbstractMojo {
 	private String externalsMessage;
 
 	/**
-	 * The property where the current build number is stored. Jenkins automatically sets an environment variable called <code>BUILD_NUMBER</code> each time a job is run
+	 * The property where the current build number is stored. Jenkins automatically sets an environment variable called
+	 * <code>BUILD_NUMBER</code> each time a job is run
 	 * 
 	 * @parameter expression="${externals.buildNumberProperty}" default-value="env.BUILD_NUMBER"
 	 */
 	private String buildNumberProperty;
 
 	/**
-	 * Either <code>BUILDNUMBER</code> or <code>REVISION</code>
+	 * Either <code>BUILDNUMBER</code>, <code>REVISION</code>, or <code>RELEASE</code>
 	 * 
 	 * @parameter expression="${externals.tagStyle}" default-value="BUILDNUMBER"
 	 */
