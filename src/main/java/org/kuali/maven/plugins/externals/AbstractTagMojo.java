@@ -29,6 +29,8 @@ public abstract class AbstractTagMojo extends AbstractMojo {
 
 	MojoHelper helper = MojoHelper.getInstance();
 
+	public abstract TagStyle getTagStyle();
+
 	/**
 	 * The prefix Maven needs in front of the real SCM url
 	 * 
@@ -109,13 +111,6 @@ public abstract class AbstractTagMojo extends AbstractMojo {
 	 */
 	private String buildNumberProperty;
 
-	/**
-	 * Either <code>BUILDNUMBER</code>, <code>REVISION</code>, or <code>RELEASE</code>
-	 * 
-	 * @parameter expression="${externals.tagStyle}" default-value="BUILDNUMBER"
-	 */
-	private TagStyle tagStyle;
-
 	public List<Mapping> getMappings() {
 		return mappings;
 	}
@@ -142,14 +137,6 @@ public abstract class AbstractTagMojo extends AbstractMojo {
 
 	public void setExternalsMessage(String externalsMessage) {
 		this.externalsMessage = externalsMessage;
-	}
-
-	public TagStyle getTagStyle() {
-		return tagStyle;
-	}
-
-	public void setTagStyle(TagStyle tagStyle) {
-		this.tagStyle = tagStyle;
 	}
 
 	public String getScmUrlPrefix() {

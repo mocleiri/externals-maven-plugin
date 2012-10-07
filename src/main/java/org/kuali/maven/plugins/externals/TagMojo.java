@@ -27,9 +27,23 @@ import org.apache.maven.plugin.MojoExecutionException;
  */
 public class TagMojo extends AbstractTagMojo {
 
+	/**
+	 * Either <code>BUILDNUMBER</code>, <code>REVISION</code>, or <code>RELEASE</code>
+	 * 
+	 * @parameter expression="${externals.tagStyle}" default-value="BUILDNUMBER"
+	 */
+	private TagStyle tagStyle;
 
 	@Override
 	public void execute() throws MojoExecutionException {
 		helper.createAndUpdateTag(this);
+	}
+
+	public TagStyle getTagStyle() {
+		return tagStyle;
+	}
+
+	public void setTagStyle(TagStyle tagStyle) {
+		this.tagStyle = tagStyle;
 	}
 }
