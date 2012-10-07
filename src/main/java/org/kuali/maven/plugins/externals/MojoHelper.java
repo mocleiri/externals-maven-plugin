@@ -664,6 +664,31 @@ public class MojoHelper {
 		}
 	}
 
+	/**
+	 * Assuming version is in the form "1.0.0-beta-SNAPSHOT", this method will increment the 3rd digit by 1, eg "1.0.1-beta-SNAPSHOT"
+	 */
+	public String getNextVersion(String version) {
+		if (!version.contains(MAVEN_SNAPSHOT_TOKEN)) {
+			throw new IllegalArgumentException(version + " is not a " + MAVEN_SNAPSHOT_TOKEN);
+		}
+		String trimmed = trimSnapshot(version);
+		Version v = parseVersion(trimmed);
+		Integer oldIncremental = new Integer(v.getIncremental());
+		Integer newIncremental = oldIncremental + 1;
+		v.setIncremental(newIncremental.toString());
+		StringBuilder sb = new StringBuilder();
+		sb.append(v.getMajor());
+		sb.append(".");
+		sb.append(v.getMinor());
+		sb.append(".");
+		sb.append(v.getIncremental());
+		sb.append("-");
+		sb.append(v.getQualifier());
+		sb.append("-");
+		sb.append(MAVEN_SNAPSHOT_TOKEN);
+		return sb.toString();
+	}
+
 	public String getTag(String url, String version, String artifactId, int buildNumber, long revision, TagStyle tagStyle) {
 		switch (tagStyle) {
 		case REVISION:
