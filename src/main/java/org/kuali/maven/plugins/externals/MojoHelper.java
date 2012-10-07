@@ -73,6 +73,63 @@ public class MojoHelper {
 		return instance;
 	}
 
+	public void createAndUpdateTag(AbstractTagMojo mojo) {
+		int buildNumber = getBuildNumber(mojo.getProject(), mojo.getBuildNumberProperty());
+		GAV gav = getGav(mojo.getProject());
+
+		List<File> files = getPoms(mojo.getProject().getBasedir(), mojo.getPom(), mojo.getIgnoreDirectories());
+		List<DefaultMutableTreeNode> nodes = getNodes(files);
+		DefaultMutableTreeNode node = getTree(mojo.getProject().getBasedir(), nodes, mojo.getPom());
+
+		// Extract svn:externals info from the root of the checkout
+		List<SVNExternal> externals = svnUtils.getExternals(mojo.getProject().getBasedir());
+		// Make sure the modules listed in the pom match the svn:externals definitions and the mappings provided in the plugin config
+		validate(mojo.getProject(), externals, mojo.getMappings());
+		// Calculate the build tag for the root
+		BuildTag rootTag = getBuildTag(mojo.getProject().getBasedir(), gav, mojo.getTagStyle(), buildNumber);
+		// Update build info for the root node
+		updateBuildInfo(node, rootTag, mojo.getTagStyle(), buildNumber);
+		// Calculate build tags for each module
+		List<BuildTag> moduleTags = getBuildTags(mojo.getProject().getProperties(), externals, mojo.getMappings(), mojo.getTagStyle(), buildNumber);
+		// Update build information for nodes that represent an svn:external
+		updateBuildInfo(nodes, moduleTags, mojo.getMappings(), mojo.getTagStyle(), buildNumber);
+		// Recursively update the mojo.getProject() gav's and parent gav's
+		updateGavs(node);
+		// Recursively update the corresponding Maven pom's
+		updateXml(node);
+		// Update the properties in the root pom that hold version info for the modules
+		updateProperties(node, mojo.getProject().getProperties(), mojo.getMappings());
+		// Update the <scm> info in the root pom
+		updateScm(node, mojo.getScmUrlPrefix());
+		// Create new svn:externals definitions based on the newly created tags
+		List<SVNExternal> newExternals = getExternals(moduleTags, mojo.getMappings());
+		// Create the module tags
+		createTags(moduleTags, mojo.getCreateTagMessage());
+		// Create the root tag
+		createTag(rootTag, mojo.getCreateTagMessage());
+		File checkoutDir = mojo.getCheckoutDir();
+		// Update svn:externals definitions on the root tag so they point to the new module tags
+		SVNCommitInfo info = svnUtils.setExternals(rootTag.getTagUrl(), newExternals, mojo.getExternalsMessage());
+		logger.info("Set " + newExternals.size() + " externals @ " + rootTag.getTagUrl());
+		logger.info("Committed revision " + info.getNewRevision() + ".");
+		logger.info("Checking out - " + rootTag.getTagUrl());
+		logger.info("Checkout dir - " + checkoutDir.getAbsolutePath());
+		if (checkoutDir.exists()) {
+			logger.info("Deleting " + checkoutDir.getAbsolutePath());
+			deleteDirectory(checkoutDir);
+		}
+		long start = System.currentTimeMillis();
+		long revision = svnUtils.checkout(rootTag.getTagUrl(), checkoutDir, null, null);
+		logTime("Total checkout time: ", System.currentTimeMillis() - start);
+		logger.info("Checked out revision " + revision + ".");
+		// Update the poms in the directory where the tag has been checked out
+		writePoms(node, mojo.getProject().getBasedir(), checkoutDir);
+		// Update the svn.externals file in the tag
+		updateExternalsFile(newExternals, mojo.getFile());
+		// Commit the changes to the tag
+		commitTagChanges(checkoutDir, newExternals, mojo.getUpdateTagMessage());
+	}
+
 	public GAV getGav(MavenProject project) {
 		GAV gav = new GAV();
 		gav.setGroupId(project.getGroupId());
