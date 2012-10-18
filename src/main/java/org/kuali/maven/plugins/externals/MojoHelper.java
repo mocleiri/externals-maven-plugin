@@ -73,6 +73,13 @@ public class MojoHelper {
 		return instance;
 	}
 
+	public void incrementVersions(AbstractTagMojo mojo) {
+		List<File> files = getPoms(mojo.getProject().getBasedir(), mojo.getPom(), mojo.getIgnoreDirectories());
+		List<DefaultMutableTreeNode> nodes = getNodes(files);
+		DefaultMutableTreeNode node = getTree(mojo.getProject().getBasedir(), nodes, mojo.getPom());
+		
+	}
+
 	public void createAndUpdateTag(AbstractTagMojo mojo) {
 		int buildNumber = getBuildNumber(mojo.getProject(), mojo.getBuildNumberProperty());
 		GAV gav = getGav(mojo.getProject());
@@ -665,14 +672,14 @@ public class MojoHelper {
 	}
 
 	/**
-	 * Assuming version is in the form "1.0.0-beta-SNAPSHOT", this method will increment the 3rd digit by 1, eg "1.0.1-beta-SNAPSHOT"
+	 * Assuming version is in the form <code>1.0.0-beta-SNAPSHOT</code>, this method will increment the 3rd digit by 1, and return
+	 * <code>1.0.1-beta-SNAPSHOT</code>
 	 */
 	public String getNextVersion(String version) {
 		if (!version.contains(MAVEN_SNAPSHOT_TOKEN)) {
 			throw new IllegalArgumentException(version + " is not a " + MAVEN_SNAPSHOT_TOKEN);
 		}
-		String trimmed = trimSnapshot(version);
-		Version v = parseVersion(trimmed);
+		Version v = parseVersion(version);
 		Integer oldIncremental = new Integer(v.getIncremental());
 		Integer newIncremental = oldIncremental + 1;
 		v.setIncremental(newIncremental.toString());
