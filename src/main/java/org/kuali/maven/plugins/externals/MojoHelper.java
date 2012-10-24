@@ -84,6 +84,7 @@ public class MojoHelper {
 		updateXml(node);
 		writePoms(node, mojo.getProject().getBasedir());
 		List<SVNExternal> externals = svnUtils.getExternals(mojo.getProject().getBasedir());
+		logger.info("Committing pom changes");
 		commitChanges(mojo.getProject().getBasedir(), externals, "[externals-maven-plugin] prepare for next development iteration");
 	}
 
