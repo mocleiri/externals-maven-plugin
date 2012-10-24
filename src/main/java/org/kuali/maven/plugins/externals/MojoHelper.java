@@ -117,7 +117,7 @@ public class MojoHelper {
 		}
 	}
 
-	public void createAndUpdateTag(AbstractTagMojo mojo) {
+	public void createAndUpdateTags(AbstractTagMojo mojo) {
 
 		// Extract the Jenkins build number. Defaults to zero if no BUILD_NUMBER is set
 		int buildNumber = getBuildNumber(mojo.getProject(), mojo.getBuildNumberProperty());

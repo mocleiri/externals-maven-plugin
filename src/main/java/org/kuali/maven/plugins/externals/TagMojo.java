@@ -36,7 +36,7 @@ public class TagMojo extends AbstractTagMojo {
 
 	@Override
 	public void execute() throws MojoExecutionException {
-		helper.createAndUpdateTag(this);
+		helper.createAndUpdateTags(this);
 	}
 
 	public TagStyle getTagStyle() {

@@ -33,7 +33,7 @@ public class ReleaseMojo extends AbstractTagMojo {
 
 	@Override
 	public void execute() throws MojoExecutionException {
-		helper.createAndUpdateTag(this);
+		helper.createAndUpdateTags(this);
 		getLog().info("Release has been successfully tagged.");
 		getLog().info("Incrementing version numbers for the next development iteration");
 		helper.incrementVersions(this);
