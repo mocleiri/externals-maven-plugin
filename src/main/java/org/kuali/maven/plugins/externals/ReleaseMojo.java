@@ -18,6 +18,10 @@ package org.kuali.maven.plugins.externals;
 import org.apache.maven.plugin.MojoExecutionException;
 
 /**
+ * Perform a release of a multi-module Maven project that contains svn:externals. The release process creates a separate tag for each module
+ * defined as an svn:external after trimming "-SNAPSHOT" off the version number. It then increments the version number in all of the
+ * respective poms and commits the updated poms.
+ *
  * @goal release
  */
 public class ReleaseMojo extends AbstractTagMojo {
