@@ -83,6 +83,8 @@ public class MojoHelper {
 		updateProperties(node, mojo.getProject().getProperties(), mojo.getMappings());
 		updateXml(node);
 		writePoms(node, mojo.getProject().getBasedir());
+		List<SVNExternal> externals = svnUtils.getExternals(mojo.getProject().getBasedir());
+		commitChanges(mojo.getProject().getBasedir(), externals, "[externals-maven-plugin] prepare for next development iteration");
 	}
 
 	protected List<DefaultMutableTreeNode> getChildren(DefaultMutableTreeNode node) {
@@ -195,7 +197,7 @@ public class MojoHelper {
 		updateExternalsFile(newExternals, mojo.getFile());
 
 		// Commit the changes to the tag
-		commitTagChanges(checkoutDir, newExternals, mojo.getUpdateTagMessage());
+		commitChanges(checkoutDir, newExternals, mojo.getUpdateTagMessage());
 	}
 
 	public GAV getGav(MavenProject project) {
@@ -421,11 +423,11 @@ public class MojoHelper {
 		logger.info("Updated svn:externals control file - " + externalsFile.getAbsolutePath());
 	}
 
-	public void commitTagChanges(File tagDir, List<SVNExternal> externals, String msg) {
+	public void commitChanges(File dir, List<SVNExternal> externals, String msg) {
 		List<File> workingCopyPaths = new ArrayList<File>();
-		workingCopyPaths.add(tagDir);
+		workingCopyPaths.add(dir);
 		for (SVNExternal external : externals) {
-			String path = tagDir.getAbsolutePath() + File.separator + external.getPath();
+			String path = dir.getAbsolutePath() + File.separator + external.getPath();
 			workingCopyPaths.add(new File(path));
 		}
 		File[] commitDirs = workingCopyPaths.toArray(new File[workingCopyPaths.size()]);
