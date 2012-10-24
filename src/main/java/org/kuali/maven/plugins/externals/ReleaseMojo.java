@@ -23,13 +23,13 @@ import org.apache.maven.plugin.MojoExecutionException;
 public class ReleaseMojo extends AbstractTagMojo {
 
 	@Override
-    public TagStyle getTagStyle() {
+	public TagStyle getTagStyle() {
 		return TagStyle.RELEASE;
 	}
 
 	@Override
 	public void execute() throws MojoExecutionException {
-		// helper.createAndUpdateTag(this);
+		helper.createAndUpdateTag(this);
 		helper.incrementVersions(this);
 	}
 
