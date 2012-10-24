@@ -92,16 +92,19 @@ public class MojoHelper {
 	}
 
 	public void incrementVersions(DefaultMutableTreeNode node) {
+		int level = node.getLevel();
 		Project project = (Project) node.getUserObject();
 		if (!node.isRoot()) {
-			// GAV oldParentGav = project.getParent();
-			// DefaultMutableTreeNode parentNode = (DefaultMutableTreeNode) node.getParent();
-			// Project parentProject = (Project) parentNode.getUserObject();
-			// GAV newParentGav = parentProject.getGav();
-			// String newParentVersion = newParentGav.getVersion();
-			// oldParentGav.setVersion(newParentVersion);
+			GAV oldParentGav = project.getParent();
+			DefaultMutableTreeNode parentNode = (DefaultMutableTreeNode) node.getParent();
+			Project parentProject = (Project) parentNode.getUserObject();
+			GAV newParentGav = parentProject.getGav();
+			String oldParentVersion = oldParentGav.getVersion();
+			String newParentVersion = newParentGav.getVersion();
+			oldParentGav.setVersion(newParentVersion);
+			logger.debug(StringUtils.repeat("  ", level) + "update parent: " + oldParentGav.getArtifactId() + ":" + oldParentGav.getArtifactId() + ":" + oldParentVersion + "->"
+			        + newParentVersion);
 		}
-		int level = node.getLevel();
 		GAV gav = project.getGav();
 		String oldVersion = gav.getVersion();
 		if (!StringUtils.isBlank(oldVersion)) {
