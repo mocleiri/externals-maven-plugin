@@ -79,6 +79,10 @@ public class MojoHelper {
 		List<DefaultMutableTreeNode> nodes = getNodes(files);
 		DefaultMutableTreeNode node = getTree(mojo.getProject().getBasedir(), nodes, mojo.getPom());
 		incrementVersions(node);
+		updateGavs(node);
+		updateProperties(node, mojo.getProject().getProperties(), mojo.getMappings());
+		updateXml(node);
+		writePoms(node, mojo.getProject().getBasedir());
 	}
 
 	protected List<DefaultMutableTreeNode> getChildren(DefaultMutableTreeNode node) {
@@ -92,25 +96,17 @@ public class MojoHelper {
 	}
 
 	public void incrementVersions(DefaultMutableTreeNode node) {
-		int level = node.getLevel();
 		Project project = (Project) node.getUserObject();
-		if (!node.isRoot()) {
-			GAV oldParentGav = project.getParent();
-			DefaultMutableTreeNode parentNode = (DefaultMutableTreeNode) node.getParent();
-			Project parentProject = (Project) parentNode.getUserObject();
-			GAV newParentGav = parentProject.getGav();
-			String oldParentVersion = oldParentGav.getVersion();
-			String newParentVersion = newParentGav.getVersion();
-			oldParentGav.setVersion(newParentVersion);
-			logger.debug(StringUtils.repeat("  ", level) + "update parent: " + oldParentGav.getArtifactId() + ":" + oldParentGav.getArtifactId() + ":" + oldParentVersion + "->"
-			        + newParentVersion);
-		}
 		GAV gav = project.getGav();
 		String oldVersion = gav.getVersion();
 		if (!StringUtils.isBlank(oldVersion)) {
 			String newVersion = getNextVersion(oldVersion);
-			gav.setVersion(newVersion);
-			logger.info(StringUtils.repeat("  ", level) + gav.getArtifactId() + ":" + gav.getArtifactId() + ":" + oldVersion + "->" + newVersion);
+			GAV newGav = new GAV();
+			newGav.setGroupId(gav.getGroupId());
+			newGav.setArtifactId(gav.getArtifactId());
+			newGav.setVersion(newVersion);
+			project.setNewGav(newGav);
+			logger.info(StringUtils.repeat("  ", node.getLevel()) + gav.getArtifactId() + ":" + gav.getArtifactId() + ":" + oldVersion + "->" + newVersion);
 		}
 		List<DefaultMutableTreeNode> children = getChildren(node);
 		for (DefaultMutableTreeNode child : children) {
@@ -451,6 +447,24 @@ public class MojoHelper {
 		}
 	}
 
+	public void writePoms(DefaultMutableTreeNode node, File baseDir) {
+		int count = 0;
+		Enumeration<?> e = node.depthFirstEnumeration();
+		while (e.hasMoreElements()) {
+			DefaultMutableTreeNode element = (DefaultMutableTreeNode) e.nextElement();
+			Project project = (Project) element.getUserObject();
+			File pom = project.getPom();
+			String oldContents = read(pom);
+			String newContents = project.getPomContents();
+			if (!oldContents.equals(newContents)) {
+				logger.debug("Updating " + pom.getAbsolutePath());
+				write(pom, newContents);
+				count++;
+			}
+		}
+		logger.info("Updated " + count + " Maven pom's");
+	}
+
 	public void writePoms(DefaultMutableTreeNode node, File baseDir, File checkoutDir) {
 		int count = 0;
 		Enumeration<?> e = node.depthFirstEnumeration();
@@ -519,7 +533,11 @@ public class MojoHelper {
 		while (children.hasMoreElements()) {
 			DefaultMutableTreeNode child = (DefaultMutableTreeNode) children.nextElement();
 			Project childProject = (Project) child.getUserObject();
-			childProject.getParent().setVersion(getVersion(node));
+			String oldParentVersion = childProject.getParent().getVersion();
+			String newParentVersion = getVersion(node);
+			if (!oldParentVersion.equals(newParentVersion)) {
+				childProject.getParent().setVersion(newParentVersion);
+			}
 			updateGavs(child);
 		}
 	}
