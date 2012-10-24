@@ -22,6 +22,7 @@ import java.util.Properties;
 
 import javax.swing.tree.DefaultMutableTreeNode;
 
+import org.junit.Assert;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,6 +35,20 @@ public class MojoHelperTest {
 	private static final String POM = "pom.xml";
 	private static final String IGNORE = "src,target,.svn,.git";
 	private static final File BASEDIR = new File("/Users/jeffcaddel/ws/aggregate");
+
+	@Test
+	public void testIsReleaseCandidate() {
+		String s1 = "rc1";
+		String s2 = "Rc1";
+		String s3 = "RC1";
+		String s4 = "rC2";
+
+		Assert.assertTrue(helper.isReleaseCandidate(s1));
+		Assert.assertTrue(helper.isReleaseCandidate(s2));
+		Assert.assertTrue(helper.isReleaseCandidate(s3));
+		Assert.assertTrue(helper.isReleaseCandidate(s4));
+
+	}
 
 	@Test
 	public void testValidate() {

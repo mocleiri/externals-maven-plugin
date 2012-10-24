@@ -51,6 +51,7 @@ import org.tmatesoft.svn.core.SVNCommitInfo;
 public class MojoHelper {
 	private static final Logger logger = LoggerFactory.getLogger(MojoHelper.class);
 	private static final String MAVEN_SNAPSHOT_TOKEN = "SNAPSHOT";
+	private static final char[] DIGITS = new char[] { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9' };
 	SVNUtils svnUtils = SVNUtils.getInstance();
 	POMUtils pomUtils = new POMUtils();
 	Extractor extractor = new Extractor();
@@ -77,44 +78,102 @@ public class MojoHelper {
 		List<File> files = getPoms(mojo.getProject().getBasedir(), mojo.getPom(), mojo.getIgnoreDirectories());
 		List<DefaultMutableTreeNode> nodes = getNodes(files);
 		DefaultMutableTreeNode node = getTree(mojo.getProject().getBasedir(), nodes, mojo.getPom());
-		
+		incrementVersions(node);
+	}
+
+	protected List<DefaultMutableTreeNode> getChildren(DefaultMutableTreeNode node) {
+		Enumeration<?> e = node.children();
+		List<DefaultMutableTreeNode> children = new ArrayList<DefaultMutableTreeNode>();
+		while (e.hasMoreElements()) {
+			DefaultMutableTreeNode child = (DefaultMutableTreeNode) e.nextElement();
+			children.add(child);
+		}
+		return children;
+	}
+
+	public void incrementVersions(DefaultMutableTreeNode node) {
+		Project project = (Project) node.getUserObject();
+		if (!node.isRoot()) {
+			// GAV oldParentGav = project.getParent();
+			// DefaultMutableTreeNode parentNode = (DefaultMutableTreeNode) node.getParent();
+			// Project parentProject = (Project) parentNode.getUserObject();
+			// GAV newParentGav = parentProject.getGav();
+			// String newParentVersion = newParentGav.getVersion();
+			// oldParentGav.setVersion(newParentVersion);
+		}
+		int level = node.getLevel();
+		GAV gav = project.getGav();
+		String oldVersion = gav.getVersion();
+		if (!StringUtils.isBlank(oldVersion)) {
+			String newVersion = getNextVersion(oldVersion);
+			gav.setVersion(newVersion);
+			logger.info(StringUtils.repeat("  ", level) + gav.getArtifactId() + ":" + gav.getArtifactId() + ":" + oldVersion + "->" + newVersion);
+		}
+		List<DefaultMutableTreeNode> children = getChildren(node);
+		for (DefaultMutableTreeNode child : children) {
+			incrementVersions(child);
+		}
 	}
 
 	public void createAndUpdateTag(AbstractTagMojo mojo) {
+
+		// Extract the Jenkins build number. Defaults to zero if no BUILD_NUMBER is set
 		int buildNumber = getBuildNumber(mojo.getProject(), mojo.getBuildNumberProperty());
+
+		// Create a GAV object from the Maven project
 		GAV gav = getGav(mojo.getProject());
 
+		// Scan the file system for pom.xml files
 		List<File> files = getPoms(mojo.getProject().getBasedir(), mojo.getPom(), mojo.getIgnoreDirectories());
+
+		// Convert the list of files into a list of node objects
 		List<DefaultMutableTreeNode> nodes = getNodes(files);
+
+		// Build a tree from the list
 		DefaultMutableTreeNode node = getTree(mojo.getProject().getBasedir(), nodes, mojo.getPom());
 
 		// Extract svn:externals info from the root of the checkout
 		List<SVNExternal> externals = svnUtils.getExternals(mojo.getProject().getBasedir());
+
 		// Make sure the modules listed in the pom match the svn:externals definitions and the mappings provided in the plugin config
 		validate(mojo.getProject(), externals, mojo.getMappings());
+
 		// Calculate the build tag for the root
 		BuildTag rootTag = getBuildTag(mojo.getProject().getBasedir(), gav, mojo.getTagStyle(), buildNumber);
+
 		// Update build info for the root node
 		updateBuildInfo(node, rootTag, mojo.getTagStyle(), buildNumber);
+
 		// Calculate build tags for each module
 		List<BuildTag> moduleTags = getBuildTags(mojo.getProject().getProperties(), externals, mojo.getMappings(), mojo.getTagStyle(), buildNumber);
+
 		// Update build information for nodes that represent an svn:external
 		updateBuildInfo(nodes, moduleTags, mojo.getMappings(), mojo.getTagStyle(), buildNumber);
+
 		// Recursively update the mojo.getProject() gav's and parent gav's
 		updateGavs(node);
+
 		// Recursively update the corresponding Maven pom's
 		updateXml(node);
+
 		// Update the properties in the root pom that hold version info for the modules
 		updateProperties(node, mojo.getProject().getProperties(), mojo.getMappings());
+
 		// Update the <scm> info in the root pom
 		updateScm(node, mojo.getScmUrlPrefix());
+
 		// Create new svn:externals definitions based on the newly created tags
 		List<SVNExternal> newExternals = getExternals(moduleTags, mojo.getMappings());
+
 		// Create the module tags
 		createTags(moduleTags, mojo.getCreateTagMessage());
+
 		// Create the root tag
 		createTag(rootTag, mojo.getCreateTagMessage());
+
+		// The directory the tag was checked out to
 		File checkoutDir = mojo.getCheckoutDir();
+
 		// Update svn:externals definitions on the root tag so they point to the new module tags
 		SVNCommitInfo info = svnUtils.setExternals(rootTag.getTagUrl(), newExternals, mojo.getExternalsMessage());
 		logger.info("Set " + newExternals.size() + " externals @ " + rootTag.getTagUrl());
@@ -129,10 +188,13 @@ public class MojoHelper {
 		long revision = svnUtils.checkout(rootTag.getTagUrl(), checkoutDir, null, null);
 		logTime("Total checkout time: ", System.currentTimeMillis() - start);
 		logger.info("Checked out revision " + revision + ".");
+
 		// Update the poms in the directory where the tag has been checked out
 		writePoms(node, mojo.getProject().getBasedir(), checkoutDir);
+
 		// Update the svn.externals file in the tag
 		updateExternalsFile(newExternals, mojo.getFile());
+
 		// Commit the changes to the tag
 		commitTagChanges(checkoutDir, newExternals, mojo.getUpdateTagMessage());
 	}
@@ -231,6 +293,10 @@ public class MojoHelper {
 		return sb.toString();
 	}
 
+	/**
+	 * Convert each pom.xml into a <code>Project</code> object and then store each <code>Project</code> as the user object in a
+	 * <code>DefaultMutableTreeNode</code>
+	 */
 	protected List<DefaultMutableTreeNode> getNodes(List<File> files) {
 		List<DefaultMutableTreeNode> nodes = new ArrayList<DefaultMutableTreeNode>();
 		for (File file : files) {
@@ -657,6 +723,11 @@ public class MojoHelper {
 		return buildTag;
 	}
 
+	/**
+	 * Assuming version is in the form <code>1.0.0-beta-SNAPSHOT</code>, this method returns <code>1.0.0-beta-r3201</code> when
+	 * <code>TagStyle=REVISION</code>, <code>1.0.0-beta-build-187</code> when <code>TagStyle=BUILDNUMBER</code>, and <code>1.0.0-beta</code>
+	 * when <code>TagStyle=RELEASE</code>
+	 */
 	public String getNewVersion(String version, int buildNumber, long revision, TagStyle tagStyle) {
 		String trimmed = trimSnapshot(version);
 		switch (tagStyle) {
@@ -680,9 +751,18 @@ public class MojoHelper {
 			throw new IllegalArgumentException(version + " is not a " + MAVEN_SNAPSHOT_TOKEN);
 		}
 		Version v = parseVersion(version);
-		Integer oldIncremental = new Integer(v.getIncremental());
-		Integer newIncremental = oldIncremental + 1;
-		v.setIncremental(newIncremental.toString());
+
+		boolean incrementQualifier = isKnownQualifier(v.getQualifier());
+		if (incrementQualifier) {
+			String oldQualifier = v.getQualifier();
+			String newQualifier = getNextQualifier(oldQualifier);
+			v.setQualifier(newQualifier);
+		} else {
+			Integer oldIncremental = new Integer(v.getIncremental());
+			Integer newIncremental = oldIncremental + 1;
+			v.setIncremental(newIncremental.toString());
+		}
+
 		StringBuilder sb = new StringBuilder();
 		sb.append(v.getMajor());
 		sb.append(".");
@@ -690,10 +770,69 @@ public class MojoHelper {
 		sb.append(".");
 		sb.append(v.getIncremental());
 		sb.append("-");
-		sb.append(v.getQualifier());
-		sb.append("-");
+		if (!StringUtils.isBlank(v.getQualifier())) {
+			sb.append(v.getQualifier());
+			sb.append("-");
+		}
 		sb.append(MAVEN_SNAPSHOT_TOKEN);
 		return sb.toString();
+	}
+
+	protected String getNextQualifier(String qualifier) {
+		if (isReleaseCandidate(qualifier)) {
+			String token = qualifier.substring(2);
+			Integer oldVersion = new Integer(token);
+			Integer newVersion = oldVersion + 1;
+			return qualifier.substring(0, 2) + newVersion;
+		}
+		if (isMilestone(qualifier)) {
+			String token = qualifier.substring(1);
+			Integer oldVersion = new Integer(token);
+			Integer newVersion = oldVersion + 1;
+			return qualifier.substring(0, 1) + newVersion;
+		}
+		throw new IllegalArgumentException("'" + qualifier + "' is not a milestone or release candidate qualifier");
+	}
+
+	protected boolean isKnownQualifier(String qualifier) {
+		return isReleaseCandidate(qualifier) || isMilestone(qualifier);
+	}
+
+	protected boolean isReleaseCandidate(String qualifier) {
+		if (StringUtils.isBlank(qualifier)) {
+			return false;
+		}
+		if (qualifier.length() < 3) {
+			return false;
+		}
+		if (!qualifier.toUpperCase().startsWith("RC")) {
+			return false;
+		}
+		char thirdCharacter = qualifier.charAt(2);
+		return isDigit(thirdCharacter);
+	}
+
+	protected boolean isMilestone(String qualifier) {
+		if (StringUtils.isBlank(qualifier)) {
+			return false;
+		}
+		if (qualifier.length() < 2) {
+			return false;
+		}
+		if (!qualifier.toUpperCase().startsWith("M")) {
+			return false;
+		}
+		char secondCharacter = qualifier.charAt(1);
+		return isDigit(secondCharacter);
+	}
+
+	protected boolean isDigit(char c) {
+		for (char digit : DIGITS) {
+			if (c == digit) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	public String getTag(String url, String version, String artifactId, int buildNumber, long revision, TagStyle tagStyle) {
