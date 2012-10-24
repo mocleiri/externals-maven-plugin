@@ -19,8 +19,8 @@ import org.apache.maven.plugin.MojoExecutionException;
 
 /**
  * Perform a release of a multi-module Maven project that contains svn:externals. The release process creates a separate tag for each module
- * defined as an svn:external after trimming "-SNAPSHOT" off the version number. It then increments the version number in all of the
- * respective poms and commits the updated poms.
+ * defined as an svn:external after trimming "-SNAPSHOT" off the version number. It then increments the version number in the root poms and
+ * re-appends the SNAPSHOT qualifier before committing the altered poms.
  *
  * @goal release
  */
