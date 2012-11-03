@@ -277,9 +277,11 @@ public class SVNUtils {
 	}
 
 	/**
-	 * Convert the SVN info into <code>SVNExternal</code> objects
+	 * Convert the svn:externals definitions into a <code>List</code> of <code>SVNExternal</code> objects. This method never returns
+	 * <code>null</code>. If there are no svn:externals definitions an empty <code>List</code> is returned.
 	 */
 	protected List<SVNExternal> getExternals(SVNPropertyData data, File workingCopyPath) {
+
 		// The property svn:externals is not set on this directory
 		if (data == null) {
 			return new ArrayList<SVNExternal>();
@@ -301,13 +303,8 @@ public class SVNUtils {
 			// Trim whitespace
 			token = token.trim();
 
-			// Ignore comments
-			if (token.startsWith(EXTERNALS_COMMENT)) {
-				continue;
-			}
-
-			// Ignore blank lines
-			if (StringUtils.isBlank(token)) {
+			// Ignore comments and blank lines
+			if (token.startsWith(EXTERNALS_COMMENT) || StringUtils.isBlank(token)) {
 				continue;
 			}
 
@@ -320,7 +317,7 @@ public class SVNUtils {
 
 			// If we don't have exactly 2 non-blank tokens there is trouble
 			if (values.length != 2) {
-				throw new IllegalStateException("Unparseable svn:externals definition - " + token);
+				throw new IllegalStateException("Unparseable svn:externals definition - [" + token + ", " + workingCopyPath + "]");
 			}
 
 			// Extract the 2 values we are interested in
@@ -331,7 +328,7 @@ public class SVNUtils {
 			String url = getUrl(value1, value2);
 			String path = getPath(value1, value2);
 
-			// Get the file representing a directory relative to the current working copies path
+			// Get the file representing the local working copy of the svn:external
 			File externalsPath = getExternalWorkingCopyPath(workingCopyPath, path);
 
 			// Store the info we've accumulated into an object
@@ -343,6 +340,8 @@ public class SVNUtils {
 			// Add our object to the list
 			externals.add(external);
 		}
+
+		// Return the list we've found
 		return externals;
 	}
 
