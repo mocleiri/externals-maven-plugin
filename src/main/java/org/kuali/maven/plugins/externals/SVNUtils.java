@@ -55,6 +55,7 @@ public class SVNUtils {
 	private static final String CREATE_EXTERNALS_COMMIT_MESSAGE = "Create externals";
 	private static final String LINEFEED = "\n";
 	private static final String SPACE = " ";
+	private static final String SEMICOLON = ":";
 
 	protected static SVNUtils instance;
 
@@ -88,28 +89,32 @@ public class SVNUtils {
 	}
 
 	/**
-	 * Copy <code>src</code> to <code>dst</code> creating parent directories as needed. An exception is thrown if <code>dst</code> already exists.
+	 * Copy <code>src</code> to <code>dst</code> creating parent directories as needed. An exception is thrown if <code>dst</code> already
+	 * exists.
 	 */
 	public SVNCommitInfo copy(String src, String dst) {
 		return copy(src, null, dst, null);
 	}
 
 	/**
-	 * Copy <code>src</code> to <code>dst</code> creating parent directories as needed. An exception is thrown if <code>dst</code> already exists.
+	 * Copy <code>src</code> to <code>dst</code> creating parent directories as needed. An exception is thrown if <code>dst</code> already
+	 * exists.
 	 */
 	public SVNCommitInfo copy(String src, String dst, String msg) {
 		return copy(src, null, dst, msg);
 	}
 
 	/**
-	 * Copy <code>src</code> at the indicated revision to <code>dst</code> creating parent directories as needed. An exception is thrown if <code>dst</code> already exists.
+	 * Copy <code>src</code> at the indicated revision to <code>dst</code> creating parent directories as needed. An exception is thrown if
+	 * <code>dst</code> already exists.
 	 */
 	public SVNCommitInfo copy(String src, Long revision, String dst) {
 		return copy(src, revision, dst, null);
 	}
 
 	/**
-	 * Copy <code>src</code> at the indicated revision to <code>dst</code> creating parent directories as needed. An exception is thrown if <code>dst</code> already exists.
+	 * Copy <code>src</code> at the indicated revision to <code>dst</code> creating parent directories as needed. An exception is thrown if
+	 * <code>dst</code> already exists.
 	 */
 	public SVNCommitInfo copy(String src, Long revision, String dst, String msg) {
 		Copy copy = new Copy();
@@ -271,33 +276,94 @@ public class SVNUtils {
 		return getLastRevision(repository);
 	}
 
+	/**
+	 * Convert the SVN info into <code>SVNExternal</code> objects
+	 */
 	protected List<SVNExternal> getExternals(SVNPropertyData data, File workingCopyPath) {
+		// The property svn:externals is not set on this directory
 		if (data == null) {
 			return new ArrayList<SVNExternal>();
 		}
+
+		// Extract the property value
 		SVNPropertyValue value = data.getValue();
+
+		// Convert the value to a String
 		String s = SVNPropertyValue.getPropertyAsString(value);
+
+		// Split the string up into lines
 		String[] tokens = StringUtils.split(s, LINEFEED);
+
+		// Iterate through the lines looking for externals
 		List<SVNExternal> externals = new ArrayList<SVNExternal>();
 		for (String token : tokens) {
+
+			// Trim whitespace
 			token = token.trim();
+
+			// Ignore comments
 			if (token.startsWith(EXTERNALS_COMMENT)) {
 				continue;
 			}
+
+			// Ignore blank lines
 			if (StringUtils.isBlank(token)) {
 				continue;
 			}
+
+			// We've located a non-blank, non-comment line
+			// We've already trimmed off leading and trailing whitespace
+			// Split up the remaining portion of the string using space as a delimiter
+			// The split method skips all spaces in the line (even adjacent spaces)
+			// The String[] returned by split() will only contain tokens with non-space characters
 			String[] values = StringUtils.split(token, SPACE);
-			String path = values[0];
-			String url = values[1];
+
+			// If we don't have exactly 2 non-blank tokens there is trouble
+			if (values.length != 2) {
+				throw new IllegalStateException("Unparseable svn:externals definition - " + token);
+			}
+
+			// Extract the 2 values we are interested in
+			String value1 = values[0];
+			String value2 = values[1];
+
+			// Some SVN clients store svn:externals as <module> <location>, others store it as <location> <module>
+			String url = getUrl(value1, value2);
+			String path = getPath(value1, value2);
+
+			// Get the file representing a directory relative to the current working copies path
 			File externalsPath = getExternalWorkingCopyPath(workingCopyPath, path);
+
+			// Store the info we've accumulated into an object
 			SVNExternal external = new SVNExternal();
 			external.setUrl(url);
 			external.setPath(path);
 			external.setWorkingCopyPath(externalsPath);
+
+			// Add our object to the list
 			externals.add(external);
 		}
 		return externals;
+	}
+
+	protected boolean isUrl(String s) {
+		return s.contains(SEMICOLON);
+	}
+
+	protected String getUrl(String value1, String value2) {
+		if (isUrl(value1)) {
+			return value1;
+		} else {
+			return value2;
+		}
+	}
+
+	protected String getPath(String value1, String value2) {
+		if (isUrl(value1)) {
+			return value2;
+		} else {
+			return value1;
+		}
 	}
 
 	protected File getExternalWorkingCopyPath(File workingCopyPath, String path) {

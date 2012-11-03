@@ -30,6 +30,17 @@ public class SVNUtilsTest {
 	String password = System.getProperty("svn.password");
 
 	// @Test
+	public void testGetExternalsFromWorkingCopyPath2() {
+		try {
+			File workingCopyPath = new File("/Users/jeffcaddel/ws/aggregate");
+			List<SVNExternal> externals = svnUtils.getExternals(workingCopyPath);
+			svnUtils.showExternals(externals);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+
+	// @Test
 	public void testDeleteExternals() {
 		try {
 			String url = "https://svn.kuali.org/repos/student/sandbox/enrollment/aggregate/tags/builds/student-2.0/2.0.0/r36447";
