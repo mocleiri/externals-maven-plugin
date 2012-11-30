@@ -24,6 +24,7 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.project.MavenProject;
+import org.tmatesoft.svn.core.SVNCommitInfo;
 
 /**
  * @goal dirsync
@@ -73,17 +74,24 @@ public class DirSyncMojo extends AbstractMojo {
 	public void execute() throws MojoExecutionException {
 		try {
 			getLog().info("Syncing directories");
-			getLog().info("Old Dir - " + oldDir.getCanonicalPath());
 			getLog().info("New Dir - " + newDir.getCanonicalPath());
+			getLog().info("Old Dir - " + oldDir.getCanonicalPath());
 			getLog().info("Include - " + include);
 			getLog().info("Exclude - " + exclude);
 			List<File> oldFiles = getFiles(oldDir, include, exclude);
 			List<File> newFiles = getFiles(newDir, include, exclude);
 			List<File> deletes = getDeletableFiles(newDir, oldDir, newFiles, oldFiles);
+			if (deletes.size() == 0) {
+				getLog().info("No files to delete.");
+				return;
+			}
 			getLog().info("Located - " + deletes.size() + " files to delete");
 			for (File delete : deletes) {
 				getLog().info("Deleting " + delete);
 			}
+			svnUtils.markForDeletion(deletes);
+			SVNCommitInfo info = svnUtils.commit(oldDir, commitMessage, null, null);
+			getLog().info("Committed revision " + info.getNewRevision() + ".");
 		} catch (Exception e) {
 			throw new MojoExecutionException("Unexpected error", e);
 		}

@@ -17,6 +17,7 @@ package org.kuali.maven.plugins.externals;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import org.apache.commons.lang.StringUtils;
@@ -168,6 +169,39 @@ public class SVNUtils {
 		} catch (SVNException e) {
 			throw new IllegalStateException(e);
 		}
+	}
+
+	public void markForDeletion(List<File> files) {
+		SVNWCClient client = getSVNWCClient();
+		try {
+			for (File file : files) {
+				client.doDelete(file, true, false);
+			}
+		} catch (SVNException e) {
+			throw new IllegalStateException(e);
+		}
+	}
+
+	protected SVNURL[] getSvnUrlArray(List<File> files) {
+		String singleSlashPrefix = "file:/";
+		String doubleSlashPrefix = "file://";
+		SVNURL[] array = new SVNURL[files.size()];
+		for (int i = 0; i < files.size(); i++) {
+			File file = files.get(i);
+			String fileUrlString = file.toURI().toString();
+			boolean singleSlash = StringUtils.startsWith(fileUrlString, singleSlashPrefix);
+			boolean doubleSlash = StringUtils.startsWith(fileUrlString, doubleSlashPrefix);
+			if (singleSlash && !doubleSlash) {
+				fileUrlString = StringUtils.replace(fileUrlString, singleSlashPrefix, doubleSlashPrefix);
+			}
+			SVNURL fileUrl = getSvnUrl(fileUrlString);
+			array[i] = fileUrl;
+		}
+		return array;
+	}
+
+	public void markForDeletion(File file) {
+		markForDeletion(Collections.singletonList(file));
 	}
 
 	public SVNCommitInfo copy(Copy copy) {
