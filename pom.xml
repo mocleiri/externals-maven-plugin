@@ -25,16 +25,16 @@
   </parent>
   <groupId>org.kuali.maven.plugins</groupId>
   <artifactId>externals-maven-plugin</artifactId>
-  <version>1.0.7-SNAPSHOT</version>
+  <version>1.0.7</version>
   <packaging>maven-plugin</packaging>
   <url>http://${kuali.site.hostname}/maven/plugins/${project.artifactId}/${project.version}</url>
   <name>Externals Maven Plugin</name>
   <inceptionYear>2011</inceptionYear>
   <description>Tooling for integrating Maven with Subversion externals</description>
   <scm>
-    <connection>scm:svn:https://svn.kuali.org/repos/foundation/trunk/externals-maven-plugin</connection>
-    <developerConnection>scm:svn:https://svn.kuali.org/repos/foundation/trunk/externals-maven-plugin</developerConnection>
-    <url>https://svn.kuali.org/repos/foundation/trunk/externals-maven-plugin</url>
+    <connection>scm:svn:https://svn.kuali.org/repos/foundation/tags/externals-maven-plugin-1.0.7</connection>
+    <developerConnection>scm:svn:https://svn.kuali.org/repos/foundation/tags/externals-maven-plugin-1.0.7</developerConnection>
+    <url>https://svn.kuali.org/repos/foundation/tags/externals-maven-plugin-1.0.7</url>
   </scm>
   <developers>
     <developer>
