@@ -98,7 +98,7 @@ public class DirSyncMojo extends AbstractMojo {
 			}
 			getLog().info("Located - " + deletes.size() + " files to delete");
 			for (File delete : deletes) {
-				getLog().info("Deleting " + delete);
+				getLog().info("Deleting " + delete.getCanonicalPath());
 			}
 			svnUtils.markForDeletion(deletes);
 			SVNCommitInfo info = svnUtils.commit(oldDir, commitMessage, null, null);
