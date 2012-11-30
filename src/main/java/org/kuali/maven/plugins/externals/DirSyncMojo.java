@@ -27,6 +27,9 @@ import org.apache.maven.project.MavenProject;
 import org.tmatesoft.svn.core.SVNCommitInfo;
 
 /**
+ * This mojo examines <code>oldDir</code> for any files that are not also in <code>newDir</code>. If it finds any, it deletes them from
+ * Subversion.
+ *
  * @goal dirsync
  */
 public class DirSyncMojo extends AbstractMojo {
