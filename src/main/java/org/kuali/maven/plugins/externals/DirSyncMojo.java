@@ -68,14 +68,14 @@ public class DirSyncMojo extends AbstractMojo {
 	private File oldDir;
 
 	/**
-	 * Regex pattern for files in new dir that should be included
+	 * Regex pattern for files that should be included
 	 *
 	 * @parameter expression="${externals.include}" default-value="\*\*\/\*"
 	 */
 	private String include;
 
 	/**
-	 * Regex pattern for files in new dir that should be excluded
+	 * Regex pattern for files that should be excluded
 	 *
 	 * @parameter expression="${externals.exclude}"
 	 */
