@@ -49,7 +49,7 @@ public class DirSyncMojo extends AbstractMojo {
 	private String commitMessage;
 
 	/**
-	 * This is the new directory containing the canonical list of files for check in.
+	 * This is the new directory containing the canonical list of files that should be under version control.
 	 *
 	 * @parameter expression="${externals.newDir}"
 	 * @required
@@ -57,7 +57,7 @@ public class DirSyncMojo extends AbstractMojo {
 	private File newDir;
 
 	/**
-	 * This is the old directory containing files that were previously checked in.
+	 * This is the old directory containing files that were previously under version control.
 	 *
 	 * @parameter expression="${externals.oldDir}"
 	 * @required
