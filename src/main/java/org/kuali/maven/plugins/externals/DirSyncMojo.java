@@ -52,7 +52,7 @@ public class DirSyncMojo extends AbstractMojo {
 	private String commitMessage;
 
 	/**
-	 * This is the new directory containing the canonical list of files that should be under version control.
+	 * This is the new directory containing files that should be under version control.
 	 *
 	 * @parameter expression="${externals.newDir}"
 	 * @required
