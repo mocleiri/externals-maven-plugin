@@ -42,8 +42,8 @@
               </goals>
               <phase>test</phase>
               <configuration>
-                <oldDir>foo</oldDir>
-                <newDir>bar</newDir>
+                <newDir>/Users/jeffcaddel/sts/3.0.0-e4.2/workspace/ole-kfs-5.0/ole-app/ole-db/ole-liquibase/ole-liquibase-changeset/target/liquibase/org/kuali/ole/liquibase/sql/mysql</newDir>
+                <oldDir>/Users/jeffcaddel/sts/3.0.0-e4.2/workspace/ole-kfs-5.0/ole-app/ole-db/ole-sql/ole-liquibase-sql/src/main/resources/org/kuali/ole/sql/mysql</oldDir>
               </configuration>
             </execution>
           </executions>
