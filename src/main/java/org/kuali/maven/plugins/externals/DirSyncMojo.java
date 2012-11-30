@@ -52,7 +52,7 @@ public class DirSyncMojo extends AbstractMojo {
 	private String commitMessage;
 
 	/**
-	 * This is the new directory containing files that should be under version control.
+	 * This is the directory containing files that should be under version control.
 	 *
 	 * @parameter expression="${externals.newDir}"
 	 * @required
@@ -60,7 +60,7 @@ public class DirSyncMojo extends AbstractMojo {
 	private File newDir;
 
 	/**
-	 * This is the old directory containing files that were previously under version control.
+	 * This is the directory containing files that are already under version control.
 	 *
 	 * @parameter expression="${externals.oldDir}"
 	 * @required
@@ -134,8 +134,9 @@ public class DirSyncMojo extends AbstractMojo {
 	}
 
 	protected List<File> getFiles(File dir, String includes, String excludes) {
-
-		SimpleScanner scanner = new SimpleScanner(dir, includes, excludes);
+		String[] includeTokens = StringUtils.split(includes, ",");
+		String[] excludeTokens = StringUtils.split(excludes, ",");
+		SimpleScanner scanner = new SimpleScanner(dir, includeTokens, excludeTokens);
 		return scanner.getFiles();
 	}
 
