@@ -28,19 +28,25 @@ public class SimpleScanner extends DirectoryScanner {
 	private static final String FS = System.getProperty("file.separator");
 
 	public SimpleScanner() {
-		this(null, null, null);
+		this(null, getArray(null), getArray(null));
 	}
 
 	public SimpleScanner(File baseDir, String include, String exclude) {
+		this(baseDir, getArray(include), getArray(exclude));
+	}
+
+	public SimpleScanner(File baseDir, String[] includes, String[] excludes) {
 		super();
-		if (baseDir != null) {
-			setBasedir(baseDir);
-		}
-		if (include != null) {
-			setIncludes(new String[] { include });
-		}
-		if (exclude != null) {
-			setExcludes(new String[] { exclude });
+		setBasedir(baseDir);
+		setIncludes(includes);
+		setExcludes(excludes);
+	}
+
+	protected static final String[] getArray(String s) {
+		if (s == null) {
+			return null;
+		} else {
+			return new String[] { s };
 		}
 	}
 

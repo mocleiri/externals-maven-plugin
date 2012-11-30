@@ -68,18 +68,18 @@ public class DirSyncMojo extends AbstractMojo {
 	private File oldDir;
 
 	/**
-	 * Regex pattern for files that should be included
+	 * CSV list of regex patterns for files that should be included
 	 *
-	 * @parameter expression="${externals.include}" default-value="\*\*\/\*"
+	 * @parameter expression="${externals.include}" default-value="\*\*\/*"
 	 */
-	private String include;
+	private String includes;
 
 	/**
-	 * Regex pattern for files that should be excluded
+	 * CSV list of regex patterns for files that should be excluded
 	 *
-	 * @parameter expression="${externals.exclude}"
+	 * @parameter expression="${externals.exclude}" default-value="\*\*\/.svn/*,\*\*\/.git/*"
 	 */
-	private String exclude;
+	private String excludes;
 
 	@Override
 	public void execute() throws MojoExecutionException {
@@ -87,10 +87,10 @@ public class DirSyncMojo extends AbstractMojo {
 			getLog().info("Syncing directories");
 			getLog().info("New Dir - " + newDir.getCanonicalPath());
 			getLog().info("Old Dir - " + oldDir.getCanonicalPath());
-			getLog().info("Include - " + include);
-			getLog().info("Exclude - " + exclude);
-			List<File> oldFiles = getFiles(oldDir, include, exclude);
-			List<File> newFiles = getFiles(newDir, include, exclude);
+			getLog().info("Include - " + includes);
+			getLog().info("Exclude - " + excludes);
+			List<File> oldFiles = getFiles(oldDir, includes, excludes);
+			List<File> newFiles = getFiles(newDir, includes, excludes);
 			List<File> deletes = getDeletableFiles(newDir, oldDir, newFiles, oldFiles);
 			if (deletes.size() == 0) {
 				getLog().info("No files to delete.");
@@ -133,8 +133,9 @@ public class DirSyncMojo extends AbstractMojo {
 		return deletableFiles;
 	}
 
-	protected List<File> getFiles(File dir, String include, String exclude) {
-		SimpleScanner scanner = new SimpleScanner(dir, include, exclude);
+	protected List<File> getFiles(File dir, String includes, String excludes) {
+
+		SimpleScanner scanner = new SimpleScanner(dir, includes, excludes);
 		return scanner.getFiles();
 	}
 
@@ -162,20 +163,20 @@ public class DirSyncMojo extends AbstractMojo {
 		this.newDir = newDir;
 	}
 
-	public String getInclude() {
-		return include;
+	public String getIncludes() {
+		return includes;
 	}
 
-	public void setInclude(String include) {
-		this.include = include;
+	public void setIncludes(String include) {
+		this.includes = include;
 	}
 
-	public String getExclude() {
-		return exclude;
+	public String getExcludes() {
+		return excludes;
 	}
 
-	public void setExclude(String exclude) {
-		this.exclude = exclude;
+	public void setExcludes(String exclude) {
+		this.excludes = exclude;
 	}
 
 	public MavenProject getProject() {
