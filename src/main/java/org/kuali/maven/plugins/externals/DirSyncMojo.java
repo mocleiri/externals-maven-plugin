@@ -77,7 +77,7 @@ public class DirSyncMojo extends AbstractMojo {
 	/**
 	 * CSV list of regex patterns for files that should be excluded
 	 *
-	 * @parameter expression="${externals.exclude}" default-value="\*\*\/.svn/*,\*\*\/.git/*"
+	 * @parameter expression="${externals.exclude}" default-value="\*\*\/.svn/\*\*,\*\*\/.git/\*\*"
 	 */
 	private String excludes;
 
