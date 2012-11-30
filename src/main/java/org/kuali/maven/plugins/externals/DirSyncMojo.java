@@ -44,28 +44,36 @@ public class DirSyncMojo extends AbstractMojo {
 	/**
 	 * The message to associate with the commit
 	 *
-	 * @parameter expression="${externals.commitMessage}" default-value="[externals-maven-plugin] Sync dirs"
+	 * @parameter expression="${externals.commitMessage}" default-value="Sync directories"
 	 */
 	private String commitMessage;
 
 	/**
-	 * @parameter expression="${externals.oldDir}"
-	 * @required
-	 */
-	private File oldDir;
-
-	/**
+	 * This is the new directory containing the canonical list of files for check in.
+	 *
 	 * @parameter expression="${externals.newDir}"
 	 * @required
 	 */
 	private File newDir;
 
 	/**
+	 * This is the old directory containing files that were previously checked in.
+	 *
+	 * @parameter expression="${externals.oldDir}"
+	 * @required
+	 */
+	private File oldDir;
+
+	/**
+	 * Regex pattern for files in new dir that should be included
+	 *
 	 * @parameter expression="${externals.include}" default-value="\*\*\/\*"
 	 */
 	private String include;
 
 	/**
+	 * Regex pattern for files in new dir that should be excluded
+	 *
 	 * @parameter expression="${externals.exclude}"
 	 */
 	private String exclude;
