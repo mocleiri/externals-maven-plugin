@@ -39,6 +39,8 @@ import org.apache.commons.io.filefilter.FileFilterUtils;
 import org.apache.commons.io.filefilter.IOFileFilter;
 import org.apache.commons.lang.StringUtils;
 import org.apache.maven.project.MavenProject;
+import org.kuali.common.util.Version;
+import org.kuali.common.util.VersionUtils;
 import org.kuali.maven.common.Extractor;
 import org.kuali.maven.common.PropertiesUtils;
 import org.slf4j.Logger;
@@ -774,7 +776,7 @@ public class MojoHelper {
 		if (!version.contains(MAVEN_SNAPSHOT_TOKEN)) {
 			throw new IllegalArgumentException(version + " is not a " + MAVEN_SNAPSHOT_TOKEN);
 		}
-		Version v = parseVersion(version);
+		Version v = VersionUtils.getVersion(version);
 
 		boolean incrementQualifier = isKnownQualifier(v.getQualifier());
 		if (incrementQualifier) {
@@ -826,14 +828,26 @@ public class MojoHelper {
 		if (StringUtils.isBlank(qualifier)) {
 			return false;
 		}
+		if (StringUtils.contains(qualifier, ".")) {
+			return false;
+		}
+		if (StringUtils.contains(qualifier, "-")) {
+			return false;
+		}
 		if (qualifier.length() < 3) {
 			return false;
 		}
 		if (!qualifier.toUpperCase().startsWith("RC")) {
 			return false;
 		}
-		char thirdCharacter = qualifier.charAt(2);
-		return isDigit(thirdCharacter);
+		try {
+			String suffix = StringUtils.substring(qualifier, 2);
+			Integer.parseInt(suffix);
+			return true;
+		} catch (NumberFormatException e) {
+			// If we can't parse the right hand side return false
+			return false;
+		}
 	}
 
 	protected boolean isMilestone(String qualifier) {
@@ -846,8 +860,14 @@ public class MojoHelper {
 		if (!qualifier.toUpperCase().startsWith("M")) {
 			return false;
 		}
-		char secondCharacter = qualifier.charAt(1);
-		return isDigit(secondCharacter);
+		try {
+			String suffix = StringUtils.substring(qualifier, 1);
+			Integer.parseInt(suffix);
+			return true;
+		} catch (NumberFormatException e) {
+			// If we can't parse the right hand side return false
+			return false;
+		}
 	}
 
 	protected boolean isDigit(char c) {
