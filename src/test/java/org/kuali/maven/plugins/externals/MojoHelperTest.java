@@ -24,6 +24,8 @@ import javax.swing.tree.DefaultMutableTreeNode;
 
 import org.junit.Assert;
 import org.junit.Test;
+import org.kuali.common.util.Version;
+import org.kuali.common.util.VersionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,6 +37,17 @@ public class MojoHelperTest {
 	private static final String POM = "pom.xml";
 	private static final String IGNORE = "src,target,.svn,.git";
 	private static final File BASEDIR = new File("/Users/jeffcaddel/ws/aggregate");
+
+	@Test
+	public void testIsKnownQualifier() {
+		String version = "2.0.0-M6-CM20-SNAPSHOT";
+		String nextVersion = helper.getNextVersion(version);
+		System.out.println(nextVersion);
+		Version v = VersionUtils.getVersion(version);
+		String qualifier = v.getQualifier();
+		System.out.println(qualifier);
+		Assert.assertFalse(helper.isKnownQualifier(qualifier));
+	}
 
 	@Test
 	public void testIsReleaseCandidate() {
