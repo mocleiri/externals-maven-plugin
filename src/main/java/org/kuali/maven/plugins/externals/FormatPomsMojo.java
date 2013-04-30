@@ -43,7 +43,7 @@ public class FormatPomsMojo extends AbstractMojo {
 	/**
 	 * Directories to ignore when examining the file system
 	 * 
-	 * @parameter expression="${externals.ignoreDirectories}" default-value="src,target,.svn,.git"
+	 * @parameter expression="${externals.ignoreDirectories}" default-value="src,target,overlays,.svn,.git"
 	 */
 	private String ignoreDirectories;
 
