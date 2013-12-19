@@ -150,6 +150,23 @@ public class SVNUtils {
 			throw new IllegalStateException(e);
 		}
 	}
+	
+	public SVNCommitInfo setExternals(File repositoryPath, List<SVNExternal> externals, String message, String username, String password) {
+		SVNClientManager manager = SVNClientManager.newInstance(null, username, password);
+		SVNWCClient client = manager.getWCClient();
+		String commitMessage = StringUtils.isBlank(message) ? CREATE_EXTERNALS_COMMIT_MESSAGE : message;
+		SVNURL svnUrl = getSvnUrl(repositoryPath.getAbsolutePath());
+		StringBuilder sb = new StringBuilder();
+		for (SVNExternal external : externals) {
+			sb.append(external.getPath() + " " + external.getUrl() + "\n");
+		}
+		SVNPropertyValue value = SVNPropertyValue.create(sb.toString());
+		try {
+			return client.doSetProperty(svnUrl, EXTERNALS_PROPERTY_NAME, value, SVNRevision.HEAD, commitMessage, null, true, null);
+		} catch (SVNException e) {
+			throw new IllegalStateException(e);
+		}
+	}
 
 	public SVNCommitInfo deleteExternals(String url) {
 		return deleteExternals(url, null);
@@ -281,6 +298,19 @@ public class SVNUtils {
 		return commit(new File[] { workingCopyPath }, message, username, password);
 	}
 
+	public void addFiles (File workingCopyPath, String username, String password) {
+		
+		try {
+			SVNClientManager manager = SVNClientManager.newInstance(null, username, password);
+			SVNWCClient client = manager.getWCClient();
+			client.setIgnoreExternals(false);
+			client.doAdd(workingCopyPath, true, false, true, SVNDepth.INFINITY, true, true);
+			
+		} catch (SVNException e) {
+			throw new IllegalStateException(e);
+		}
+	
+	}
 	/**
 	 * Return any svn:externals associated with the working copy. Returns an empty list if there are none. Never returns null.
 	 */
@@ -454,7 +484,13 @@ public class SVNUtils {
 		try {
 			return SVNURL.parseURIDecoded(url);
 		} catch (SVNException e) {
-			throw new IllegalStateException(e);
+			
+			try {
+				return SVNURL.fromFile(new File (url));
+			} catch (SVNException e1) {
+				throw new IllegalStateException(e1);
+			}
+			
 		}
 	}
 }

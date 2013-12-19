@@ -16,18 +16,28 @@
 package org.kuali.maven.plugins.externals;
 
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 
 import javax.swing.tree.DefaultMutableTreeNode;
 
+import org.apache.commons.io.FileUtils;
+import org.apache.maven.wagon.PathUtils;
 import org.junit.Assert;
+import org.junit.BeforeClass;
+import org.junit.ComparisonFailure;
 import org.junit.Test;
+import org.junit.internal.runners.statements.Fail;
 import org.kuali.common.util.Version;
 import org.kuali.common.util.VersionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.tmatesoft.svn.core.SVNException;
+import org.tmatesoft.svn.core.SVNURL;
+import org.tmatesoft.svn.core.wc.SVNClientManager;
 
 public class MojoHelperTest {
 	private static final Logger logger = LoggerFactory.getLogger(SVNUtilsTest.class);
@@ -36,19 +46,147 @@ public class MojoHelperTest {
 	MojoHelper helper = MojoHelper.getInstance();
 	private static final String POM = "pom.xml";
 	private static final String IGNORE = "src,target,.svn,.git";
-	private static final File BASEDIR = new File("/Users/jeffcaddel/ws/aggregate");
+	private static final File BASEDIR = new File(System.getProperty("user.dir"), "target"+File.separator+"test-aggregate");
 
+	@BeforeClass
+	public static void beforeClass() {
+
+		if (!new File(BASEDIR, "pom.xml").exists()) {
+			logger.info("checking out the student-2.0.2-cm release tag into " + BASEDIR);
+			
+			// checkout a copy of the CM-2.0.2 release tag for verifying pom operations.
+			// this can take a while so only do it if the pom file isn't where it would be if the project were checked out there.
+			SVNUtils.getInstance().checkout("https://svn.kuali.org/repos/student/enrollment/aggregate/tags/student-2.0.2-cm",BASEDIR, "", "");
+			
+			logger.info("check out complete");
+		}
+	}
 	@Test
 	public void testIsKnownQualifier() {
+		/*
+		 * This used to fail but the new multi-part qualifier support doesn't care about ordering.
+		 * 
+		 * It detects the M6 part and will bump that up by 1.
+		 */
 		String version = "2.0.0-M6-CM20-SNAPSHOT";
-		String nextVersion = helper.getNextVersion(version);
-		System.out.println(nextVersion);
+		String nextVersion = "";
+		
+		boolean exception = false;
+		try {
+			nextVersion = helper.getNextVersion(version);
+		} catch (IllegalArgumentException e) {
+			exception = true;
+		}
+		
+		Assert.assertEquals (true, exception);
+		
+		logger.info(nextVersion);
 		Version v = VersionUtils.getVersion(version);
 		String qualifier = v.getQualifier();
-		System.out.println(qualifier);
-		Assert.assertFalse(helper.isKnownQualifier(qualifier));
+		logger.info(qualifier);
+		Assert.assertFalse(helper.isKnownSubQualifier(qualifier));
+	}
+	
+	private void assertVersionChange (String baseVersion, String expectedNextVersion, boolean assertEquals) {
+		assertVersionChange(baseVersion, expectedNextVersion, assertEquals, false);
+	}
+	
+	private void assertVersionChange (String baseVersion, String expectedNextVersion, boolean assertEquals, boolean throwException) {
+			
+		try {
+			String nextVersion = helper.getNextVersion(baseVersion);
+			
+			if (assertEquals)
+				Assert.assertEquals(expectedNextVersion, nextVersion);
+			else
+				Assert.assertNotEquals(expectedNextVersion, nextVersion);
+		} catch (IllegalArgumentException e) {
+			
+			if (throwException)
+				throw e;
+			
+			if (assertEquals) {
+				Assert.fail (e.getMessage());
+			}
+		}
+	}
+	
+	@Test
+	public void testENRFoundersReleaseVersionScheme () {
+		/*
+		 * Verifies that the ENR founders release module naming scheme will work properly. 
+		 */
+		
+		assertVersionChange("2.0.0-M9-SNAPSHOT", "2.0.0-M10-SNAPSHOT", false);
+
+		assertVersionChange("2.0.0-M6-CM20-SNAPSHOT", "2.0.0-M7-CM20-SNAPSHOT", false);
+		
+		boolean failed = false;
+		try {
+			assertVersionChange("2.0.0-FR1-RC-SNAPSHOT", "2.0.0-FR1-RC1-SNAPSHOT", true, true);
+		} catch (IllegalArgumentException e) {
+			failed = true;
+		}
+		
+		Assert.assertTrue("Should fail if the qualifier is missing a number", failed);
+		
+		assertVersionChange("2.1.0-FR2-M10-SNAPSHOT", "2.1.0-FR2-M11-SNAPSHOT", true);
+		
+		assertVersionChange("2.0.0-FR1-SNAPSHOT", "2.0.0-FR2-SNAPSHOT", true);
+		
+		assertVersionChange("2.0.0-M9-FR1-SNAPSHOT", "2.0.0-M10-FR1-SNAPSHOT", false);
 	}
 
+	@Test
+	public void testKSAPVersionScheme () {
+		
+		assertVersionChange("2.0.0-M8-KSAP-SNAPSHOT", "2.0.0-M9-KSAP-SNAPSHOT", false);
+		
+		assertVersionChange("2.0.0-KSAP-M8-SNAPSHOT", "2.0.0-KSAP-M9-SNAPSHOT", false);
+		
+	}
+	
+	@Test
+	public void testOnTemporaryRepository () {
+		
+		try {
+			SubversionTestRepositoryUtils.deleteRepository("test-repository");
+			SubversionTestRepositoryUtils.deleteRepositoryWorkingCopy("test-repository");
+		} catch (IOException e1) {
+			// fall through
+		}
+		SVNURL svnUrl = null;
+		try {
+			
+			svnUrl = SubversionTestRepositoryUtils.createRepository("test-repository");
+		} catch (SVNException e) {
+			
+			Assert.fail("failed to create test-repository");
+		}
+		
+		try {
+			SubversionTestRepositoryUtils.createExternalsBaseStructure("test-repository");
+		} catch (IOException e) {
+			Assert.fail("failed to create the base structure in test-repository.");
+		}
+		
+		File workingCopy = SubversionTestRepositoryUtils.checkOut("test-repository", "aggregate/trunk", null, null);
+		
+		logger.info ("workingCopy = " + workingCopy.getAbsolutePath());
+		
+		// check that the modules materialized properly
+		
+		File module1 = new File (workingCopy, "module1");
+		
+		Assert.assertEquals (true, module1.exists());
+		
+		File module2 = new File (workingCopy, "module2");
+		
+		Assert.assertEquals (true, module2.exists());
+		
+		
+	}
+	
 	@Test
 	public void testIsReleaseCandidate() {
 		String s1 = "rc1";
@@ -56,10 +194,10 @@ public class MojoHelperTest {
 		String s3 = "RC1";
 		String s4 = "rC2";
 
-		Assert.assertTrue(helper.isReleaseCandidate(s1));
-		Assert.assertTrue(helper.isReleaseCandidate(s2));
-		Assert.assertTrue(helper.isReleaseCandidate(s3));
-		Assert.assertTrue(helper.isReleaseCandidate(s4));
+		Assert.assertTrue(helper.isKnownSubQualifier(s1));
+		Assert.assertTrue(helper.isKnownSubQualifier(s2));
+		Assert.assertTrue(helper.isKnownSubQualifier(s3));
+		Assert.assertTrue(helper.isKnownSubQualifier(s4));
 
 	}
 

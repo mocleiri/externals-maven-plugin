@@ -110,7 +110,7 @@ public abstract class AbstractTagMojo extends AbstractMojo {
 	 * @parameter expression="${externals.buildNumberProperty}" default-value="env.BUILD_NUMBER"
 	 */
 	private String buildNumberProperty;
-
+	
 	public List<Mapping> getMappings() {
 		return mappings;
 	}

@@ -51,9 +51,19 @@ import org.springframework.core.io.ResourceLoader;
 import org.tmatesoft.svn.core.SVNCommitInfo;
 
 public class MojoHelper {
+	
+	private static final Logger log = LoggerFactory.getLogger(MojoHelper.class);
+	
+	private static final String QUALIFIER_DELIMETER = "-";
 	private static final Logger logger = LoggerFactory.getLogger(MojoHelper.class);
 	private static final String MAVEN_SNAPSHOT_TOKEN = "SNAPSHOT";
 	private static final char[] DIGITS = new char[] { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9' };
+	
+	private static final String majorQualifierFoundersReleasePrefix = "FR";
+	
+	private static final String minorQualiferMilestonePrefix  = "M";
+	private static final String minorQualiferReleaseCandidatePrefix  = "RC";
+	
 	SVNUtils svnUtils = SVNUtils.getInstance();
 	POMUtils pomUtils = new POMUtils();
 	Extractor extractor = new Extractor();
@@ -346,6 +356,7 @@ public class MojoHelper {
 		}
 		String rootPom = basedir + File.separator + pomFile;
 		DefaultMutableTreeNode root = map.get(rootPom);
+		
 		return root;
 	}
 
@@ -778,12 +789,60 @@ public class MojoHelper {
 		}
 		Version v = VersionUtils.getVersion(version);
 
-		boolean incrementQualifier = isKnownQualifier(v.getQualifier());
-		if (incrementQualifier) {
-			String oldQualifier = v.getQualifier();
-			String newQualifier = getNextQualifier(oldQualifier);
-			v.setQualifier(newQualifier);
-		} else {
+		String qualifier = v.getQualifier();
+		
+		String qualifierParts[] = qualifier.split(QUALIFIER_DELIMETER);
+		
+		if (qualifierParts.length > 0) {
+			
+			StringBuilder nextQualifer = new StringBuilder();
+			
+			if (qualifierContainsVersionedPrefix (majorQualifierFoundersReleasePrefix, qualifierParts[0])) {
+				
+				// founders release qualifier is present.
+				if (qualifierParts.length == 2) {
+					// founders release - milestone or release candidate
+					nextQualifer.append(qualifierParts[0]);
+					nextQualifer.append(QUALIFIER_DELIMETER);
+					
+					if (qualifierContainsVersionedPrefix(minorQualiferMilestonePrefix, qualifierParts[1])) {
+						// milestone
+						
+						String nextMilestone = incrementQualifier(minorQualiferMilestonePrefix, qualifierParts[1]);
+						
+						nextQualifer.append(nextMilestone);
+					}
+					else if (qualifierContainsVersionedPrefix(minorQualiferReleaseCandidatePrefix, qualifierParts[1])) {
+						// release candidate
+						String nextReleaseCandidate = incrementQualifier(minorQualiferReleaseCandidatePrefix, qualifierParts[1]);
+						
+						nextQualifer.append(nextReleaseCandidate);
+						
+					}
+					else {
+						// invalid minor qualifier
+						throw new IllegalArgumentException("invalid minor qualifier: " + qualifierParts[1]);
+					}
+					
+					v.setQualifier(nextQualifer.toString());
+				}
+				else {
+					// only contains the main qualifier
+					
+					String nextMajorQualifer = incrementQualifier(majorQualifierFoundersReleasePrefix, qualifierParts[0]);
+					
+					
+					v.setQualifier(nextMajorQualifer);
+				}
+				
+			}
+			else {
+				
+				// invalid major qualifier
+				throw new IllegalArgumentException("invalid major qualifier: " + qualifierParts[0]);
+			}
+		}
+		 else {
 			Integer oldIncremental = new Integer(v.getIncremental());
 			Integer newIncremental = oldIncremental + 1;
 			v.setIncremental(newIncremental.toString());
@@ -795,79 +854,90 @@ public class MojoHelper {
 		sb.append(v.getMinor());
 		sb.append(".");
 		sb.append(v.getIncremental());
-		sb.append("-");
+		sb.append(QUALIFIER_DELIMETER);
 		if (!StringUtils.isBlank(v.getQualifier())) {
 			sb.append(v.getQualifier());
-			sb.append("-");
+			sb.append(QUALIFIER_DELIMETER);
 		}
 		sb.append(MAVEN_SNAPSHOT_TOKEN);
 		return sb.toString();
 	}
 
-	protected String getNextQualifier(String qualifier) {
-		if (isReleaseCandidate(qualifier)) {
-			String token = qualifier.substring(2);
-			Integer oldVersion = new Integer(token);
-			Integer newVersion = oldVersion + 1;
-			return qualifier.substring(0, 2) + newVersion;
+	private String incrementQualifier(String targetPrefix, String qualifier) {
+	
+		// increment this part
+		if (qualifier.startsWith(targetPrefix)) {
+
+			String token = "";
+			try {
+				token = qualifier.substring(targetPrefix.length());
+				Integer oldVersion = new Integer(token);
+				Integer newVersion = oldVersion + 1;
+
+				return targetPrefix + newVersion;
+			} catch (NumberFormatException e) {
+				
+				throw new RuntimeException("failed to convert " + token + " suffix of " + qualifier + "into an Integer", e);
+			}
+
+		} else {
+			throw new IllegalArgumentException("'" + qualifier
+					+ "' does not contain a part starting with '"
+					+ targetPrefix);
 		}
-		if (isMilestone(qualifier)) {
-			String token = qualifier.substring(1);
-			Integer oldVersion = new Integer(token);
-			Integer newVersion = oldVersion + 1;
-			return qualifier.substring(0, 1) + newVersion;
-		}
-		throw new IllegalArgumentException("'" + qualifier + "' is not a milestone or release candidate qualifier");
+			
 	}
 
-	protected boolean isKnownQualifier(String qualifier) {
-		return isReleaseCandidate(qualifier) || isMilestone(qualifier);
+	/**
+	 * A main qualifier is a Founders Release FR[0-9]+
+	 */
+	protected boolean isKnownMainQualifier (String qualifier) {
+		return qualifierContainsVersionedPrefix(majorQualifierFoundersReleasePrefix, qualifier);
 	}
 
-	protected boolean isReleaseCandidate(String qualifier) {
+	/**
+	 * A sub qualifier is a milestone M[0-9]+ or release candidate RC[0-9]+
+	 */
+	protected boolean isKnownSubQualifier(String qualifier) {
+		
+		if (qualifierContainsVersionedPrefix(minorQualiferMilestonePrefix, qualifier) ||
+			qualifierContainsVersionedPrefix(minorQualiferReleaseCandidatePrefix, qualifier)) 
+			return true;
+		else
+			return false;
+		
+	}
+
+
+	private boolean qualifierContainsVersionedPrefix(String targetPrefix, String qualifier) {		
+		
 		if (StringUtils.isBlank(qualifier)) {
 			return false;
-		}
-		if (StringUtils.contains(qualifier, ".")) {
+		} 
+		else if (qualifier.length() < targetPrefix.length()) {
 			return false;
 		}
-		if (StringUtils.contains(qualifier, "-")) {
-			return false;
+		else {
+			if (qualifier.toLowerCase().startsWith(targetPrefix.toLowerCase())) {
+		
+				try {
+					String suffix = StringUtils.substring(qualifier,
+					targetPrefix.length());
+					Integer.parseInt(suffix);
+				} catch (NumberFormatException e) {
+		
+					log.warn("'" + qualifier
+							+ "' does not contain a valid numeric suffix");
+		
+					return false;
+				}
+		
+			}
+			else {
+				return false;
+			}
 		}
-		if (qualifier.length() < 3) {
-			return false;
-		}
-		if (!qualifier.toUpperCase().startsWith("RC")) {
-			return false;
-		}
-		try {
-			String suffix = StringUtils.substring(qualifier, 2);
-			Integer.parseInt(suffix);
-			return true;
-		} catch (NumberFormatException e) {
-			// If we can't parse the right hand side return false
-			return false;
-		}
-	}
-
-	protected boolean isMilestone(String qualifier) {
-		if (StringUtils.isBlank(qualifier)) {
-			return false;
-		}
-		if (qualifier.length() < 2) {
-			return false;
-		}
-		if (!qualifier.toUpperCase().startsWith("M")) {
-			return false;
-		}
-		try {
-			String suffix = StringUtils.substring(qualifier, 1);
-			Integer.parseInt(suffix);
-			return true;
-		} catch (NumberFormatException e) {
-			// If we can't parse the right hand side return false
-			return false;
-		}
+		return true;
 	}
 
 	protected boolean isDigit(char c) {
@@ -915,7 +985,7 @@ public class MojoHelper {
 		sb.append(tagBase);
 		sb.append("/");
 		sb.append(artifactId);
-		sb.append("-");
+		sb.append(QUALIFIER_DELIMETER);
 		sb.append(trimmed);
 		return sb.toString();
 	}
@@ -951,7 +1021,7 @@ public class MojoHelper {
 		sb.append("builds");
 		sb.append("/");
 		sb.append(artifactId);
-		sb.append("-");
+		sb.append(QUALIFIER_DELIMETER);
 		sb.append(v.getMajor());
 		sb.append(".");
 		sb.append(v.getMinor());
@@ -1055,7 +1125,7 @@ public class MojoHelper {
 	}
 
 	public String trimSnapshot(String version) {
-		if (version.toUpperCase().endsWith("-" + MAVEN_SNAPSHOT_TOKEN)) {
+		if (version.toUpperCase().endsWith(QUALIFIER_DELIMETER + MAVEN_SNAPSHOT_TOKEN)) {
 			int length = MAVEN_SNAPSHOT_TOKEN.length() + 1;
 			return StringUtils.left(version, version.length() - length);
 		} else {
@@ -1068,7 +1138,7 @@ public class MojoHelper {
 	}
 
 	protected Version parseVersion(String s) {
-		boolean snapshot = s.toUpperCase().endsWith("-" + MAVEN_SNAPSHOT_TOKEN);
+		boolean snapshot = s.toUpperCase().endsWith(QUALIFIER_DELIMETER + MAVEN_SNAPSHOT_TOKEN);
 		Version version = new Version();
 		version.setSnapshot(snapshot);
 		String[] tokens = StringUtils.split(s, ".-");
@@ -1096,7 +1166,7 @@ public class MojoHelper {
 				break;
 			}
 			if (i != 3) {
-				sb.append("-");
+				sb.append(QUALIFIER_DELIMETER);
 			}
 			sb.append(tokens[i]);
 		}

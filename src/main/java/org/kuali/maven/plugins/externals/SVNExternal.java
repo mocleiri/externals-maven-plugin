@@ -28,6 +28,17 @@ public class SVNExternal implements Comparable<SVNExternal> {
 	String path;
 	File workingCopyPath;
 
+	
+	public SVNExternal(String url, String path, File workingCopyPath) {
+		super();
+		this.url = url;
+		this.path = path;
+		this.workingCopyPath = workingCopyPath;
+	}
+
+	public SVNExternal() {
+	}
+
 	@Override
 	public int compareTo(SVNExternal other) {
 		return path.compareTo(other.getPath());
