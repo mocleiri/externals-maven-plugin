@@ -154,9 +154,7 @@ public class POMUtils {
 
 	public String updateProperties(String xml, Properties properties) {
 		Document document = getDocument(xml);
-		NodeList nodeList = document.getElementsByTagName(PROPERTIES);
-		Node propertiesNode = nodeList.item(0);
-		NodeList propertiesNodeList = propertiesNode.getChildNodes();
+		NodeList propertiesNodeList = getTopLevelProperties(document);
 		List<String> keys = new ArrayList<String>(properties.stringPropertyNames());
 		Collections.sort(keys);
 		for (String key : keys) {
@@ -165,6 +163,17 @@ public class POMUtils {
 			node.setTextContent(value);
 		}
 		return getFormattedXml(document);
+	}
+
+	public NodeList getTopLevelProperties(Document document) {
+		
+		NodeList nodeList = document.getElementsByTagName(PROJECT);
+		
+		Node projectNode = nodeList.item(0);
+		
+		Node topLevelPropertiesNode = this.findNode(projectNode.getChildNodes(), PROPERTIES);
+		
+		return topLevelPropertiesNode.getChildNodes();
 	}
 
 	protected Node findNode(NodeList nodeList, String key) {
