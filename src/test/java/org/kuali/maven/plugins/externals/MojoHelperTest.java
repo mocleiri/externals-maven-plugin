@@ -48,19 +48,6 @@ public class MojoHelperTest {
 	private static final String IGNORE = "src,target,.svn,.git";
 	private static final File BASEDIR = new File(System.getProperty("user.dir"), "target"+File.separator+"test-aggregate");
 
-	@BeforeClass
-	public static void beforeClass() {
-
-		if (!new File(BASEDIR, "pom.xml").exists()) {
-			logger.info("checking out the student-2.0.2-cm release tag into " + BASEDIR);
-			
-			// checkout a copy of the CM-2.0.2 release tag for verifying pom operations.
-			// this can take a while so only do it if the pom file isn't where it would be if the project were checked out there.
-			SVNUtils.getInstance().checkout("https://svn.kuali.org/repos/student/enrollment/aggregate/tags/student-2.0.2-cm",BASEDIR, "", "");
-			
-			logger.info("check out complete");
-		}
-	}
 	@Test
 	public void testIsKnownQualifier() {
 		/*
