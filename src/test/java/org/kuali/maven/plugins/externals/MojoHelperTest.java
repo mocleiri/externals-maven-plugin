@@ -134,6 +134,14 @@ public class MojoHelperTest {
 	}
 	
 	@Test
+	public void testOtherVersions () {
+		
+		assertVersionChange("2.0.0-SNAPSHOT", "2.0.1-SNAPSHOT", true);
+		
+	}
+	
+	
+	@Test
 	public void testOnTemporaryRepository () {
 		
 		try {

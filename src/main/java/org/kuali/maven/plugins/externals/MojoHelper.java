@@ -791,63 +791,74 @@ public class MojoHelper {
 
 		String qualifier = v.getQualifier();
 		
-		String qualifierParts[] = qualifier.split(QUALIFIER_DELIMETER);
-		
-		if (qualifierParts.length > 0) {
-			
-			StringBuilder nextQualifer = new StringBuilder();
-			
-			if (qualifierContainsVersionedPrefix (majorQualifierFoundersReleasePrefix, qualifierParts[0])) {
-				
-				// founders release qualifier is present.
-				if (qualifierParts.length == 2) {
-					// founders release - milestone or release candidate
-					nextQualifer.append(qualifierParts[0]);
-					nextQualifer.append(QUALIFIER_DELIMETER);
-					
-					if (qualifierContainsVersionedPrefix(minorQualiferMilestonePrefix, qualifierParts[1])) {
-						// milestone
-						
-						String nextMilestone = incrementQualifier(minorQualiferMilestonePrefix, qualifierParts[1]);
-						
-						nextQualifer.append(nextMilestone);
+		if (qualifier != null && !qualifier.isEmpty()) {
+			String qualifierParts[] = qualifier.split(QUALIFIER_DELIMETER);
+
+			if (qualifierParts.length > 0) {
+
+				StringBuilder nextQualifer = new StringBuilder();
+
+				if (qualifierContainsVersionedPrefix(
+						majorQualifierFoundersReleasePrefix, qualifierParts[0])) {
+
+					// founders release qualifier is present.
+					if (qualifierParts.length == 2) {
+						// founders release - milestone or release candidate
+						nextQualifer.append(qualifierParts[0]);
+						nextQualifer.append(QUALIFIER_DELIMETER);
+
+						if (qualifierContainsVersionedPrefix(
+								minorQualiferMilestonePrefix, qualifierParts[1])) {
+							// milestone
+
+							String nextMilestone = incrementQualifier(
+									minorQualiferMilestonePrefix,
+									qualifierParts[1]);
+
+							nextQualifer.append(nextMilestone);
+						} else if (qualifierContainsVersionedPrefix(
+								minorQualiferReleaseCandidatePrefix,
+								qualifierParts[1])) {
+							// release candidate
+							String nextReleaseCandidate = incrementQualifier(
+									minorQualiferReleaseCandidatePrefix,
+									qualifierParts[1]);
+
+							nextQualifer.append(nextReleaseCandidate);
+
+						} else {
+							// invalid minor qualifier
+							throw new IllegalArgumentException(
+									"invalid minor qualifier: "
+											+ qualifierParts[1]);
+						}
+
+						v.setQualifier(nextQualifer.toString());
+					} else {
+						// only contains the main qualifier
+
+						String nextMajorQualifer = incrementQualifier(
+								majorQualifierFoundersReleasePrefix,
+								qualifierParts[0]);
+
+						v.setQualifier(nextMajorQualifer);
 					}
-					else if (qualifierContainsVersionedPrefix(minorQualiferReleaseCandidatePrefix, qualifierParts[1])) {
-						// release candidate
-						String nextReleaseCandidate = incrementQualifier(minorQualiferReleaseCandidatePrefix, qualifierParts[1]);
-						
-						nextQualifer.append(nextReleaseCandidate);
-						
-					}
-					else {
-						// invalid minor qualifier
-						throw new IllegalArgumentException("invalid minor qualifier: " + qualifierParts[1]);
-					}
-					
-					v.setQualifier(nextQualifer.toString());
+
+				} else {
+
+					// invalid major qualifier
+					throw new IllegalArgumentException(
+							"invalid major qualifier: " + qualifierParts[0]);
 				}
-				else {
-					// only contains the main qualifier
-					
-					String nextMajorQualifer = incrementQualifier(majorQualifierFoundersReleasePrefix, qualifierParts[0]);
-					
-					
-					v.setQualifier(nextMajorQualifer);
-				}
-				
-			}
-			else {
-				
-				// invalid major qualifier
-				throw new IllegalArgumentException("invalid major qualifier: " + qualifierParts[0]);
-			}
+			} 
+
 		}
-		 else {
+		else {
 			Integer oldIncremental = new Integer(v.getIncremental());
 			Integer newIncremental = oldIncremental + 1;
 			v.setIncremental(newIncremental.toString());
 		}
-
+		
 		StringBuilder sb = new StringBuilder();
 		sb.append(v.getMajor());
 		sb.append(".");
@@ -859,6 +870,7 @@ public class MojoHelper {
 			sb.append(v.getQualifier());
 			sb.append(QUALIFIER_DELIMETER);
 		}
+		
 		sb.append(MAVEN_SNAPSHOT_TOKEN);
 		return sb.toString();
 	}
