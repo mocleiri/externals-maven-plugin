@@ -647,7 +647,14 @@ public class MojoHelper {
 		GAV gav = project.getGav();
 		String propertyVersion = properties.getProperty(mapping.getVersionProperty());
 		String gavVersion = gav.getVersion();
-		return propertyVersion.equals(gavVersion);
+		
+		if (propertyVersion.equals(gavVersion)) {
+			return true;
+		}
+		else {
+			log.warn(String.format("(artifactId, propertyVersion, gavVersion) = (%s, %s, %s)", project.getGav().getArtifactId(), propertyVersion, gavVersion));
+			return false;
+		}
 	}
 
 	public void validateParents(DefaultMutableTreeNode node, Map<String, DefaultMutableTreeNode> map) {
