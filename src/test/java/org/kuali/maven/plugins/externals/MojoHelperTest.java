@@ -119,7 +119,13 @@ public class MojoHelperTest {
 		
 		assertVersionChange("2.1.0-FR2-M10-SNAPSHOT", "2.1.0-FR2-M11-SNAPSHOT", true);
 		
+		assertVersionChange("2.1.0-fr2-M10-SNAPSHOT", "2.1.0-fr2-M11-SNAPSHOT", true);
+		
+		assertVersionChange("2.1.0-fr2-m10-SNAPSHOT", "2.1.0-fr2-m11-SNAPSHOT", true);
+		
 		assertVersionChange("2.0.0-FR1-SNAPSHOT", "2.0.0-FR2-SNAPSHOT", true);
+		
+		assertVersionChange("2.0.0-fr1-SNAPSHOT", "2.0.0-fr2-SNAPSHOT", true);
 		
 		assertVersionChange("2.0.0-M9-FR1-SNAPSHOT", "2.0.0-M10-FR1-SNAPSHOT", false);
 	}

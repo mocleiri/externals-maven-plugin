@@ -878,15 +878,16 @@ public class MojoHelper {
 	private String incrementQualifier(String targetPrefix, String qualifier) {
 	
 		// increment this part
-		if (qualifier.startsWith(targetPrefix)) {
+		if (qualifier.toLowerCase().startsWith(targetPrefix.toLowerCase())) {
 
+			String baseQualifier = qualifier.substring(0, targetPrefix.length());
 			String token = "";
 			try {
 				token = qualifier.substring(targetPrefix.length());
 				Integer oldVersion = new Integer(token);
 				Integer newVersion = oldVersion + 1;
 
-				return targetPrefix + newVersion;
+				return baseQualifier + newVersion;
 			} catch (NumberFormatException e) {
 				
 				throw new RuntimeException("failed to convert " + token + " suffix of " + qualifier + "into an Integer", e);
@@ -937,9 +938,6 @@ public class MojoHelper {
 					targetPrefix.length());
 					Integer.parseInt(suffix);
 				} catch (NumberFormatException e) {
-		
-					log.warn("'" + qualifier
-							+ "' does not contain a valid numeric suffix");
 		
 					return false;
 				}
