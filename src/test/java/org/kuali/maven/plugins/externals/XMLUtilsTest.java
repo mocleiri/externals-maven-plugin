@@ -33,7 +33,7 @@ import org.tmatesoft.svn.core.SVNURL;
 public class XMLUtilsTest extends AbstractLocalSvnRepositoryTest {
 	private static final Logger logger = LoggerFactory.getLogger(XMLUtilsTest.class);
 
-	MojoHelper helper = MojoHelper.getInstance();
+	MojoHelper helper = MojoHelper.getInstance(new LogOnlyTestMojo());
 	POMUtils xmlUtils = new POMUtils();
 	
 	private static final String POM = "pom.xml";

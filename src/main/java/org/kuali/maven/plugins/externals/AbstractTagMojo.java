@@ -27,7 +27,7 @@ import org.apache.maven.project.MavenProject;
  */
 public abstract class AbstractTagMojo extends AbstractMojo {
 
-	MojoHelper helper = MojoHelper.getInstance();
+	MojoHelper helper = MojoHelper.getInstance(this);
 
 	public abstract TagStyle getTagStyle();
 

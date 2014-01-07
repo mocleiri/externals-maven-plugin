@@ -30,7 +30,7 @@ import org.apache.maven.project.MavenProject;
  */
 public class FormatPomsMojo extends AbstractMojo {
 
-	MojoHelper helper = MojoHelper.getInstance();
+	MojoHelper helper = MojoHelper.getInstance(this);
 	POMUtils pomUtils = new POMUtils();
 
 	/**

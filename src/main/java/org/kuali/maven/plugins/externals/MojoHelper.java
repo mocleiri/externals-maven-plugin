@@ -38,13 +38,14 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.filefilter.FileFilterUtils;
 import org.apache.commons.io.filefilter.IOFileFilter;
 import org.apache.commons.lang.StringUtils;
+import org.apache.maven.plugin.AbstractMojo;
+import org.apache.maven.plugin.Mojo;
+import org.apache.maven.plugin.logging.Log;
 import org.apache.maven.project.MavenProject;
 import org.kuali.common.util.Version;
 import org.kuali.common.util.VersionUtils;
 import org.kuali.maven.common.Extractor;
 import org.kuali.maven.common.PropertiesUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.core.io.DefaultResourceLoader;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
@@ -52,10 +53,7 @@ import org.tmatesoft.svn.core.SVNCommitInfo;
 
 public class MojoHelper {
 	
-	private static final Logger log = LoggerFactory.getLogger(MojoHelper.class);
-	
 	private static final String QUALIFIER_DELIMETER = "-";
-	private static final Logger logger = LoggerFactory.getLogger(MojoHelper.class);
 	private static final String MAVEN_SNAPSHOT_TOKEN = "SNAPSHOT";
 	private static final char[] DIGITS = new char[] { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9' };
 	
@@ -69,19 +67,22 @@ public class MojoHelper {
 	Extractor extractor = new Extractor();
 	PropertiesUtils propertiesUtils = new PropertiesUtils();
 	NumberFormat nf = NumberFormat.getInstance();
+	private final Log logger;
 
 	protected static MojoHelper instance;
 
-	protected MojoHelper() {
+	protected MojoHelper(Mojo mojo) {
 		super();
 		nf.setMaximumFractionDigits(3);
 		nf.setMinimumFractionDigits(3);
 		nf.setGroupingUsed(false);
+		
+		logger = mojo.getLog();
 	}
 
-	public synchronized static MojoHelper getInstance() {
+	public synchronized static MojoHelper getInstance(Mojo mojo) {
 		if (instance == null) {
-			instance = new MojoHelper();
+			instance = new MojoHelper(mojo);
 		}
 		return instance;
 	}
@@ -652,7 +653,7 @@ public class MojoHelper {
 			return true;
 		}
 		else {
-			log.warn(String.format("(artifactId, propertyVersion, gavVersion) = (%s, %s, %s)", project.getGav().getArtifactId(), propertyVersion, gavVersion));
+			logger.error(String.format("(artifactId, propertyVersion, gavVersion) = (%s, %s, %s)", project.getGav().getArtifactId(), propertyVersion, gavVersion));
 			return false;
 		}
 	}

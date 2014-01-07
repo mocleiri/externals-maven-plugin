@@ -31,7 +31,7 @@ public class TestRetreiveTopLevelPropertiesOnly {
 
 	private static final Logger log = LoggerFactory.getLogger(TestRetreiveTopLevelPropertiesOnly.class);
 	
-	MojoHelper helper = MojoHelper.getInstance();
+	MojoHelper helper = MojoHelper.getInstance(new LogOnlyTestMojo());
 	POMUtils pomUtils = new POMUtils();
 	
 	public TestRetreiveTopLevelPropertiesOnly() {

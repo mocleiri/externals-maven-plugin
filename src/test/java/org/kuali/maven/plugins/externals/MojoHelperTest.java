@@ -25,6 +25,11 @@ import java.util.Properties;
 import javax.swing.tree.DefaultMutableTreeNode;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.maven.plugin.Mojo;
+import org.apache.maven.plugin.MojoExecutionException;
+import org.apache.maven.plugin.MojoFailureException;
+import org.apache.maven.plugin.logging.Log;
+import org.apache.maven.plugin.logging.SystemStreamLog;
 import org.apache.maven.wagon.PathUtils;
 import org.junit.Assert;
 import org.junit.BeforeClass;
@@ -43,7 +48,7 @@ public class MojoHelperTest {
 	private static final Logger logger = LoggerFactory.getLogger(SVNUtilsTest.class);
 	SVNUtils svnUtils = SVNUtils.getInstance();
 
-	MojoHelper helper = MojoHelper.getInstance();
+	MojoHelper helper = MojoHelper.getInstance(new LogOnlyTestMojo());
 	private static final String POM = "pom.xml";
 	private static final String IGNORE = "src,target,.svn,.git";
 	private static final File BASEDIR = new File(System.getProperty("user.dir"), "target"+File.separator+"test-aggregate");

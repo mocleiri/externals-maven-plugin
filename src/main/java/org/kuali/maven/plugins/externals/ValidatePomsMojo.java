@@ -34,7 +34,7 @@ import org.apache.maven.project.MavenProject;
 public class ValidatePomsMojo extends AbstractMojo {
 
 	SVNUtils svnUtils = SVNUtils.getInstance();
-	MojoHelper helper = MojoHelper.getInstance();
+	MojoHelper helper = MojoHelper.getInstance(this);
 
 	/**
 	 * Filename pattern used to discover Maven pom's

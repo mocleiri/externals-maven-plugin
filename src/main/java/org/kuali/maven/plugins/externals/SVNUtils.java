@@ -33,7 +33,6 @@ import org.tmatesoft.svn.core.auth.ISVNAuthenticationManager;
 import org.tmatesoft.svn.core.internal.io.dav.DAVRepositoryFactory;
 import org.tmatesoft.svn.core.internal.io.fs.FSRepositoryFactory;
 import org.tmatesoft.svn.core.internal.io.svn.SVNRepositoryFactoryImpl;
-import org.tmatesoft.svn.core.internal.wc2.SvnWcGeneration;
 import org.tmatesoft.svn.core.io.SVNRepository;
 import org.tmatesoft.svn.core.io.SVNRepositoryFactory;
 import org.tmatesoft.svn.core.wc.SVNClientManager;
@@ -70,8 +69,6 @@ public class SVNUtils {
 		SVNRepositoryFactoryImpl.setup();
 		DAVRepositoryFactory.setup();
 		FSRepositoryFactory.setup();
-		
-		
 	}
 
 	public synchronized static SVNUtils getInstance() {
@@ -273,8 +270,6 @@ public class SVNUtils {
 		try {
 			SVNClientManager manager = SVNClientManager.newInstance(null, username, password);
 			SVNUpdateClient client = manager.getUpdateClient();
-			// force to a 1.6 working copy format for now
-			client.getOperationsFactory().setPrimaryWcGeneration(SvnWcGeneration.V16);
 			client.setIgnoreExternals(false);
 			SVNURL svnUrl = getSvnUrl(url);
 			return client.doCheckout(svnUrl, dstPath, SVNRevision.HEAD, SVNRevision.HEAD, SVNDepth.INFINITY, false);
